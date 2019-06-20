@@ -13,11 +13,13 @@ class KfsmTests {
 
     @Test
     fun `test creation of fsm`() {
-        val definition = StateMachine<LockStates, LockEvents, Lock>()
-            .on(LOCKED, UNLOCK, UNLOCKED) { context ->
+        val definition = StateMachine<LockStates, LockEvents, Lock>() {
+                if(it.locked) LOCKED else UNLOCKED
+            }
+            .on(UNLOCK, LOCKED, UNLOCKED) { context ->
                 context.unlock()
             }
-            .on(UNLOCKED, LOCK, LOCKED) { context ->
+            .on(LOCK, UNLOCKED, LOCKED) { context ->
                 context.lock()
             }
 
