@@ -1,32 +1,37 @@
 # Kotlin Finite State Machine
 
-This is a small implementation of an FSM in Kotlin
+This is a small implementation of an FSM in Kotlin.
+This model supports events that trigger may cause a transition from one state to another while performing an optional action.
 
 Assume we and to manage the state on a simple lock.
 We want to ensure that the `lock()` function is only called when the lock is not locked and we want `unlock()` to be called when locked.
 
 ```kotlin
-class Lock(l: Boolean = false) {
-    var locked: Boolean = l
+class Lock {
+    var locked: Int = 0
         private set
 
     fun lock() {
+        assert(locked == 0)
         println("Lock")
-        locked = true
+        locked += 1
     }
 
     fun doubleLock() {
-        assert(locked)
+        assert(locked == 1)        
         println("DoubleLock")
+        locked += 1
     }
 
     fun unlock() {
+        assert(locked == 1)
         println("Unlock")
-        locked = false
+        locked -= 1
     }
     fun doubleUnlock() {
-        assert(locked)
+        assert(locked == 2)
         println("DoubleUnlock")
+        locked -= 1
     }
 }
 ```
@@ -46,10 +51,20 @@ enum class LockEvents {
 }
 ```
 
-Then we declare a statemachine
+Then we use the DSL to declare a definition of a statemachine matching the diagram:
+
+![state-diagram](lock_fsm.png "Lock State Diagram")
+
 ```kotlin
 val definition = StateMachine<LockStates, LockEvents, Lock>().dsl {
-    initial { if (it.locked) LOCKED else UNLOCKED }
+    initial { context ->
+        when (context.locked) {
+            0 -> UNLOCKED
+            1 -> LOCKED
+            2 -> DOUBLE_LOCKED
+            else -> error("Invalid state locked=${it.locked}")
+        }
+    }
     event(UNLOCK) {
         state(LOCKED to UNLOCKED) { context ->
             context.unlock()
@@ -74,13 +89,16 @@ val definition = StateMachine<LockStates, LockEvents, Lock>().dsl {
     }
 }.build()
 ```
+
 With this We are saying:
 On an event UNLOCK when the state is LOCKED transition to UNLOCKED and execute the code in the lambda 
+
+In the case where we use `state(UNLOCKED) {` we are saying when the state is UNLOCKED perform the action without changing the end state.
 
 Then we instantiate the FSM and provide a context to operate on:
 
 ```kotlin
-val lock = Lock(true)
+val lock = Lock()
 val fsm = definition.instance(lock)
 ```
 

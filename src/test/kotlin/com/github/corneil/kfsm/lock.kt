@@ -11,26 +11,30 @@ enum class LockEvents {
     UNLOCK
 }
 
-class Lock(l: Boolean = false) {
-    var locked: Boolean = l
+class Lock {
+    var locked: Int = 1
         private set
 
     fun lock() {
+        assert(locked == 0)
         println("Lock")
-        locked = true
+        locked += 1
     }
 
     fun doubleLock() {
-        assert(locked)
+        assert(locked == 1)
         println("DoubleLock")
+        locked += 1
     }
 
     fun unlock() {
+        assert(locked == 1)
         println("Unlock")
-        locked = false
+        locked -= 1
     }
     fun doubleUnlock() {
-        assert(locked)
+        assert(locked == 2)
         println("DoubleUnlock")
+        locked -= 1
     }
 }

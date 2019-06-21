@@ -14,7 +14,14 @@ class KfsmTests {
     fun `test creation of fsm`() {
         // given
         val definition = StateMachine<LockStates, LockEvents, Lock>()
-        definition.deriveInitialState = { if (it.locked) LOCKED else UNLOCKED }
+        definition.deriveInitialState = { context ->
+            when (context.locked) {
+                0 -> UNLOCKED
+                1 -> LOCKED
+                2 -> DOUBLE_LOCKED
+                else -> error("Invalid state locked=${context.locked}")
+            }
+        }
         definition.transition(UNLOCK, LOCKED, UNLOCKED) { context ->
             context.unlock()
         }
@@ -28,17 +35,17 @@ class KfsmTests {
             context.doubleLock()
         }
 
-        val lock = Lock(true)
+        val lock = Lock()
         // when
         val fsm = definition.instance(LOCKED, lock)
         // then
         assertTrue { fsm.currentState == LOCKED }
-        assertTrue { lock.locked }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.event(UNLOCK)
         // then
         assertTrue { fsm.currentState == UNLOCKED }
-        assertTrue { !lock.locked }
+        assertTrue { lock.locked == 0 }
         try {
             // when
             fsm.event(UNLOCK)
@@ -52,12 +59,12 @@ class KfsmTests {
         fsm.event(LOCK)
         // then
         assertTrue { fsm.currentState == LOCKED }
-        assertTrue { lock.locked }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.event(LOCK)
         // then
         assertTrue { fsm.currentState == DOUBLE_LOCKED }
-        assertTrue { lock.locked }
+        assertTrue { lock.locked == 2 }
         try {
             // when
             fsm.event(LOCK)
@@ -73,7 +80,14 @@ class KfsmTests {
     fun `test dsl creation of fsm`() {
         // given
         val definition = StateMachine<LockStates, LockEvents, Lock>().dsl {
-            initial { if (it.locked) LOCKED else UNLOCKED }
+            initial { context ->
+                when (context.locked) {
+                    0 -> UNLOCKED
+                    1 -> LOCKED
+                    2 -> DOUBLE_LOCKED
+                    else -> error("Invalid state locked=${context.locked}")
+                }
+            }
             event(UNLOCK) {
                 state(LOCKED to UNLOCKED) { context ->
                     context.unlock()
@@ -98,17 +112,17 @@ class KfsmTests {
             }
         }.build()
 
-        val lock = Lock(true)
+        val lock = Lock()
         // when
-        val fsm = definition.instance(LOCKED, lock)
+        val fsm = definition.instance(lock)
         // then
         assertTrue { fsm.currentState == LOCKED }
-        assertTrue { lock.locked }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.event(UNLOCK)
         // then
         assertTrue { fsm.currentState == UNLOCKED }
-        assertTrue { !lock.locked }
+        assertTrue { lock.locked == 0 }
 
         try {
             // when
@@ -123,12 +137,12 @@ class KfsmTests {
         fsm.event(LOCK)
         // then
         assertTrue { fsm.currentState == LOCKED }
-        assertTrue { lock.locked }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.event(LOCK)
         // then
         assertTrue { fsm.currentState == DOUBLE_LOCKED }
-        assertTrue { lock.locked }
+        assertTrue { lock.locked == 2 }
         try {
             // when
             fsm.event(LOCK)
