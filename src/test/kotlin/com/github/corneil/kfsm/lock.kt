@@ -2,6 +2,7 @@ package com.github.corneil.kfsm
 
 enum class LockStates {
     LOCKED,
+    DOUBLE_LOCKED,
     UNLOCKED
 }
 
@@ -19,8 +20,17 @@ class Lock(l: Boolean = false) {
         locked = true
     }
 
+    fun doubleLock() {
+        assert(locked)
+        println("DoubleLock")
+    }
+
     fun unlock() {
         println("Unlock")
         locked = false
+    }
+    fun doubleUnlock() {
+        assert(locked)
+        println("DoubleUnlock")
     }
 }
