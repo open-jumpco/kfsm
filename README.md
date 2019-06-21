@@ -1,4 +1,4 @@
-# Kotlin Finite State Machine
+# Kotlin Finite-state machine
 
 This is a small implementation of an FSM in Kotlin.
 This model supports events that trigger may cause a transition from one state to another while performing an optional action.
