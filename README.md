@@ -86,3 +86,13 @@ val fsm = definition.instance(lock)
 
 Now we have a context that is independent of the FSM. 
 
+Sending events may invoke actions:
+```kotlin
+// State state is LOCKED
+fsm.event(LOCK)
+// Expect DoubleLock and end state is DOUBLE_LOCKED
+fsm.event(UNLOCK)
+// Expect DoubleUnlock and end state is LOCKED
+fsm.event(UNLOCK)
+// Expect Unlock and end state is UNLOCKED
+```
