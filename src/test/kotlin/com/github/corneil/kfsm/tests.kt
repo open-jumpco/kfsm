@@ -37,7 +37,7 @@ class KfsmTests {
 
         val lock = Lock()
         // when
-        val fsm = definition.instance(LOCKED, lock)
+        val fsm = definition.instance(lock, LOCKED)
         // then
         assertTrue { fsm.currentState == LOCKED }
         assertTrue { lock.locked == 1 }

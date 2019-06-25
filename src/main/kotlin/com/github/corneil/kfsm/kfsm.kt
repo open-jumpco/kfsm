@@ -1,13 +1,13 @@
 package com.github.corneil.kfsm
 
-data class Transition<T, E, C>(
+data class Transition<T : Enum<T>, E : Enum<E>, C>(
     val startState: T,
     val event: E,
     val endState: T,
     val action: ((C) -> Unit)?
 )
 
-class StateMachineDslHelper<T, E, C>(private val fsm: StateMachine<T, E, C>) {
+class StateMachineDslHelper<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
     fun initial(deriveInitialState: (C) -> T): StateMachineDslHelper<T, E, C> {
         fsm.deriveInitialState = deriveInitialState
         return this
@@ -20,7 +20,7 @@ class StateMachineDslHelper<T, E, C>(private val fsm: StateMachine<T, E, C>) {
     fun build() = fsm
 }
 
-class StateMachineDslEventHelper<T, E, C>(private val event: E, private val fsm: StateMachine<T, E, C>) {
+class StateMachineDslEventHelper<T : Enum<T>, E : Enum<E>, C>(private val event: E, private val fsm: StateMachine<T, E, C>) {
     fun state(states: Pair<T, T>, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
         val key = states.first to event
         assert(fsm.transitions[key] == null) { "Transition for ${states.first} transition $event already defined" }
@@ -36,7 +36,7 @@ class StateMachineDslEventHelper<T, E, C>(private val event: E, private val fsm:
     }
 }
 
-class StateMachine<T, E, C>() {
+class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
     lateinit var deriveInitialState: ((C) -> T)
     val transitions: MutableMap<Pair<T, E>, Transition<T, E, C>> = mutableMapOf()
     fun transition(event: E, startState: T, endState: T?, action: ((C) -> Unit)?) {
@@ -44,22 +44,20 @@ class StateMachine<T, E, C>() {
         transitions[startState to event] = Transition(startState, event, endState ?: startState, action)
     }
 
-    fun instance(initialState: T, context: C) = StateMachineInstance(initialState, context, this)
-    fun instance(context: C) = StateMachineInstance(
-        deriveInitialState.invoke(context) ?: error("Definition requires deriveInitialState"),
-        context,
-        this
-    )
+    fun instance(context: C, initialState: T? = null) =
+        StateMachineInstance(context,
+            this,
+            initialState ?: deriveInitialState.invoke(context) ?: error("Definition requires deriveInitialState"))
 
     fun dsl(handler: StateMachineDslHelper<T, E, C>.() -> Unit): StateMachineDslHelper<T, E, C> {
         return StateMachineDslHelper(this).apply(handler)
     }
 }
 
-class StateMachineInstance<T, E, C>(
-    private val initialState: T,
+class StateMachineInstance<T : Enum<T>, E : Enum<E>, C>(
     private val context: C,
-    private val fsm: StateMachine<T, E, C>
+    private val fsm: StateMachine<T, E, C>,
+    private val initialState: T
 ) {
     var currentState: T = initialState
         private set
