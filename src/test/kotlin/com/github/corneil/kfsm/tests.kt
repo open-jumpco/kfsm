@@ -3,6 +3,9 @@ package com.github.corneil.kfsm
 import com.github.corneil.kfsm.LockEvents.LOCK
 import com.github.corneil.kfsm.LockEvents.UNLOCK
 import com.github.corneil.kfsm.LockStates.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -152,5 +155,57 @@ class KfsmTests {
             // then
             assertEquals("Already Double Locked", x.message)
         }
+    }
+
+    @Test
+    fun `Uncle Bob's Turnstile`() {
+        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
+            initial { ts ->
+                when (ts.locked) {
+                    true -> TurnstileStates.LOCKED
+                    false -> TurnstileStates.UNLOCKED
+                }
+            }
+            event(TurnstileEvents.COIN) {
+                state(TurnstileStates.LOCKED to TurnstileStates.UNLOCKED) { ts ->
+                    ts.unlock()
+                }
+                state(TurnstileStates.UNLOCKED to TurnstileStates.UNLOCKED) { ts ->
+                    ts.thankYou()
+                }
+            }
+            event(TurnstileEvents.PASS) {
+                state(TurnstileStates.UNLOCKED to TurnstileStates.LOCKED) { ts ->
+                    ts.lock();
+                }
+                state(TurnstileStates.LOCKED to TurnstileStates.LOCKED) { ts ->
+                    ts.alarm()
+                }
+            }
+        }.build()
+        val turnstile = mockk<Turnstile>()
+        val fsm = definition.instance(turnstile, TurnstileStates.LOCKED)
+
+        assertTrue { fsm.currentState == TurnstileStates.LOCKED }
+
+        every { turnstile.unlock() } returns Unit
+        fsm.event(TurnstileEvents.COIN)
+        verify { turnstile.unlock() }
+        assertTrue { fsm.currentState == TurnstileStates.UNLOCKED }
+
+        every { turnstile.thankYou() } returns Unit
+        fsm.event(TurnstileEvents.COIN)
+        verify { turnstile.thankYou() }
+        assertTrue { fsm.currentState == TurnstileStates.UNLOCKED }
+
+        every { turnstile.lock() } returns Unit
+        fsm.event(TurnstileEvents.PASS)
+        verify { turnstile.lock() }
+        assertTrue { fsm.currentState == TurnstileStates.LOCKED }
+
+        every { turnstile.alarm() } returns Unit
+        fsm.event(TurnstileEvents.PASS)
+        verify { turnstile.alarm() }
+        assertTrue { fsm.currentState == TurnstileStates.LOCKED }
     }
 }

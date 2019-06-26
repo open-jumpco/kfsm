@@ -19,6 +19,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+    testImplementation("io.mockk:mockk:1.9")
 }
 
 
