@@ -37,4 +37,9 @@ class Lock {
         println("DoubleUnlock")
         locked -= 1
     }
+
+    override fun toString(): String {
+        return "Lock(locked=$locked)"
+    }
+
 }
