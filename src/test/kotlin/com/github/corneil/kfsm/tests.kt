@@ -17,7 +17,7 @@ class KfsmTests {
     fun `test creation of fsm`() {
         // given
         val definition = StateMachine<LockStates, LockEvents, Lock>()
-        definition.deriveInitialState = { context ->
+        definition.initial { context ->
             when (context.locked) {
                 0 -> UNLOCKED
                 1 -> LOCKED

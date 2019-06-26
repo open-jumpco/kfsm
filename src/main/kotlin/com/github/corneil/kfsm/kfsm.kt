@@ -12,10 +12,11 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
     class StateMachineDslHelper<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
 
         fun initial(deriveInitialState: (C) -> T): StateMachineDslHelper<T, E, C> {
-            fsm.deriveInitialState = deriveInitialState
+            fsm.initial(deriveInitialState)
             return this
         }
-        fun state(currentState: T, handler: StateMachineDslEventHelper<T, E, C>.() -> Unit) :
+
+        fun state(currentState: T, handler: StateMachineDslEventHelper<T, E, C>.() -> Unit):
                 StateMachineDslEventHelper<T, E, C> {
             return StateMachineDslEventHelper(currentState, fsm).apply(handler)
         }
@@ -25,8 +26,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
 
     class StateMachineDslEventHelper<T : Enum<T>, E : Enum<E>, C>(
         private val currentState: T,
-        private val fsm: StateMachine<T, E, C>
-    ) {
+        private val fsm: StateMachine<T, E, C>) {
         fun event(event: Pair<E, T>, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
             val key = Pair(currentState, event.first)
             assert(fsm.transitions[key] == null) { "Transition for ${currentState} transition ${event.first} already defined" }
@@ -58,8 +58,11 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
         return StateMachineDslHelper(this).apply(handler)
     }
 
-    lateinit var deriveInitialState: ((C) -> T)
-    val transitions: MutableMap<Pair<T, E>, Transition<T, E, C>> = mutableMapOf()
+    private lateinit var deriveInitialState: ((C) -> T)
+    private val transitions: MutableMap<Pair<T, E>, Transition<T, E, C>> = mutableMapOf()
+    fun initial(init: (C) -> T) {
+        deriveInitialState = init
+    }
 
     class StateMachineInstance<T : Enum<T>, E : Enum<E>, C>(
         private val context: C,
