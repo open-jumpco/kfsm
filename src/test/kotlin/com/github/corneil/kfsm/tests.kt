@@ -170,7 +170,7 @@ class KfsmTests {
                 state(TurnstileStates.LOCKED to TurnstileStates.UNLOCKED) { ts ->
                     ts.unlock()
                 }
-                state(TurnstileStates.UNLOCKED to TurnstileStates.UNLOCKED) { ts ->
+                state(TurnstileStates.UNLOCKED) { ts ->
                     ts.thankYou()
                 }
             }
@@ -178,13 +178,15 @@ class KfsmTests {
                 state(TurnstileStates.UNLOCKED to TurnstileStates.LOCKED) { ts ->
                     ts.lock();
                 }
-                state(TurnstileStates.LOCKED to TurnstileStates.LOCKED) { ts ->
+                state(TurnstileStates.LOCKED) { ts ->
                     ts.alarm()
                 }
             }
         }.build()
+
         val turnstile = mockk<Turnstile>()
-        val fsm = definition.instance(turnstile, TurnstileStates.LOCKED)
+        every { turnstile.locked } returns true
+        val fsm = definition.instance(turnstile)
 
         assertTrue { fsm.currentState == TurnstileStates.LOCKED }
 
