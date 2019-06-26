@@ -25,22 +25,22 @@ class KfsmTests {
                 else -> error("Invalid state locked=${context.locked}")
             }
         }
-        definition.transition(UNLOCK, LOCKED, UNLOCKED) { context ->
+        definition.transition(LOCKED, UNLOCK, UNLOCKED) { context ->
             context.unlock()
         }
-        definition.transition(UNLOCK, DOUBLE_LOCKED, LOCKED) { context ->
+        definition.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) { context ->
             context.doubleUnlock()
         }
-        definition.transition(LOCK, UNLOCKED, LOCKED) { context ->
+        definition.transition(UNLOCKED, LOCK, LOCKED) { context ->
             context.lock()
         }
-        definition.transition(LOCK, LOCKED, DOUBLE_LOCKED) { context ->
+        definition.transition(LOCKED, LOCK, DOUBLE_LOCKED) { context ->
             context.doubleLock()
         }
 
         val lock = Lock()
         // when
-        val fsm = definition.instance(lock, LOCKED)
+        val fsm = definition.create(lock, LOCKED)
         // then
         assertTrue { fsm.currentState == LOCKED }
         assertTrue { lock.locked == 1 }
@@ -120,7 +120,7 @@ class KfsmTests {
 
         val lock = Lock()
         // when
-        val fsm = definition.instance(lock)
+        val fsm = definition.create(lock)
         // then
         assertTrue { fsm.currentState == LOCKED }
         assertTrue { lock.locked == 1 }
@@ -188,8 +188,9 @@ class KfsmTests {
         }.build()
 
         val turnstile = mockk<Turnstile>()
+
         every { turnstile.locked } returns true
-        val fsm = definition.instance(turnstile)
+        val fsm = definition.create(turnstile)
 
         assertTrue { fsm.currentState == TurnstileStates.LOCKED }
 
