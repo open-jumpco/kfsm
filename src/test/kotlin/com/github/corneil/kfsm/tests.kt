@@ -91,26 +91,29 @@ class KfsmTests {
                     else -> error("Invalid state locked=${context.locked}")
                 }
             }
-            event(UNLOCK) {
-                state(LOCKED to UNLOCKED) { context ->
-                    context.unlock()
-                }
-                state(DOUBLE_LOCKED to LOCKED) { context ->
-                    context.doubleUnlock()
-                }
-                state(UNLOCKED) {
-                    error("Already Unlocked")
-                }
-            }
-            event(LOCK) {
-                state(UNLOCKED to LOCKED) { context ->
-                    context.lock()
-                }
-                state(LOCKED to DOUBLE_LOCKED) { context ->
+
+            state(LOCKED) {
+                event(LOCK to DOUBLE_LOCKED) { context ->
                     context.doubleLock()
                 }
-                state(DOUBLE_LOCKED) {
+                event(UNLOCK to UNLOCKED) { context ->
+                    context.unlock()
+                }
+            }
+            state(DOUBLE_LOCKED) {
+                event(UNLOCK to LOCKED) { context ->
+                    context.doubleUnlock()
+                }
+                event(LOCK) {
                     error("Already Double Locked")
+                }
+            }
+            state(UNLOCKED) {
+                event(LOCK to LOCKED) { context ->
+                    context.lock()
+                }
+                event(UNLOCK) {
+                    error("Already Unlocked")
                 }
             }
         }.build()
@@ -166,20 +169,20 @@ class KfsmTests {
                     false -> TurnstileStates.UNLOCKED
                 }
             }
-            event(TurnstileEvents.COIN) {
-                state(TurnstileStates.LOCKED to TurnstileStates.UNLOCKED) { ts ->
+            state(TurnstileStates.LOCKED) {
+                event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
                     ts.unlock()
                 }
-                state(TurnstileStates.UNLOCKED) { ts ->
-                    ts.thankYou()
+                event(TurnstileEvents.PASS) { ts ->
+                    ts.alarm()
                 }
             }
-            event(TurnstileEvents.PASS) {
-                state(TurnstileStates.UNLOCKED to TurnstileStates.LOCKED) { ts ->
-                    ts.lock();
+            state(TurnstileStates.UNLOCKED) {
+                event(TurnstileEvents.COIN) { ts ->
+                    ts.thankYou()
                 }
-                state(TurnstileStates.LOCKED) { ts ->
-                    ts.alarm()
+                event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+                    ts.lock();
                 }
             }
         }.build()

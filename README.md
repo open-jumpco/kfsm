@@ -57,20 +57,20 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl
             false -> TurnstileStates.UNLOCKED
         }
     }
-    event(TurnstileEvents.COIN) {
-        state(TurnstileStates.LOCKED to TurnstileStates.UNLOCKED) { ts ->
+    state(TurnstileStates.LOCKED) {
+        event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
             ts.unlock()
         }
-        state(TurnstileStates.UNLOCKED) { ts ->
-            ts.thankYou()
+        event(TurnstileEvents.PASS) { ts ->
+            ts.alarm()
         }
     }
-    event(TurnstileEvents.PASS) {
-        state(TurnstileStates.UNLOCKED to TurnstileStates.LOCKED) { ts ->
-            ts.lock();
+    state(TurnstileStates.UNLOCKED) {
+        event(TurnstileEvents.COIN) { ts ->
+            ts.thankYou()
         }
-        state(TurnstileStates.LOCKED) { ts ->
-            ts.alarm()
+        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+            ts.lock();
         }
     }
 }.build()

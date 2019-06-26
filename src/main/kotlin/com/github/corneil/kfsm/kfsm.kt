@@ -15,30 +15,29 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
             fsm.deriveInitialState = deriveInitialState
             return this
         }
-
-        fun event(event: E, handler: StateMachineDslEventHelper<T, E, C>.() -> Unit):
+        fun state(currentState: T, handler: StateMachineDslEventHelper<T, E, C>.() -> Unit) :
                 StateMachineDslEventHelper<T, E, C> {
-            return StateMachineDslEventHelper(event, fsm).apply(handler)
+            return StateMachineDslEventHelper(currentState, fsm).apply(handler)
         }
 
         fun build() = fsm
     }
 
     class StateMachineDslEventHelper<T : Enum<T>, E : Enum<E>, C>(
-        private val event: E,
+        private val currentState: T,
         private val fsm: StateMachine<T, E, C>
     ) {
-        fun state(states: Pair<T, T>, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
-            val key = states.first to event
-            assert(fsm.transitions[key] == null) { "Transition for ${states.first} transition $event already defined" }
-            fsm.transitions[key] = Transition(states.first, event, states.second, action)
+        fun event(event: Pair<E, T>, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
+            val key = Pair(currentState, event.first)
+            assert(fsm.transitions[key] == null) { "Transition for ${currentState} transition ${event.first} already defined" }
+            fsm.transitions[key] = Transition(currentState, event.first, event.second, action)
             return this
         }
 
-        fun state(startState: T, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
-            val key = startState to event
-            assert(fsm.transitions[key] == null) { "Transition for $startState transition $event already defined" }
-            fsm.transitions[key] = Transition(startState, event, startState, action)
+        fun event(event: E, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
+            val key = Pair(currentState, event)
+            assert(fsm.transitions[key] == null) { "Transition for $currentState transition $event already defined" }
+            fsm.transitions[key] = Transition(currentState, event, currentState, action)
             return this
         }
     }
