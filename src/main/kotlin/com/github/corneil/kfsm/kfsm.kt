@@ -7,7 +7,21 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
         val event: E,
         val endState: T,
         val action: ((C) -> Unit)?
-    )
+    ) {
+        fun execute(context: C, fsm: StateMachine<T, E, C>) {
+            if (startState != endState) {
+                fsm.exitActions[startState]?.let { it ->
+                    it.invoke(context, startState, endState)
+                }
+            }
+            action?.invoke(context)
+            if (startState != endState) {
+                fsm.entryActions[endState]?.let { it ->
+                    it.invoke(context, startState, endState)
+                }
+            }
+        }
+    }
 
     class StateMachineDslHelper<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
 
@@ -28,20 +42,35 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
         private val currentState: T,
         private val fsm: StateMachine<T, E, C>
     ) {
+        fun entry(action: (C, T, T) -> Unit) {
+            fsm.entry(currentState, action)
+        }
+
+        fun exit(action: (C, T, T) -> Unit) {
+            fsm.exit(currentState, action)
+        }
+
         fun event(event: Pair<E, T>, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
             fsm.transition(currentState, event.first, event.second, action)
             return this
         }
 
         fun event(event: E, action: ((C) -> Unit)?): StateMachineDslEventHelper<T, E, C> {
-            fsm.transition(currentState, event, null, action)
+            fsm.transition(currentState, event, action)
             return this
         }
     }
 
-    fun transition(startState: T, event: E, endState: T?, action: ((C) -> Unit)?) {
-        assert(transitions[startState to event] == null) { "Transition for $startState transition $event already defined" }
-        transitions[startState to event] = Transition(startState, event, endState ?: startState, action)
+    fun transition(startState: T, event: E, endState: T, action: ((C) -> Unit)?) {
+        val key = Pair(startState, event)
+        assert(transitions[key] == null) { "Transition for $startState transition $event already defined" }
+        transitions[key] = Transition(startState, event, endState, action)
+    }
+
+    fun transition(startState: T, event: E, action: ((C) -> Unit)?) {
+        val key = Pair(startState, event)
+        assert(transitions[key] == null) { "Transition for $startState transition $event already defined" }
+        transitions[key] = Transition(startState, event, startState, action)
     }
 
     fun create(context: C, initialState: T? = null) = StateMachineInstance(
@@ -56,6 +85,17 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
 
     private lateinit var deriveInitialState: ((C) -> T)
     private val transitions: MutableMap<Pair<T, E>, Transition<T, E, C>> = mutableMapOf()
+    private val entryActions: MutableMap<T, (C, T, T) -> Unit> = mutableMapOf()
+    private val exitActions: MutableMap<T, (C, T, T) -> Unit> = mutableMapOf()
+    fun entry(currentState: T, action: (C, T, T) -> Unit) {
+        assert(entryActions[currentState] == null) { "Entry action already defined for $currentState" }
+        entryActions[currentState] = action
+    }
+
+    fun exit(currentState: T, action: (C, T, T) -> Unit) {
+        assert(exitActions[currentState] == null) { "Exit action already defined for $currentState" }
+        exitActions[currentState] = action
+    }
 
     fun initial(init: (C) -> T) {
         deriveInitialState = init
@@ -70,12 +110,13 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
             private set
 
         fun event(event: E) {
-            val state = fsm.transitions[currentState to event]
+            val transition = fsm.transitions[currentState to event]
                 ?: error("Statemachine doesn't provide for $event in $currentState")
-            if (state.action != null) {
-                state.action.invoke(context)
-            }
-            currentState = state.endState
+            transition.execute(context, fsm)
+            currentState = transition.endState
         }
     }
 }
+
+
+
