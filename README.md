@@ -77,9 +77,9 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl
 ```
 
 With this We are saying:
-On an event COIN when the state is LOCKED transition to UNLOCKED and execute the code in the lambda `{ ts -> ts.unlock() }`
+When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the code in the lambda `{ ts -> ts.unlock() }`
 
-In the case where we use `state(UNLOCKED) {` we are saying when the state is UNLOCKED perform the action without changing the end state.
+When the state is `LOCKED` and on `event(PASS)` we are perform the action `alarm()` without changing the end state.
 
 Then we instantiate the FSM and provide a context to operate on:
 
