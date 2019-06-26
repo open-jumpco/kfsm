@@ -29,6 +29,9 @@ class Turnstile(var locked: Boolean = true) {
     fun thankYou() {
         println("Thank You")
     }
+    override fun toString(): String {
+        return "Turnstile(locked=$locked)"
+    }
 }
 ```
 We declare 2 enums, one for the possible states and one for the possible events.
@@ -66,12 +69,25 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl
         }
     }
     state(TurnstileStates.UNLOCKED) {
+        // event without an endState will not trigger entry or exit actions
         event(TurnstileEvents.COIN) { ts ->
             ts.thankYou()
         }
         event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
             ts.lock();
         }
+    }
+    default { // default state handler
+        entry { context, startState, endState ->
+            println("Entering:$stateState -> $endState for $context")            
+        }
+        exit { context, startState, endState ->
+            // will be invoke if state doesn't have exit defined.
+            println("Existing:$stateState -> $endState for $context")            
+        }
+        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { context, currentState, event ->
+            // will be invoke for PASS event and will transition to LOCKED if no event it defined for the currentState
+        }    
     }
 }.build()
 ```

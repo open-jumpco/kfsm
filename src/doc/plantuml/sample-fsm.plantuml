@@ -1,0 +1,9 @@
+@startuml
+
+[*] --> STATE1
+STATE1 ---> STATE2 : EVENT1 { action1() }
+STATE2 ---> STATE1 : EVENT2 { action2() }
+STATE1 ---> STATE1 : EVENT2 { action3() }
+STATE2 ---> STATE2 : EVENT1 { action4() }
+
+@enduml
