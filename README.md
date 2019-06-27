@@ -86,7 +86,9 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl
             println("Existing:$stateState -> $endState for $context")            
         }
         event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { context, currentState, event ->
-            // will be invoke for PASS event and will transition to LOCKED if no event it defined for the currentState
+            // will be invoked for PASS event and will transition to LOCKED if no event it defined for the currentState
+            // in this specific case the definition covers all possibilities to this will never be called
+            error("Should not be called with this definition")
         }    
     }
 }.build()
