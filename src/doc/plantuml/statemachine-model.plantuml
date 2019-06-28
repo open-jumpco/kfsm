@@ -1,0 +1,20 @@
+@startuml
+
+
+class StateMachine<T : Enum<T>, E : Enum<E>, C> {
+    transition(startState: T, event: E, endState: T, action: (C) -> Unit)
+    transition(startState: T, event: E, action: (C) -> Unit)
+    create(context: C, initialState: T?)
+    dsl()
+}
+
+class StateMachineInstance<T: Enum<T>, E: Enum<E>, C> {
+    C: context
+    fsm: StateMachine<T,E,C>
+    event(event: E)
+}
+
+StateMachineInstance *--> StateMachine : fsm
+
+
+@enduml

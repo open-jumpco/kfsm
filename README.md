@@ -54,30 +54,29 @@ Then we use the DSL to declare a definition of a statemachine matching the diagr
 
 ```kotlin
 val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
-    initial { ts ->
-        when (ts.locked) {
-            true -> TurnstileStates.LOCKED
-            false -> TurnstileStates.UNLOCKED
-        }
-    }
-    state(TurnstileStates.LOCKED) {
-        event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
+    initial { if(it.locked) LOCKED else UNLOCKED }
+    state(LOCKED) {
+        event(COIN to UNLOCKED) { ts ->
             ts.unlock()
         }
         event(TurnstileEvents.PASS) { ts ->
             ts.alarm()
         }
     }
-    state(TurnstileStates.UNLOCKED) {
+    state(UNLOCKED) {
         // event without an endState will not trigger entry or exit actions
-        event(TurnstileEvents.COIN) { ts ->
+        event(COIN) { ts ->
             ts.thankYou()
         }
-        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+        event(PASS to LOCKED) { ts ->
             ts.lock();
         }
     }
     default { // default state handler
+        action { context, state, event ->
+            println("Default action for $event in $state for $context")
+            error("Should not be called with this definition")
+        }
         entry { context, startState, endState ->
             println("Entering:$stateState -> $endState for $context")            
         }
@@ -85,7 +84,7 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl
             // will be invoke if state doesn't have exit defined.
             println("Existing:$stateState -> $endState for $context")            
         }
-        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { context, currentState, event ->
+        event(PASS to LOCKED) { context, currentState, event ->
             // will be invoked for PASS event and will transition to LOCKED if no event it defined for the currentState
             // in this specific case the definition covers all possibilities to this will never be called
             error("Should not be called with this definition")
@@ -120,4 +119,33 @@ fsm.event(COIN)
 // Expect unlock() and end state is UNLOCKED
 fsm.event(COIN)
 // Expect thankYou() and end state is UNLOCKED
+```
+Questions:
+
+Considering:
+```kotlin
+dsl {
+    state(LOCKED) {
+        event(COIN to UNLOCKED) { it.unlock() }
+        event(PASS) { it.alarm() }
+    }
+}
+```
+* Will it be better to use `transition` than `event` in the DSL?
+```kotlin
+dsl {
+    state(LOCKED) {
+        transition(COIN to UNLOCKED) { it.unlock() }
+        transition(PASS) { it.alarm() }
+    }
+}
+```
+* Will it be better to use `on` than `event` in the DSL?
+```kotlin
+dsl {
+    state(LOCKED) {
+        on(COIN to UNLOCKED) { it.unlock() }
+        on(PASS) { it.alarm() }
+    }
+}
 ```
