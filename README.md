@@ -149,3 +149,5 @@ dsl {
     }
 }
 ```
+
+![statemachine-model](statemachine_model.png "State-machine Model")
