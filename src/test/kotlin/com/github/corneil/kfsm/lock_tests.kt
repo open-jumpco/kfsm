@@ -141,67 +141,19 @@ class LockFsmTests {
 
     @Test
     fun `simple lock test`() {
-        // given
-        val definition = StateMachine<LockStates, LockEvents, Lock>().dsl {
-            initial { context ->
-                when (context.locked) {
-                    0 -> UNLOCKED
-                    1 -> LOCKED
-                    2 -> DOUBLE_LOCKED
-                    else -> error("Invalid state locked=${context.locked}")
-                }
-            }
-            default {
-                action { context, state, event ->
-                    println("Default action for state($state) -> event($event) for $context")
-                }
-                entry { context, startState, endState ->
-                    println("entering:$startState -> $endState for $context")
-                }
-                event(LOCK) {
-                    println("Default lock event")
-                }
-                event(UNLOCK) {
-                    println("Default unlock event")
-                }
-                exit { context, startState, endState ->
-                    println("exiting:$startState -> $endState for $context")
-                }
-            }
-            state(LOCKED) {
-                event(LOCK to DOUBLE_LOCKED) { context ->
-                    context.doubleLock()
-                }
-                event(UNLOCK to UNLOCKED) { context ->
-                    context.unlock()
-                }
-            }
-            state(DOUBLE_LOCKED) {
-                event(UNLOCK to LOCKED) { context ->
-                    context.doubleUnlock()
-                }
-            }
-            state(UNLOCKED) {
-                default { context, state, event ->
-                    println("Ignoring-UNLOCKED:$state:$event:$context")
-                }
-                entry { context, startState, endState ->
-                    println("entering:$startState -> $endState for $context")
-                }
-                event(LOCK to LOCKED) { context ->
-                    context.lock()
-                }
-            }
-        }.build()
-        // when
-        val lock = Lock()
-        val fsm = definition.create(lock)
-        // then
-        fsm.event(LOCK)
-        fsm.event(LOCK)
-        fsm.event(LOCK)
-        fsm.event(UNLOCK)
-        fsm.event(UNLOCK)
-        fsm.event(UNLOCK)
+        val lock = Lock(0)
+        val fsm = LockFSM(lock)
+        println("--lock1")
+        fsm.lock()
+        println("--lock2")
+        fsm.lock()
+        println("--lock3")
+        fsm.lock()
+        println("--unlock1")
+        fsm.unlock()
+        println("--unlock2")
+        fsm.unlock()
+        println("--unlock3")
+        fsm.unlock()
     }
 }

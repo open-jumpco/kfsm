@@ -2,9 +2,16 @@
 
 
 class StateMachine<T : Enum<T>, E : Enum<E>, C> {
+    initial(action: (C) -> T)
     transition(startState: T, event: E, endState: T, action: (C) -> Unit)
     transition(startState: T, event: E, action: (C) -> Unit)
-    create(context: C, initialState: T?)
+    entry(currentState: T, action: (C) -> Unit)
+    exit(currentState: T, action: (C) -> Unit)
+    defaultAction(action: (C, T, E) -> Unit)
+    defaultEntry(action: (C, T, T) -> Unit)
+    defaultExit(action: (C, T, T) -> Unit)
+    default(currentState: T, action: (C, T, E) -> Unit)
+    create(context: C, initialState: T?) : StateMachineInstance<T,E,C>
     dsl()
 }
 

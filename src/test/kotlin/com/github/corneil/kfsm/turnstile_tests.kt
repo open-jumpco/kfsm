@@ -163,4 +163,22 @@ class TurnstileFsmTests {
         assertTrue { !turnstile.locked }
         assertTrue { fsm.currentState == UNLOCKED }
     }
+
+    @Test
+    fun `fsm component test`() {
+        val turnstile = Turnstile()
+        val fsm = TurnstileFSM(turnstile)
+        println("--coin1")
+        fsm.coin()
+        println("--pass1")
+        fsm.pass()
+        println("--pass2")
+        fsm.pass()
+        println("--pass3")
+        fsm.pass()
+        println("--coin2")
+        fsm.coin()
+        println("--coin3")
+        fsm.coin()
+    }
 }
