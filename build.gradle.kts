@@ -1,14 +1,14 @@
 plugins {
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm") version "1.3.40"
 }
 
 repositories {
     mavenCentral()
 }
 
-group = "com.github.corneil"
+group = "io.jumpco.open"
 
-version = "0.0.1"
+version = "0.1.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

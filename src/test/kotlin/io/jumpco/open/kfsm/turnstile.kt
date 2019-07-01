@@ -1,4 +1,4 @@
-package com.github.corneil.kfsm
+package io.jumpco.open.kfsm
 
 class Turnstile(var locked: Boolean = true) {
     fun unlock() {

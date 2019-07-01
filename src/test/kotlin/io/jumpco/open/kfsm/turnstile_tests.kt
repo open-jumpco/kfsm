@@ -1,9 +1,7 @@
-package com.github.corneil.kfsm
+package io.jumpco.open.kfsm
 
-import com.github.corneil.kfsm.TurnstileEvents.COIN
-import com.github.corneil.kfsm.TurnstileEvents.PASS
-import com.github.corneil.kfsm.TurnstileStates.LOCKED
-import com.github.corneil.kfsm.TurnstileStates.UNLOCKED
+import io.jumpco.open.kfsm.TurnstileEvents.*
+import io.jumpco.open.kfsm.TurnstileStates.*
 import io.mockk.*
 import kotlin.test.Test
 import kotlin.test.assertTrue

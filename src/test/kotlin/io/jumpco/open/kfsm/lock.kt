@@ -1,4 +1,4 @@
-package com.github.corneil.kfsm
+package io.jumpco.open.kfsm
 
 class Lock(initial: Int = 1) {
     var locked: Int = initial

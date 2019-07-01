@@ -1,8 +1,7 @@
-package com.github.corneil.kfsm
+package io.jumpco.open.kfsm
 
-import com.github.corneil.kfsm.LockEvents.LOCK
-import com.github.corneil.kfsm.LockEvents.UNLOCK
-import com.github.corneil.kfsm.LockStates.*
+import io.jumpco.open.kfsm.LockEvents.*
+import io.jumpco.open.kfsm.LockStates.*
 import io.mockk.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

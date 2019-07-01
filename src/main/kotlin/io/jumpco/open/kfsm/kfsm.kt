@@ -1,4 +1,4 @@
-package com.github.corneil.kfsm
+package io.jumpco.open.kfsm
 
 
 class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
