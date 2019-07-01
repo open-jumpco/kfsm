@@ -204,4 +204,4 @@ dsl {
 }
 ```
 
-![statemachine-model](statemachine_model.png "State-machine Model")
+![statemachine-model](statemachine_model.png "State Machine Model")
