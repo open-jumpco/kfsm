@@ -11,11 +11,11 @@ dependencies {
 }
 ```
 
-The FSM can then be packaged as follows:
+The FSM can then be defined and packaged as follows:
 ```kotlin
 class TurnstileFSM(private val turnstile: Turnstile) {
     companion object {
-        private val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
+       private fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
             initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
             state(TurnstileStates.LOCKED) {
                 entry { context, startState, endState ->
@@ -46,6 +46,7 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                 }
             }
         }.build()
+        private val definition by lazy { define() }
     }
     private val fsm = definition.create(turnstile)
 
@@ -93,5 +94,3 @@ dsl {
     }
 }
 ```
-
-![statemachine-model](src/doc/asciidoc/statemachine_model.png "State Machine Model")

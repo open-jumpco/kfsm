@@ -8,6 +8,10 @@ We want to ensure that the `lock()` function is only called when the lock is not
 
 link:http://smc.sourceforge.net/slides/SMC_Tutorial.pdf[SMC Tutorial]
 
+Then we use the DSL to declare a definition of a statemachine matching the diagram:
+
+image::turnstile_fsm.png[LockStateDiagram]
+
 ```kotlin
 class Turnstile(var locked: Boolean = true) {
     fun unlock() {
@@ -47,10 +51,6 @@ enum class TurnstileEvents {
     PASS
 }
 ```
-
-Then we use the DSL to declare a definition of a statemachine matching the diagram:
-
-image::turnstile_fsm.png[LockStateDiagram]
 
 ```kotlin
 val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
