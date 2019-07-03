@@ -1,14 +1,25 @@
+/*
+ * Copyright (c) 2019. Open JumpCO
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.jumpco.open.kfsm
 
+/**
+ * @suppress
+ */
 class Turnstile(var locked: Boolean = true) {
     fun unlock() {
-        assert(locked) { "Cannot unlock when not locked" }
+        require(locked) { "Cannot unlock when not locked" }
         println("Unlock")
         locked = false
     }
 
     fun lock() {
-        assert(!locked) { "Cannot lock when locked" }
+        require(!locked) { "Cannot lock when locked" }
         println("Lock")
         locked = true
     }
@@ -26,21 +37,27 @@ class Turnstile(var locked: Boolean = true) {
     }
 
 }
-
+/**
+ * @suppress
+ */
 enum class TurnstileStates {
     LOCKED,
     UNLOCKED
 }
-
+/**
+ * @suppress
+ */
 enum class TurnstileEvents {
     COIN,
     PASS
 }
 
-
+/**
+ * @suppress
+ */
 class TurnstileFSM(private val turnstile: Turnstile) {
     companion object {
-        private val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
+        private fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
             initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
             state(TurnstileStates.LOCKED) {
                 entry { context, startState, endState ->
@@ -71,6 +88,7 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                 }
             }
         }.build()
+        private val definition by lazy { define() }
     }
     private val fsm = definition.create(turnstile)
 
