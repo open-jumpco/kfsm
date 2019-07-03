@@ -1,56 +1,106 @@
-import org.gradle.execution.ExcludedTaskFilteringBuildConfigurationAction
 import org.gradle.internal.os.OperatingSystem
+
 plugins {
     id 'org.jetbrains.kotlin.multiplatform' version '1.3.40'
+    id 'org.jetbrains.dokka' version '0.9.18'
+    id 'maven-publish'
 }
 repositories {
     jcenter()
     mavenCentral()
 }
-apply plugin: 'maven-publish'
-group = "io.jumpco.open"
 
-version = "0.1.0"
+group = 'io.jumpco.open'
+version = '0.1.0-SNAPSHOT'
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-if(OperatingSystem.current().isWindows()) {
-    profile += ',mingw'
-}
-if(OperatingSystem.current().isLinux()) {
-    profile += ',linux'
-}
-if(OperatingSystem.current().isMacOsX()) {
-    profile += ',macos'
+def useMingw = defaultProfile.contains('mingw')
+def useLinux = defaultProfile.contains('linux')
+def useMacos = defaultProfile.contains('macos')
+def useJs = defaultProfile.contains('js')
+def useJvm = defaultProfile.contains('jvm')
+def useWasm = defaultProfile.contains('wasm')
+
+def profile = ext.find('profile') ?: defaultProfile
+if (profile) {
+    if (profile.contains('default')) {
+        if (OperatingSystem.current().isWindows()) {
+            useMingw = true
+            logger.lifecycle "Detected ${OperatingSystem.current().name} using mingw"
+        }
+        if (OperatingSystem.current().isLinux()) {
+            useLinux = true
+            logger.lifecycle "Detected ${OperatingSystem.current().name} using linux"
+        }
+        if (OperatingSystem.current().isMacOsX()) {
+            useMacos = true
+            logger.lifecycle "Detected ${OperatingSystem.current().name} using macos"
+        }
+    }
+    if (profile.contains('linux')) {
+        useLinux = true
+    }
+    if (profile.contains('mingw')) {
+        useMingw = true
+    }
+    if (profile.contains('macos')) {
+        useMacos = true
+    }
+    if (profile.contains('wasm')) {
+        useWasm = true
+    }
 }
 
 kotlin {
-    jvm()
-    if(profile.contains('js')) {
-        js {
-            if(profile.contains('browser')) {
-                browser {
-                }
-            }
-            if(profile.contains("nodejs")) {
-                nodejs {
-                }
+    if (useJvm) {
+        jvm() {
+            mavenPublication {
+                artifactId = 'kfsm-jvm'
             }
         }
     }
-    if(profile.contains('mingw')) {
-        mingwX64('mingw')
+    if (useJs) {
+        js {
+            browser {
+            }
+            nodejs {
+            }
+            mavenPublication {
+                artifactId = 'kfsm-js'
+            }
+        }
     }
-    if(profile.contains('linux')) {
-        linuxX64('linux')
+    if (useMingw) {
+        mingwX64('mingw') {
+            mavenPublication {
+                artifactId = 'kfsm-mingwX64'
+            }
+        }
     }
-    if(profile.contains('macos')) {
-        macosX64('macos')
+    if (useLinux) {
+        linuxX64('linux') {
+            mavenPublication {
+                artifactId = 'kfsm-linuxX64'
+            }
+        }
     }
-    if(profile.contains('wasm')) {
-        wasm32("wasm")
+    if (useMacos) {
+        macosX64('macos') {
+            mavenPublication {
+                artifactId = 'kfsm-macosX64'
+            }
+        }
+    }
+    if (useWasm) {
+        wasm32("wasm") {
+            mavenPublication {
+                artifactId = 'kfsm-wasm32'
+            }
+        }
     }
     sourceSets {
         commonMain {
@@ -65,19 +115,21 @@ kotlin {
                 implementation 'io.mockk:mockk-common:1.9.3'
             }
         }
-        jvmMain {
-            dependencies {
-                implementation kotlin('stdlib-jdk8')
+        if (useJvm) {
+            jvmMain {
+                dependencies {
+                    implementation kotlin('stdlib-jdk8')
+                }
+            }
+            jvmTest {
+                dependencies {
+                    implementation kotlin('test')
+                    implementation kotlin('test-junit')
+                    implementation 'io.mockk:mockk:1.9.3'
+                }
             }
         }
-        jvmTest {
-            dependencies {
-                implementation kotlin('test')
-                implementation kotlin('test-junit')
-                implementation 'io.mockk:mockk:1.9.3'
-            }
-        }
-        if(profile.contains('js')) {
+        if (useJs) {
             jsMain {
                 dependencies {
                     implementation kotlin('stdlib-js')
@@ -89,63 +141,107 @@ kotlin {
                 }
             }
         }
-        if(profile.contains('mingw')) {
-            mingwMain {
-                kotlin.srcDirs = ['src/native/main']
-            }
-            mingwTest {
-                kotlin.srcDirs = ['src/native/test']
-            }
+        if (useMingw) {
+            configureNative(mingwMain, mingwTest)
         }
-        if(profile.contains('linux')) {
-            linuxMain {
-                kotlin.srcDirs = ['src/native/main']
-            }
-            linuxTest {
-                kotlin.srcDirs = ['src/native/test']
-            }
+        if (useLinux) {
+            configureNative(linuxMain, linuxTest)
         }
-        if(profile.contains('macos')) {
-            macosMain {
-                kotlin.srcDirs = ['src/native/main']
-            }
-            macosTest {
-                kotlin.srcDirs = ['src/native/test']
-            }
+        if (useMacos) {
+            configureNative(macosMain, macosTest)
         }
-        if(profile.contains('wasm')) {
-            wasmMain {
-                kotlin.srcDirs = ['src/native/main']
-            }
-            wasmTest {
-                kotlin.srcDirs = ['src/native/test']
-            }
+        if (useWasm) {
+            configureNative(wasmMain, wasmTest)
         }
     }
 }
-/*
-val dokka by tasks.getting(DokkaTask::class) {
-    outputFormat = "html"
+
+def configureNative(srcSetMain, srcSetTest) {
+    srcSetMain.kotlin.srcDirs = ['src/native/main']
+    srcSetTest.kotlin.srcDirs = ['src/native/test']
+}
+
+dokka {
+    outputFormat = 'html'
     outputDirectory = "$buildDir/javadoc"
     includeNonPublic = false
-    samples = listOf("src/commonTest/kotlin/io/jumpco/open/kfsm/turnstile.kt")
+    impliedPlatforms = ["Common"] // This will force platform tags for all non-common sources e.g. "JVM"
+    kotlinTasks {
+        // dokka fails to retrieve sources from MPP-tasks so they must be set empty to avoid exception
+        // use sourceRoot instead (see below)
+        []
+    }
+    sourceRoot {
+        // assuming there is only a single source dir...
+        path = kotlin.sourceSets.commonMain.kotlin.srcDirs[0]
+        platforms = ['Common']
+    }
+    if (useJvm) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.jvmMain.kotlin.srcDirs[0]
+            platforms << 'JVM'
+        }
+    }
+    if (useJs) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.jsMain.kotlin.srcDirs[0]
+            platforms << 'JS'
+        }
+    }
+    if (useLinux) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.linuxMain.kotlin.srcDirs[0]
+            platforms << 'Linux'
+        }
+    }
+    if (useMacos) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.macosMain.kotlin.srcDirs[0]
+            platforms << 'macOS'
+        }
+    }
+    samples = ['src/commonTest/kotlin/io/jumpco/open/kfsm/turnstile.kt']
 }
-*/
 
-/*
-val dokkaJavadoc by tasks.creating(DokkaTask::class) {
-    outputFormat = "javadoc"
-    outputDirectory = "$buildDir/javadoc"
-    samples = listOf("src/test/kotlin/io/jumpco/open/kfsm/turnstile.kt")
-}
- */
-
-/*val javadocJar by tasks.creating(Jar::class) {
-    dependsOn(dokka)
-    archiveClassifier.set("javadoc")
-    from("$buildDir/javadoc")
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from files('src/commonMain/kotlin')
 }
 
-tasks.named("assemble") {
-    dependsOn(*//*sourcesJar,*//* javadocJar)
-}*/
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+
+}
+
+gradle.afterProject {
+    tasks.forEach { task ->
+        if (task.name.endsWith('Classes')) {
+            sourcesJar.dependsOn(task)
+        }
+        if (task.name.contains('dokka')) {
+            javadocJar.dependsOn(task)
+        }
+        if (task.name.contains('Publication')) {
+            publish.dependsOn(task)
+        }
+    }
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+publishing {
+    publications {
+        kfsm(MavenPublication) {
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+}

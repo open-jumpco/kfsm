@@ -22,10 +22,12 @@ class LockFsmTests {
     private fun verifyLockFSM(fsm: StateMachine.StateMachineInstance<LockStates, LockEvents, Lock>, lock: Lock) {
         // then
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.event(UNLOCK)
         // then
         assertTrue { fsm.currentState == UNLOCKED }
+        assertTrue { lock.locked == 0 }
         try {
             // when
             fsm.event(UNLOCK)
@@ -39,10 +41,12 @@ class LockFsmTests {
         fsm.event(LOCK)
         // then
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.event(LOCK)
         // then
         assertTrue { fsm.currentState == DOUBLE_LOCKED }
+        assertTrue { lock.locked == 2 }
         try {
             // when
             fsm.event(LOCK)
@@ -52,6 +56,7 @@ class LockFsmTests {
             // then
             assertEquals("Already double locked", x.message)
         }
+        assertTrue { lock.locked == 2 }
     }
 
     @Test

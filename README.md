@@ -5,13 +5,54 @@ This model supports events that trigger may cause a transition from one state to
 
 ## Getting Started
 
+Until we publish the first release you should clone, build and publish the project to local Maven.
+```cmd
+git clone https://github.com/open-jumpco/kfsm.git
+./gradlew publish -Pprofile=default
+```
+The property `defaultProfile` is configured to `jvm,js,wasm`
+
+The `profile=default` will detect and add the current native platform.
+
+### JVM Projects
 ```groovy
 dependencies {
-    
+    implementation 'io.jumpco.open:kfsm-jvm:0.1.0-SNAPSHOT'
+}
+```
+### KotlinJS Projects
+```groovy
+dependencies {
+    implementation 'io.jumpco.open:kfsm-js:0.1.0-SNAPSHOT'
+}
+```
+### Kotlin/Native Projects using WASM
+```groovy
+dependencies {
+    implementation 'io.jumpco.open:kfsm-wasm32:0.1.0-SNAPSHOT'    
+}
+```
+### Kotlin/Native Projects using LinuxX64
+```groovy
+dependencies {
+    implementation 'io.jumpco.open:kfsm-linux:0.1.0-SNAPSHOT'    
+}
+```
+### Kotlin/Native Projects using MinGW64
+```groovy
+dependencies {
+    implementation 'io.jumpco.open:kfsm-mingw:0.1.0-SNAPSHOT'    
+}
+```
+### Kotlin/Native Projects using macOS
+```groovy
+dependencies {
+    implementation 'io.jumpco.open:kfsm-macos:0.1.0-SNAPSHOT'    
 }
 ```
 
-The FSM can then be defined and packaged as follows:
+An FSM can then be defined as follows:
+
 ```kotlin
 class TurnstileFSM(private val turnstile: Turnstile) {
     companion object {

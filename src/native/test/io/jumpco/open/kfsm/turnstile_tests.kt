@@ -23,22 +23,27 @@ class TurnstileFsmTests {
     ) {
 
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { turnstile.locked }
         // when
         fsm.event(COIN)
         // then
         assertTrue { fsm.currentState == UNLOCKED }
+        assertTrue { !turnstile.locked }
         // when
         fsm.event(COIN)
         // then
         assertTrue { fsm.currentState == UNLOCKED }
+        assertTrue { !turnstile.locked }
         // when
         fsm.event(TurnstileEvents.PASS)
         // then
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { turnstile.locked }
         // when
         fsm.event(TurnstileEvents.PASS)
         // then
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { turnstile.locked }
     }
 
     @Test
