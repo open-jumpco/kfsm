@@ -90,9 +90,6 @@ kotlin {
     }
     if (useMacos) {
         macosX64('macos') {
-            mavenPublication {
-                artifactId = 'kfsm-macosX64'
-            }
         }
     }
     if (useWasm) {
@@ -242,6 +239,12 @@ publishing {
         kfsm(MavenPublication) {
             artifact javadocJar
             artifact sourcesJar
+        }
+    }
+    publications.all { publication ->
+        logger.info "publication:$publication.name"
+        if (publication.name == 'kotlinMultiplatform') {
+            publication.artifactId = "kfsm-common"
         }
     }
 }
