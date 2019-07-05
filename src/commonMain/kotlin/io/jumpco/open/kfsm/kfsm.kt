@@ -80,7 +80,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
     /**
      * @suppress
      */
-    class DslStateMachineEventHelper<T : Enum<T>, E : Enum<E>, C>(
+    class DslStateMachineEventHandler<T : Enum<T>, E : Enum<E>, C>(
         private val currentState: T,
         private val fsm: StateMachine<T, E, C>
     ) {
@@ -112,7 +112,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
          * @param event A Pair with the first being the event and the second being the endState.
          * @param action The action will be performed
          */
-        fun event(event: Pair<E, T>, action: ((C) -> Unit)?): DslStateMachineEventHelper<T, E, C> {
+        fun event(event: Pair<E, T>, action: ((C) -> Unit)?): DslStateMachineEventHandler<T, E, C> {
             fsm.transition(currentState, event.first, event.second, action)
             return this
         }
@@ -120,7 +120,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
         /**
          * Defines a transition where an event causes an action but doesn't change the state.
          */
-        fun event(event: E, action: ((C) -> Unit)?): DslStateMachineEventHelper<T, E, C> {
+        fun event(event: E, action: ((C) -> Unit)?): DslStateMachineEventHandler<T, E, C> {
             fsm.transition(currentState, event, action)
             return this
         }
@@ -129,21 +129,21 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
     /**
      * @suppress
      */
-    class DslStateMachineHelper<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
+    class DslStateMachineHandler<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
 
-        fun initial(deriveInitialState: (C) -> T): DslStateMachineHelper<T, E, C> {
+        fun initial(deriveInitialState: (C) -> T): DslStateMachineHandler<T, E, C> {
             fsm.initial(deriveInitialState)
             return this
         }
 
-        fun state(currentState: T, handler: DslStateMachineEventHelper<T, E, C>.() -> Unit):
-                DslStateMachineEventHelper<T, E, C> {
-            return DslStateMachineEventHelper(currentState, fsm).apply(handler)
+        fun state(currentState: T, handler: DslStateMachineEventHandler<T, E, C>.() -> Unit):
+                DslStateMachineEventHandler<T, E, C> {
+            return DslStateMachineEventHandler(currentState, fsm).apply(handler)
         }
 
-        fun default(handler: DslStateMachineDefaultEventHelper<T, E, C>.() -> Unit):
-                DslStateMachineDefaultEventHelper<T, E, C> {
-            return DslStateMachineDefaultEventHelper(fsm).apply(handler)
+        fun default(handler: DslStateMachineDefaultEventHandler<T, E, C>.() -> Unit):
+                DslStateMachineDefaultEventHandler<T, E, C> {
+            return DslStateMachineDefaultEventHandler(fsm).apply(handler)
         }
 
         fun build() = fsm
@@ -151,7 +151,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
     /**
      * @suppress
      */
-    class DslStateMachineDefaultEventHelper<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
+    class DslStateMachineDefaultEventHandler<T : Enum<T>, E : Enum<E>, C>(private val fsm: StateMachine<T, E, C>) {
         /**
          * Define a default action that will be applied when no other transitions are matched.
          */
@@ -180,13 +180,13 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
          * @param event Pair representing an event and endState for transition. Can be written as EVENT to STATE
          * @param action The action will be performed before transition is completed
          */
-        fun event(event: Pair<E, T>, action: ((C) -> Unit)?): DslStateMachineDefaultEventHelper<T, E, C> {
+        fun event(event: Pair<E, T>, action: ((C) -> Unit)?): DslStateMachineDefaultEventHandler<T, E, C> {
             require(fsm.defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
             fsm.defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
             return this
         }
 
-        fun event(event: E, action: ((C) -> Unit)?): DslStateMachineDefaultEventHelper<T, E, C> {
+        fun event(event: E, action: ((C) -> Unit)?): DslStateMachineDefaultEventHandler<T, E, C> {
             require(fsm.defaultTransitions[event] == null) { "Default transition for $event already defined" }
             fsm.defaultTransitions[event] = DefaultTransition<E, T, C>(event, null, action)
             return this
@@ -281,10 +281,10 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
 
     /**
      * This method is the entry point to creating the DSL
-     * @sample io.jumpco.open.kfsm.TurnstileFSM.Companion.define()
+     * @sample io.jumpco.open.kfsm.TurnstileFSM.define()
      */
-    fun stateMachine(handler: DslStateMachineHelper<T, E, C>.() -> Unit): DslStateMachineHelper<T, E, C> {
-        return DslStateMachineHelper(this).apply(handler)
+    fun stateMachine(handler: DslStateMachineHandler<T, E, C>.() -> Unit): DslStateMachineHandler<T, E, C> {
+        return DslStateMachineHandler(this).apply(handler)
     }
 
     /**

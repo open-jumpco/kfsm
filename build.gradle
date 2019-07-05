@@ -17,53 +17,50 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-
-def useMingw = defaultProfile.contains('mingw')
-def useLinux = defaultProfile.contains('linux')
-def useMacos = defaultProfile.contains('macos')
-def useJs = defaultProfile.contains('js')
-def useJvm = defaultProfile.contains('jvm')
-def useWasm = defaultProfile.contains('wasm')
-
-def profile = ext.find('profile') ?: defaultProfile
-if (profile) {
-    if (profile.contains('default')) {
-        if (OperatingSystem.current().isWindows()) {
-            useMingw = true
-            logger.lifecycle "Detected ${OperatingSystem.current()} using mingw"
-        }
-        if (OperatingSystem.current().isLinux()) {
-            useLinux = true
-            logger.lifecycle "Detected ${OperatingSystem.current()} using linux"
-        }
-        if (OperatingSystem.current().isMacOsX()) {
-            useMacos = true
-            logger.lifecycle "Detected ${OperatingSystem.current()} using macos"
-        }
-    }
-    if (profile.contains('linux')) {
-        useLinux = true
-    }
-    if (profile.contains('mingw')) {
-        useMingw = true
-    }
-    if (profile.contains('macos')) {
-        useMacos = true
-    }
-    if (profile.contains('wasm')) {
-        useWasm = true
-    }
+def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm']
+def useTarget = [:]
+targetList.forEach { target ->
+    useTarget[target] = defaultProfile.contains(target)
 }
 
+def profile = ext.find('profile') ?: defaultProfile ?: ''
+if (profile.contains('default')) {
+    if (OperatingSystem.current().isWindows()) {
+        useTarget['mingw'] = true
+        logger.lifecycle "Detected ${OperatingSystem.current()} using mingw"
+    }
+    if (OperatingSystem.current().isLinux()) {
+        useTarget['linux'] = true
+        logger.lifecycle "Detected ${OperatingSystem.current()} using linux"
+    }
+    if (OperatingSystem.current().isMacOsX()) {
+        useTarget['macos'] = true
+        logger.lifecycle "Detected ${OperatingSystem.current()} using macos"
+    }
+}
+if (profile.contains('linux')) {
+    useTarget['linux'] = true
+}
+if (profile.contains('mingw')) {
+    useTarget['mingw'] = true
+}
+if (profile.contains('macos')) {
+    useTarget['macos'] = true
+}
+if (profile.contains('wasm')) {
+    useTarget['wasm'] = true
+}
+
+
 kotlin {
-    if (useJvm) {
+    if (useTarget['jvm']) {
         jvm() {
             mavenPublication {
                 artifactId = 'kfsm-jvm'
             }
         }
     }
-    if (useJs) {
+    if (useTarget['js']) {
         js {
             browser {
             }
@@ -74,25 +71,25 @@ kotlin {
             }
         }
     }
-    if (useMingw) {
+    if (useTarget['mingw']) {
         mingwX64('mingw') {
             mavenPublication {
                 artifactId = 'kfsm-mingwX64'
             }
         }
     }
-    if (useLinux) {
+    if (useTarget['linux']) {
         linuxX64('linux') {
             mavenPublication {
                 artifactId = 'kfsm-linuxX64'
             }
         }
     }
-    if (useMacos) {
+    if (useTarget['macos']) {
         macosX64('macos') {
         }
     }
-    if (useWasm) {
+    if (useTarget['wasm']) {
         wasm32("wasm") {
             mavenPublication {
                 artifactId = 'kfsm-wasm32'
@@ -112,7 +109,7 @@ kotlin {
                 implementation 'io.mockk:mockk-common:1.9.3'
             }
         }
-        if (useJvm) {
+        if (useTarget['jvm']) {
             jvmMain {
                 dependencies {
                     implementation kotlin('stdlib-jdk8')
@@ -126,7 +123,7 @@ kotlin {
                 }
             }
         }
-        if (useJs) {
+        if (useTarget['js']) {
             jsMain {
                 dependencies {
                     implementation kotlin('stdlib-js')
@@ -138,16 +135,16 @@ kotlin {
                 }
             }
         }
-        if (useMingw) {
+        if (useTarget['mingw']) {
             configureNative(mingwMain, mingwTest)
         }
-        if (useLinux) {
+        if (useTarget['linux']) {
             configureNative(linuxMain, linuxTest)
         }
-        if (useMacos) {
+        if (useTarget['macos']) {
             configureNative(macosMain, macosTest)
         }
-        if (useWasm) {
+        if (useTarget['wasm']) {
             configureNative(wasmMain, wasmTest)
         }
     }
@@ -173,28 +170,28 @@ dokka {
         path = kotlin.sourceSets.commonMain.kotlin.srcDirs[0]
         platforms = ['Common']
     }
-    if (useJvm) {
+    if (useTarget['jvm']) {
         sourceRoot {
             // assuming there is only a single source dir...
             path = kotlin.sourceSets.jvmMain.kotlin.srcDirs[0]
             platforms << 'JVM'
         }
     }
-    if (useJs) {
+    if (useTarget['js']) {
         sourceRoot {
             // assuming there is only a single source dir...
             path = kotlin.sourceSets.jsMain.kotlin.srcDirs[0]
             platforms << 'JS'
         }
     }
-    if (useLinux) {
+    if (useTarget['linux']) {
         sourceRoot {
             // assuming there is only a single source dir...
             path = kotlin.sourceSets.linuxMain.kotlin.srcDirs[0]
             platforms << 'Linux'
         }
     }
-    if (useMacos) {
+    if (useTarget['macos']) {
         sourceRoot {
             // assuming there is only a single source dir...
             path = kotlin.sourceSets.macosMain.kotlin.srcDirs[0]
