@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.3.40'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.3.41'
     id 'org.jetbrains.dokka' version '0.9.18'
     id 'maven-publish'
 }
@@ -30,15 +30,15 @@ if (profile) {
     if (profile.contains('default')) {
         if (OperatingSystem.current().isWindows()) {
             useMingw = true
-            logger.lifecycle "Detected ${OperatingSystem.current().name} using mingw"
+            logger.lifecycle "Detected ${OperatingSystem.current()} using mingw"
         }
         if (OperatingSystem.current().isLinux()) {
             useLinux = true
-            logger.lifecycle "Detected ${OperatingSystem.current().name} using linux"
+            logger.lifecycle "Detected ${OperatingSystem.current()} using linux"
         }
         if (OperatingSystem.current().isMacOsX()) {
             useMacos = true
-            logger.lifecycle "Detected ${OperatingSystem.current().name} using macos"
+            logger.lifecycle "Detected ${OperatingSystem.current()} using macos"
         }
     }
     if (profile.contains('linux')) {
