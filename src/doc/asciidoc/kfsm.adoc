@@ -30,8 +30,8 @@ class Turnstile(var locked: Boolean = true) {
         println("Alarm")
     }
 
-    fun thankYou() {
-        println("Thank You")
+    fun returnCoin() {
+        println("Return coin")
     }
     override fun toString(): String {
         return "Turnstile(locked=$locked)"
@@ -54,21 +54,21 @@ enum class TurnstileEvents {
 
 ```kotlin
 val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-    initial { if(it.locked) LOCKED else UNLOCKED }
-    state(LOCKED) {
-        event(COIN to UNLOCKED) { ts ->
+    initial { if(it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
+    state(TurnstileStates.LOCKED) {
+        event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
             ts.unlock()
         }
         event(TurnstileEvents.PASS) { ts ->
             ts.alarm()
         }
     }
-    state(UNLOCKED) {
+    state(TurnstileStates.UNLOCKED) {
         // event without an endState will not trigger entry or exit actions
-        event(COIN) { ts ->
-            ts.thankYou()
+        event(TurnstileEvents.COIN) { ts ->
+            ts.returnCoin()
         }
-        event(PASS to LOCKED) { ts ->
+        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
             ts.lock();
         }
     }
@@ -84,7 +84,7 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().sta
             // will be invoke if state doesn't have exit defined.
             println("Existing:$stateState -> $endState for $context")
         }
-        event(PASS to LOCKED) { context, currentState, event ->
+        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { context, currentState, event ->
             // will be invoked for PASS event and will transition to LOCKED if no event it defined for the currentState
             // in this specific case the definition covers all possibilities to this will never be called
             error("Should not be called with this definition")
@@ -118,14 +118,14 @@ fsm.event(PASS)
 fsm.event(COIN)
 // Expect unlock() and end state is UNLOCKED
 fsm.event(COIN)
-// Expect thankYou() and end state is UNLOCKED
+// Expect returnCoin() and end state is UNLOCKED
 ```
 
 The FSM can then be packaged as follows:
 ```kotlin
 class TurnstileFSM(private val turnstile: Turnstile) {
     companion object {
-        fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
+        fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
             state(TurnstileStates.LOCKED) {
                 entry { context, startState, endState ->
@@ -146,7 +146,7 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                     println("entering:$startState -> $endState for $context")
                 }
                 event(TurnstileEvents.COIN) { ts ->
-                    ts.thankYou()
+                    ts.returnCoin()
                 }
                 event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
                     ts.lock();

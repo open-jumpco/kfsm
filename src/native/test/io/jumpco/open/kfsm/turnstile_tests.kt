@@ -57,7 +57,7 @@ class TurnstileFsmTests {
             ts.alarm()
         }
         definition.transition(UNLOCKED, COIN) { ts ->
-            ts.thankYou()
+            ts.returnCoin()
         }
         definition.transition(UNLOCKED, PASS, LOCKED) { ts ->
             ts.lock();
@@ -85,7 +85,7 @@ class TurnstileFsmTests {
             }
             state(UNLOCKED) {
                 event(COIN) { ts ->
-                    ts.thankYou()
+                    ts.returnCoin()
                 }
                 event(PASS to LOCKED) { ts ->
                     ts.lock();
@@ -123,7 +123,7 @@ class TurnstileFsmTests {
                     println("entering:$startState -> $endState for $context")
                 }
                 event(COIN) { ts ->
-                    ts.thankYou()
+                    ts.returnCoin()
                 }
                 event(PASS to LOCKED) { ts ->
                     ts.lock();

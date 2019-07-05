@@ -79,7 +79,7 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                     println("entering:$startState -> $endState for $context")
                 }
                 event(TurnstileEvents.COIN) { ts ->
-                    ts.thankYou()
+                    ts.returnCoin()
                 }
                 event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
                     ts.lock();
@@ -112,7 +112,7 @@ Questions:
 
 Considering:
 ```kotlin
-dsl {
+stateMachine {
     state(LOCKED) {
         event(COIN to UNLOCKED) { it.unlock() }
         event(PASS) { it.alarm() }
@@ -121,7 +121,7 @@ dsl {
 ```
 * Will it be better to use `transition` than `event` in the DSL?
 ```kotlin
-dsl {
+stateMachine {
     state(LOCKED) {
         transition(COIN to UNLOCKED) { it.unlock() }
         transition(PASS) { it.alarm() }
@@ -130,7 +130,7 @@ dsl {
 ```
 * Will it be better to use `on` than `event` in the DSL?
 ```kotlin
-dsl {
+stateMachine {
     state(LOCKED) {
         on(COIN to UNLOCKED) { it.unlock() }
         on(PASS) { it.alarm() }

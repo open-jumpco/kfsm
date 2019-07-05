@@ -4,6 +4,6 @@
 LOCKED ---> UNLOCKED : COIN { unlock() }
 UNLOCKED ---> LOCKED : PASS { lock() }
 LOCKED ---> LOCKED : PASS { alarm() }
-UNLOCKED ---> UNLOCKED : COIN { thankYou() }
+UNLOCKED ---> UNLOCKED : COIN { returnCoin() }
 
 @enduml

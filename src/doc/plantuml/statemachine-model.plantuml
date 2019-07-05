@@ -1,27 +1,36 @@
 @startuml
 
+class C {
+}
+enum S {
+}
+enum E {
+}
 
-class StateMachine<T : Enum<T>, E : Enum<E>, C> {
-    initial(action: (C) -> T)
-    transition(startState: T, event: E, endState: T, action: (C) -> Unit)
-    transition(startState: T, event: E, action: (C) -> Unit)
-    entry(currentState: T, action: (C) -> Unit)
-    exit(currentState: T, action: (C) -> Unit)
-    defaultAction(action: (C, T, E) -> Unit)
-    defaultEntry(action: (C, T, T) -> Unit)
-    defaultExit(action: (C, T, T) -> Unit)
-    default(currentState: T, action: (C, T, E) -> Unit)
-    create(context: C, initialState: T?) : StateMachineInstance<T,E,C>
+class StateMachine<S : Enum<S>, E : Enum<E>, C> {
+    initial(action: (C) -> S)
+    transition(startState: S, event: E, endState: S, action: (C) -> Unit)
+    transition(startState: S, event: E, action: (C) -> Unit)
+    entry(currentState: S, action: (C) -> Unit)
+    exit(currentState: S, action: (C) -> Unit)
+    defaultAction(action: (C, S, E) -> Unit)
+    defaultEntry(action: (C, S, S) -> Unit)
+    defaultExit(action: (C, S, S) -> Unit)
+    default(currentState: S, action: (C, S, E) -> Unit)
+    create(context: C, initialState: S?) : StateMachineInstance<S,E,C>
     stateMachine()
 }
 
-class StateMachineInstance<T: Enum<T>, E: Enum<E>, C> {
+class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
     C: context
-    fsm: StateMachine<T,E,C>
+    fsm: StateMachine<S,E,C>
     event(event: E)
 }
+StateMachine .left.> S : <<states>>
+StateMachine .right.> E : <<events>>
+StateMachine .up.> C : <<context>>
 
-StateMachineInstance *--> StateMachine : fsm
-
+StateMachineInstance *---> StateMachine : fsm
+StateMachineInstance *-left-> C : context
 
 @enduml

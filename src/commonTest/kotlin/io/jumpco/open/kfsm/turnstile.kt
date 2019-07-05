@@ -28,8 +28,8 @@ class Turnstile(var locked: Boolean = true) {
         println("Alarm")
     }
 
-    fun thankYou() {
-        println("Thank You")
+    fun returnCoin() {
+        println("Return Coin")
     }
 
     override fun toString(): String {
@@ -78,7 +78,7 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                     println("entering:$startState -> $endState for $context")
                 }
                 event(TurnstileEvents.COIN) { ts ->
-                    ts.thankYou()
+                    ts.returnCoin()
                 }
                 event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
                     ts.lock();
