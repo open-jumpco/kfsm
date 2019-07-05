@@ -100,7 +100,7 @@ class LockFsmTests {
     @Test
     fun testDslCreationOfFsm() {
         // given
-        val definition = StateMachine<LockStates, LockEvents, Lock>().dsl {
+        val definition = StateMachine<LockStates, LockEvents, Lock>().stateMachine {
             initial { context ->
                 when (context.locked) {
                     0 -> UNLOCKED

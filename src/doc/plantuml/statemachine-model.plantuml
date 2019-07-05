@@ -12,7 +12,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C> {
     defaultExit(action: (C, T, T) -> Unit)
     default(currentState: T, action: (C, T, E) -> Unit)
     create(context: C, initialState: T?) : StateMachineInstance<T,E,C>
-    dsl()
+    stateMachine()
 }
 
 class StateMachineInstance<T: Enum<T>, E: Enum<E>, C> {

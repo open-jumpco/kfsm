@@ -283,7 +283,7 @@ class StateMachine<T : Enum<T>, E : Enum<E>, C>() {
      * This method is the entry point to creating the DSL
      * @sample io.jumpco.open.kfsm.TurnstileFSM.Companion.define()
      */
-    fun dsl(handler: DslStateMachineHelper<T, E, C>.() -> Unit): DslStateMachineHelper<T, E, C> {
+    fun stateMachine(handler: DslStateMachineHelper<T, E, C>.() -> Unit): DslStateMachineHelper<T, E, C> {
         return DslStateMachineHelper(this).apply(handler)
     }
 

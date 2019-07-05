@@ -78,7 +78,7 @@ class TurnstileFsmTests {
     @Test
     fun `Uncle Bob's Turnstile DSL`() {
         // given
-        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
+        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (it.locked) LOCKED else UNLOCKED }
             state(LOCKED) {
                 event(COIN to UNLOCKED) { ts ->
@@ -108,7 +108,7 @@ class TurnstileFsmTests {
 
     @Test
     fun `Simple Turnstile Test`() {
-        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().dsl {
+        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (it.locked) LOCKED else UNLOCKED }
             state(LOCKED) {
                 entry { context, startState, endState ->
