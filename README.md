@@ -35,25 +35,25 @@ dependencies {
 ### Kotlin/Native Projects using LinuxX64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linux:0.1.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.1.0-SNAPSHOT'    
 }
 ```
 ### Kotlin/Native Projects using MinGW64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingw:0.1.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.1.0-SNAPSHOT'    
 }
 ```
 ### Kotlin/Native Projects using macOS
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macos:0.1.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-macosX64:0.1.0-SNAPSHOT'    
 }
 ```
 
 [Documentation](src/doc/asciidoc/kfsm.adoc)
 
-An FSM can then be defined as follows:
+A Finite state machine can be defined as follows:
 
 ```kotlin
 class TurnstileFSM(private val turnstile: Turnstile) {
