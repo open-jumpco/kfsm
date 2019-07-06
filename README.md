@@ -51,8 +51,8 @@ dependencies {
 }
 ```
 
-[Documentation](src/doc/asciidoc/kfsm.adoc)
-[Samples](https://github.com/open-jumpco/kfsm-samples)
+* [Documentation](src/doc/asciidoc/kfsm.adoc)
+* [Samples](https://github.com/open-jumpco/kfsm-samples)
 
 A Finite state machine can be defined as follows:
 
