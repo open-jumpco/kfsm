@@ -39,12 +39,12 @@ class TurnstileFsmTests {
         verify { turnstile.returnCoin() }
         assertTrue { fsm.currentState == UNLOCKED }
         // when
-        fsm.event(TurnstileEvents.PASS)
+        fsm.event(PASS)
         // then
         verify { turnstile.lock() }
         assertTrue { fsm.currentState == LOCKED }
         // when
-        fsm.event(TurnstileEvents.PASS)
+        fsm.event(PASS)
         // then
         verify { turnstile.alarm() }
         assertTrue { fsm.currentState == LOCKED }
@@ -64,7 +64,7 @@ class TurnstileFsmTests {
             ts.returnCoin()
         }
         definition.transition(UNLOCKED, PASS, LOCKED) { ts ->
-            ts.lock();
+            ts.lock()
         }
         // when
         val turnstile = mockk<Turnstile>()
@@ -93,7 +93,7 @@ class TurnstileFsmTests {
                     ts.returnCoin()
                 }
                 event(PASS to LOCKED) { ts ->
-                    ts.lock();
+                    ts.lock()
                 }
             }
         }.build()
@@ -132,7 +132,7 @@ class TurnstileFsmTests {
                     ts.returnCoin()
                 }
                 event(PASS to LOCKED) { ts ->
-                    ts.lock();
+                    ts.lock()
                 }
                 exit { context, startState, endState ->
                     println("exiting:$startState -> $endState for $context")

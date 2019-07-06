@@ -15,7 +15,7 @@ package io.jumpco.open.kfsm
  * @param E is en enum representing all the events the FSM may receive
  * @param C is the class of the Context where the action will be applied.
  */
-class StateMachine<S : Enum<S>, E : Enum<E>, C>() {
+class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     private lateinit var deriveInitialState: ((C) -> S)
     private val transitions: MutableMap<Pair<S, E>, Transition<S, E, C>> = mutableMapOf()
     private val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
@@ -36,15 +36,11 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C>() {
     ) {
         fun execute(context: C, instance: StateMachineInstance<S, E, C>) {
             if (endState != null) {
-                instance.fsm.defaultExitAction?.let { it ->
-                    it.invoke(context, instance.currentState, endState)
-                }
+                instance.fsm.defaultExitAction?.invoke(context, instance.currentState, endState)
             }
             action?.invoke(context)
             if (endState != null) {
-                instance.fsm.defaultEntryAction?.let { it ->
-                    it.invoke(context, instance.currentState, endState)
-                }
+                instance.fsm.defaultEntryAction?.invoke(context, instance.currentState, endState)
             }
         }
     }

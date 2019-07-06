@@ -82,7 +82,7 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                     ts.returnCoin()
                 }
                 event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
-                    ts.lock();
+                    ts.lock()
                 }
                 exit { context, startState, endState ->
                     println("exiting:$startState -> $endState for $context")
