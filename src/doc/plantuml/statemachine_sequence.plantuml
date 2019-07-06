@@ -1,0 +1,28 @@
+@startuml
+
+actor Consumer
+boundary StateMachineInstance
+control Context
+
+Consumer ----> StateMachineInstance : event()
+
+    activate StateMachineInstance
+    StateMachineInstance ----> StateMachineInstance : transition
+    note right of StateMachineInstance
+        StateMachineInstance determines the transition
+        or default exit / entry / action(s) needed
+    end note
+    activate StateMachineInstance
+    StateMachineInstance ----> StateMachineInstance : exit {}
+    StateMachineInstance ----> StateMachineInstance : entry {}
+    StateMachineInstance ----> Context : action {}
+    activate Context
+    note right of Context
+        Context performs the action(s)
+    end note
+    Context ---->  StateMachineInstance
+    deactivate Context
+    deactivate StateMachineInstance
+    return
+
+@enduml

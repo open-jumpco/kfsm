@@ -1,0 +1,15 @@
+@startuml
+actor Consumer
+boundary TurnStileFSM
+control Turnstile
+
+Consumer ----> TurnStileFSM : COIN
+TurnStileFSM ----> Turnstile : unlock()
+Consumer ----> TurnStileFSM : COIN
+TurnStileFSM ----> Turnstile : returnCoin()
+Consumer ----> TurnStileFSM : PASS
+TurnStileFSM ----> Turnstile : lock()
+Consumer ----> TurnStileFSM : PASS
+TurnStileFSM ----> Turnstile : alarm()
+
+@enduml
