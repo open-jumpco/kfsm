@@ -5,10 +5,19 @@ This model supports events that trigger may cause a transition from one state to
 
 ## Getting Started
 
-Until we publish the first release you should clone, build and publish the project to local Maven.
+### Repository
+```groovy
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/groups/public' 
+    }
+}
+```
+### Building locally
+
 ```cmd
 git clone https://github.com/open-jumpco/kfsm.git
-./gradlew publish -Pprofile=default
+./gradlew publishToMavenLocal -Pprofile=default
 ```
 The property `defaultProfile` is configured to `jvm,js,wasm`
 

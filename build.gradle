@@ -4,12 +4,13 @@ plugins {
     id 'org.jetbrains.kotlin.multiplatform' version '1.3.41'
     id 'org.jetbrains.dokka' version '0.9.18'
     id 'maven-publish'
+    id 'signing'
 }
+
 repositories {
     jcenter()
     mavenCentral()
 }
-
 group = 'io.jumpco.open'
 version = '0.1.0-SNAPSHOT'
 
@@ -212,6 +213,20 @@ task javadocJar(type: Jar) {
 
 }
 
+publishing {
+    publications {
+        kfsm(MavenPublication) {
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+    kotlin.targets.all { target ->
+        def targetPublication = publications.findByName(target.name)
+        if (targetPublication != null) {
+            targetPublication.artifact javadocJar
+        }
+    }
+}
 gradle.afterProject {
     tasks.forEach { task ->
         if (task.name.endsWith('Classes')) {
@@ -231,17 +246,81 @@ artifacts {
     archives sourcesJar
 }
 
-publishing {
-    publications {
-        kfsm(MavenPublication) {
-            artifact javadocJar
-            artifact sourcesJar
+def pomConfig = {
+    licenses {
+        license {
+            name 'GNU General Public License v3'
+            url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+            distribution 'repo'
         }
     }
+    developers {
+        developer {
+            id 'corneil_jumpco'
+            name 'Corneil @ JumpCO'
+            organization 'Open JumpCO'
+            organizationUrl 'https://open.jumpco.io'
+        }
+    }
+
+    scm {
+        url project.vcs
+    }
+}
+
+def configureMavenCentralMetadata = { pom ->
+    def root = asNode()
+    root.appendNode('name', project.name)
+    root.appendNode('description', project.description)
+    root.appendNode('url', project.vcs)
+    root.children().last() + pomConfig
+}
+
+publishing {
+    repositories {
+        maven {
+            logger.lifecycle("maven:publish:version=$version")
+            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+            url = project.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username rootProject.ext.find('ossJiraUser') ?: System.getenv('OSS_JIRA_USER')
+                password rootProject.ext.find('ossJiraPwd') ?: System.getenv('OSS_JIRA_PWD')
+            }
+        }
+    }
+
+    // Process each publication we have in this project
     publications.all { publication ->
+        // apply changes to pom.xml files, see pom.gradle
+        pom.withXml(configureMavenCentralMetadata)
         logger.info "publication:$publication.name"
         if (publication.name == 'kotlinMultiplatform') {
             publication.artifactId = "kfsm-common"
         }
     }
+
 }
+
+signing {
+    sign publishing.publications.kotlinMultiplatform
+    if(useTarget['jvm']) {
+        sign publishing.publications.jvm
+    }
+    if(useTarget['js']) {
+        sign publishing.publications.js
+    }
+    if(useTarget['macos']) {
+        sign publishing.publications.macos
+    }
+    if(useTarget['linux']) {
+        sign publishing.publications.linux
+    }
+    if(useTarget['mingw']) {
+        sign publishing.publications.mingw
+    }
+    if(useTarget['wasm']) {
+        sign publishing.publications.wasm
+    }
+}
+
