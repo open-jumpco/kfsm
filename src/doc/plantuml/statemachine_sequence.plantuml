@@ -7,7 +7,6 @@ control Context
 Consumer ----> StateMachineInstance : event()
 
     activate StateMachineInstance
-    StateMachineInstance ----> StateMachineInstance : transition
     note right of StateMachineInstance
         StateMachineInstance determines the transition
         or default exit / entry / action(s) needed

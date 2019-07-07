@@ -1,9 +1,24 @@
 # Kotlin Finite-state machine
 
 This is a small implementation of an FSM in Kotlin.
-This model supports events that trigger may cause a transition from one state to another while performing an optional action.
 
-## Getting Started
+The model supports events when triggered may cause a transition from one state to another while performing an optional action as well as entry and exit actions.
+
+## Resources
+* [Documentation](src/doc/asciidoc/kfsm.adoc)
+* [Sample Project](https://github.com/open-jumpco/kfsm-samples)
+
+## How to get it?
+
+### Building locally
+
+```cmd
+git clone https://github.com/open-jumpco/kfsm.git
+./gradlew publishToMavenLocal -Pprofile=default
+```
+The property `defaultProfile` is configured to `jvm,js,wasm,default`
+
+The `profile=default` will detect and add the current native platform.
 
 ### Repository
 ```groovy
@@ -13,15 +28,6 @@ repositories {
     }
 }
 ```
-### Building locally
-
-```cmd
-git clone https://github.com/open-jumpco/kfsm.git
-./gradlew publishToMavenLocal -Pprofile=default
-```
-The property `defaultProfile` is configured to `jvm,js,wasm`
-
-The `profile=default` will detect and add the current native platform.
 
 ### JVM Projects
 ```groovy
@@ -60,90 +66,3 @@ dependencies {
 }
 ```
 
-* [Documentation](src/doc/asciidoc/kfsm.adoc)
-* [Samples](https://github.com/open-jumpco/kfsm-samples)
-
-A Finite state machine can be defined as follows:
-
-```kotlin
-class TurnstileFSM(private val turnstile: Turnstile) {
-    companion object {
-       private fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-            initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
-            state(TurnstileStates.LOCKED) {
-                entry { context, startState, endState ->
-                    println("entering:$startState -> $endState for $context")
-                }
-                event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
-                    ts.unlock()
-                }
-                event(TurnstileEvents.PASS) { ts ->
-                    ts.alarm()
-                }
-                exit { context, startState, endState ->
-                    println("exiting:$startState -> $endState for $context")
-                }
-            }
-            state(TurnstileStates.UNLOCKED) {
-                entry { context, startState, endState ->
-                    println("entering:$startState -> $endState for $context")
-                }
-                event(TurnstileEvents.COIN) { ts ->
-                    ts.returnCoin()
-                }
-                event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
-                    ts.lock()
-                }
-                exit { context, startState, endState ->
-                    println("exiting:$startState -> $endState for $context")
-                }
-            }
-        }.build()
-        private val definition by lazy { define() }
-    }
-    private val fsm = definition.create(turnstile)
-
-    fun coin() = fsm.event(TurnstileEvents.COIN)
-    fun pass() = fsm.event(TurnstileEvents.PASS)
-}
-```
-Providing for simple code like:
-
-```kotlin
-val turnstile = Turnstile()
-val fsm = TurnstileFSM(turnstile)
-
-fsm.coin()
-fsm.pass()
-```
-
-
-Questions:
-
-Considering:
-```kotlin
-stateMachine {
-    state(LOCKED) {
-        event(COIN to UNLOCKED) { it.unlock() }
-        event(PASS) { it.alarm() }
-    }
-}
-```
-* Will it be better to use `transition` than `event` in the DSL?
-```kotlin
-stateMachine {
-    state(LOCKED) {
-        transition(COIN to UNLOCKED) { it.unlock() }
-        transition(PASS) { it.alarm() }
-    }
-}
-```
-* Will it be better to use `on` than `event` in the DSL?
-```kotlin
-stateMachine {
-    state(LOCKED) {
-        on(COIN to UNLOCKED) { it.unlock() }
-        on(PASS) { it.alarm() }
-    }
-}
-```
