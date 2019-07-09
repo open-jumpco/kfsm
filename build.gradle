@@ -12,315 +12,42 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '0.1.0-SNAPSHOT'
+version = '0.2.0-SNAPSHOT'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm']
-def useTarget = [:]
-targetList.forEach { target ->
-    useTarget[target] = defaultProfile.contains(target)
-}
 
-def profile = ext.find('profile') ?: defaultProfile ?: ''
-if (profile.contains('default')) {
-    if (OperatingSystem.current().isWindows()) {
-        useTarget['mingw'] = true
-        logger.lifecycle "Detected ${OperatingSystem.current()} using mingw"
-    }
-    if (OperatingSystem.current().isLinux()) {
-        useTarget['linux'] = true
-        logger.lifecycle "Detected ${OperatingSystem.current()} using linux"
-    }
-    if (OperatingSystem.current().isMacOsX()) {
-        useTarget['macos'] = true
-        logger.lifecycle "Detected ${OperatingSystem.current()} using macos"
-    }
-}
-if (profile.contains('linux')) {
-    useTarget['linux'] = true
-}
-if (profile.contains('mingw')) {
-    useTarget['mingw'] = true
-}
-if (profile.contains('macos')) {
-    useTarget['macos'] = true
-}
-if (profile.contains('wasm')) {
-    useTarget['wasm'] = true
-}
+apply from: "$rootProject.projectDir/gradle/platform.gradle"
+apply from: "$rootProject.projectDir/gradle/dokka.gradle"
+apply from: "$rootProject.projectDir/gradle/publish.gradle"
 
+def useTarget = project.ext.useTarget
 
 kotlin {
-    if (useTarget['jvm']) {
-        jvm() {
-            mavenPublication {
-                artifactId = 'kfsm-jvm'
-            }
-        }
-    }
-    if (useTarget['js']) {
-        js {
-            browser {
-            }
-            nodejs {
-            }
-            mavenPublication {
-                artifactId = 'kfsm-js'
-            }
-        }
-    }
-    if (useTarget['mingw']) {
-        mingwX64('mingw') {
-            mavenPublication {
-                artifactId = 'kfsm-mingwX64'
-            }
-        }
-    }
-    if (useTarget['linux']) {
-        linuxX64('linux') {
-            mavenPublication {
-                artifactId = 'kfsm-linuxX64'
-            }
-        }
-    }
-    if (useTarget['macos']) {
-        macosX64('macos') {
-        }
-    }
-    if (useTarget['wasm']) {
-        wasm32("wasm") {
-            mavenPublication {
-                artifactId = 'kfsm-wasm32'
-            }
-        }
-    }
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation kotlin('stdlib-common')
-            }
-        }
         commonTest {
             dependencies {
-                implementation kotlin('test-common')
-                implementation kotlin('test-annotations-common')
                 implementation 'io.mockk:mockk-common:1.9.3'
             }
         }
         if (useTarget['jvm']) {
-            jvmMain {
-                dependencies {
-                    implementation kotlin('stdlib-jdk8')
-                }
-            }
             jvmTest {
                 dependencies {
-                    implementation kotlin('test')
-                    implementation kotlin('test-junit')
                     implementation 'io.mockk:mockk:1.9.3'
                 }
             }
         }
-        if (useTarget['js']) {
-            jsMain {
-                dependencies {
-                    implementation kotlin('stdlib-js')
-                }
-            }
-            jsTest {
-                dependencies {
-                    implementation kotlin('test-js')
-                }
-            }
-        }
-        if (useTarget['mingw']) {
-            configureNative(mingwMain, mingwTest)
-        }
-        if (useTarget['linux']) {
-            configureNative(linuxMain, linuxTest)
-        }
-        if (useTarget['macos']) {
-            configureNative(macosMain, macosTest)
-        }
-        if (useTarget['wasm']) {
-            configureNative(wasmMain, wasmTest)
-        }
     }
 }
 
-def configureNative(srcSetMain, srcSetTest) {
-    srcSetMain.kotlin.srcDirs = ['src/native/main']
-    srcSetTest.kotlin.srcDirs = ['src/native/test']
-}
 
 dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
-    includeNonPublic = false
-    impliedPlatforms = ["Common"] // This will force platform tags for all non-common sources e.g. "JVM"
-    kotlinTasks {
-        // dokka fails to retrieve sources from MPP-tasks so they must be set empty to avoid exception
-        // use sourceRoot instead (see below)
-        []
-    }
-    sourceRoot {
-        // assuming there is only a single source dir...
-        path = kotlin.sourceSets.commonMain.kotlin.srcDirs[0]
-        platforms = ['Common']
-    }
-    if (useTarget['jvm']) {
-        sourceRoot {
-            // assuming there is only a single source dir...
-            path = kotlin.sourceSets.jvmMain.kotlin.srcDirs[0]
-            platforms << 'JVM'
-        }
-    }
-    if (useTarget['js']) {
-        sourceRoot {
-            // assuming there is only a single source dir...
-            path = kotlin.sourceSets.jsMain.kotlin.srcDirs[0]
-            platforms << 'JS'
-        }
-    }
-    if (useTarget['linux']) {
-        sourceRoot {
-            // assuming there is only a single source dir...
-            path = kotlin.sourceSets.linuxMain.kotlin.srcDirs[0]
-            platforms << 'Linux'
-        }
-    }
-    if (useTarget['macos']) {
-        sourceRoot {
-            // assuming there is only a single source dir...
-            path = kotlin.sourceSets.macosMain.kotlin.srcDirs[0]
-            platforms << 'macOS'
-        }
-    }
     samples = ['src/commonTest/kotlin/io/jumpco/open/kfsm/turnstile.kt']
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from files('src/commonMain/kotlin')
-}
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from dokka.outputDirectory
 
-}
 
-publishing {
-    publications {
-        kfsm(MavenPublication) {
-            artifact javadocJar
-            artifact sourcesJar
-        }
-    }
-    kotlin.targets.all { target ->
-        def targetPublication = publications.findByName(target.name)
-        if (targetPublication != null) {
-            targetPublication.artifact javadocJar
-        }
-    }
-}
-gradle.afterProject {
-    tasks.forEach { task ->
-        if (task.name.endsWith('Classes')) {
-            sourcesJar.dependsOn(task)
-        }
-        if (task.name.contains('dokka')) {
-            javadocJar.dependsOn(task)
-        }
-        if (task.name.contains('Publication')) {
-            publish.dependsOn(task)
-        }
-    }
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name 'GNU General Public License v3'
-            url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
-            distribution 'repo'
-        }
-    }
-    developers {
-        developer {
-            id 'corneil_jumpco'
-            name 'Corneil @ JumpCO'
-            organization 'Open JumpCO'
-            organizationUrl 'https://open.jumpco.io'
-        }
-    }
-
-    scm {
-        url project.vcs
-    }
-}
-
-def configureMavenCentralMetadata = { pom ->
-    def root = asNode()
-    root.appendNode('name', project.name)
-    root.appendNode('description', project.description)
-    root.appendNode('url', project.vcs)
-    root.children().last() + pomConfig
-}
-
-publishing {
-    repositories {
-        maven {
-            logger.lifecycle("maven:publish:version=$version")
-            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
-            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-            url = project.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials {
-                username rootProject.ext.find('ossJiraUser') ?: System.getenv('OSS_JIRA_USER')
-                password rootProject.ext.find('ossJiraPwd') ?: System.getenv('OSS_JIRA_PWD')
-            }
-        }
-    }
-
-    // Process each publication we have in this project
-    publications.all { publication ->
-        // apply changes to pom.xml files, see pom.gradle
-        pom.withXml(configureMavenCentralMetadata)
-        logger.info "publication:$publication.name"
-        if (publication.name == 'kotlinMultiplatform') {
-            publication.artifactId = "kfsm-common"
-        }
-    }
-
-}
-
-signing {
-    sign publishing.publications.kotlinMultiplatform
-    if(useTarget['jvm']) {
-        sign publishing.publications.jvm
-    }
-    if(useTarget['js']) {
-        sign publishing.publications.js
-    }
-    if(useTarget['macos']) {
-        sign publishing.publications.macos
-    }
-    if(useTarget['linux']) {
-        sign publishing.publications.linux
-    }
-    if(useTarget['mingw']) {
-        sign publishing.publications.mingw
-    }
-    if(useTarget['wasm']) {
-        sign publishing.publications.wasm
-    }
-}
 

@@ -29,13 +29,13 @@ class LockFsmTests {
         // then
         assertTrue { fsm.currentState == LOCKED }
         // when
-        fsm.event(UNLOCK)
+        fsm.sendEvent(UNLOCK)
         // then
         verify { lock.unlock() }
         assertTrue { fsm.currentState == UNLOCKED }
         try {
             // when
-            fsm.event(UNLOCK)
+            fsm.sendEvent(UNLOCK)
             fail("Expected an exception")
         } catch (x: Throwable) {
             println("Expected:$x")
@@ -43,18 +43,18 @@ class LockFsmTests {
             assertEquals("Already unlocked", x.message)
         }
         // when
-        fsm.event(LOCK)
+        fsm.sendEvent(LOCK)
         // then
         verify { lock.lock() }
         assertTrue { fsm.currentState == LOCKED }
         // when
-        fsm.event(LOCK)
+        fsm.sendEvent(LOCK)
         verify { lock.doubleLock() }
         // then
         assertTrue { fsm.currentState == DOUBLE_LOCKED }
         try {
             // when
-            fsm.event(LOCK)
+            fsm.sendEvent(LOCK)
             fail("Expected an exception")
         } catch (x: Throwable) {
             println("Expected:$x")
@@ -116,26 +116,26 @@ class LockFsmTests {
             }
 
             state(LOCKED) {
-                event(LOCK to DOUBLE_LOCKED) { context ->
+                on(LOCK to DOUBLE_LOCKED) { context ->
                     context.doubleLock()
                 }
-                event(UNLOCK to UNLOCKED) { context ->
+                on(UNLOCK to UNLOCKED) { context ->
                     context.unlock()
                 }
             }
             state(DOUBLE_LOCKED) {
-                event(UNLOCK to LOCKED) { context ->
+                on(UNLOCK to LOCKED) { context ->
                     context.doubleUnlock()
                 }
-                event(LOCK) {
+                on(LOCK) {
                     error("Already double locked")
                 }
             }
             state(UNLOCKED) {
-                event(LOCK to LOCKED) { context ->
+                on(LOCK to LOCKED) { context ->
                     context.lock()
                 }
-                event(UNLOCK) {
+                on(UNLOCK) {
                     error("Already unlocked")
                 }
             }

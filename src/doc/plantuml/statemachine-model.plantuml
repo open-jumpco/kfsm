@@ -13,6 +13,8 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     transition(startState: S, event: E, action: (C) -> Unit)
     entry(currentState: S, action: (C) -> Unit)
     exit(currentState: S, action: (C) -> Unit)
+    defaultTransition(startState: S, event: E, endState: S, action: (C) -> Unit)
+    defaultTransition(startState: S, event: E, action: (C) -> Unit)
     defaultAction(action: (C, S, E) -> Unit)
     defaultEntry(action: (C, S, S) -> Unit)
     defaultExit(action: (C, S, S) -> Unit)
@@ -24,7 +26,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
 class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
     C: context
     fsm: StateMachine<S,E,C>
-    event(event: E)
+    sendEvent(event: E)
 }
 StateMachine .left.> S : <<states>>
 StateMachine .right.> E : <<events>>

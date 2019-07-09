@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2019. Open JumpCO
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply plugin: 'org.jetbrains.dokka'
+
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+    includeNonPublic = false
+    impliedPlatforms = ["Common"] // This will force platform tags for all non-common sources e.g. "JVM"
+    kotlinTasks {
+        // dokka fails to retrieve sources from MPP-tasks so they must be set empty to avoid exception
+        // use sourceRoot instead (see below)
+        []
+    }
+    sourceRoot {
+        // assuming there is only a single source dir...
+        path = kotlin.sourceSets.commonMain.kotlin.srcDirs[0]
+        platforms = ['Common']
+    }
+    if (useTarget['jvm']) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.jvmMain.kotlin.srcDirs[0]
+            platforms << 'JVM'
+        }
+    }
+    if (useTarget['js']) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.jsMain.kotlin.srcDirs[0]
+            platforms << 'JS'
+        }
+    }
+    if (useTarget['linux']) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.linuxMain.kotlin.srcDirs[0]
+            platforms << 'Linux'
+        }
+    }
+    if (useTarget['macos']) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.macosMain.kotlin.srcDirs[0]
+            platforms << 'macOS'
+        }
+    }
+}

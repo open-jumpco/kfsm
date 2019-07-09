@@ -1,0 +1,150 @@
+/*
+ * Copyright (c) 2019. Open JumpCO
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+
+def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm']
+project.ext.useTarget = [:]
+def useTarget = project.ext.useTarget
+
+targetList.forEach { target ->
+    useTarget[target] = defaultProfile.contains(target)
+}
+
+def profile = ext.find('profile') ?: defaultProfile ?: ''
+if (profile.contains('default')) {
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        useTarget['mingw'] = true
+        logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using mingw"
+    }
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        useTarget['linux'] = true
+        logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using linux"
+    }
+    if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        useTarget['macos'] = true
+        logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using macos"
+    }
+}
+if (profile.contains('linux')) {
+    useTarget['linux'] = true
+}
+if (profile.contains('mingw')) {
+    useTarget['mingw'] = true
+}
+if (profile.contains('macos')) {
+    useTarget['macos'] = true
+}
+if (profile.contains('wasm')) {
+    useTarget['wasm'] = true
+}
+
+def configureNative(srcSetMain, srcSetTest) {
+    srcSetMain.kotlin.srcDirs = ['src/native/main']
+    srcSetTest.kotlin.srcDirs = ['src/native/test']
+}
+
+kotlin {
+    if (useTarget['jvm']) {
+        jvm() {
+            mavenPublication {
+                artifactId = "${project.name}-jvm"
+            }
+        }
+    }
+    if (useTarget['js']) {
+        js {
+            browser {
+            }
+            nodejs {
+            }
+            mavenPublication {
+                artifactId = "${project.name}-js"
+            }
+        }
+    }
+    if (useTarget['mingw']) {
+        mingwX64('mingw') {
+            mavenPublication {
+                artifactId = "${project.name}-mingwX64"
+            }
+        }
+    }
+    if (useTarget['linux']) {
+        linuxX64('linux') {
+            mavenPublication {
+                artifactId = "${project.name}-linuxX64"
+            }
+        }
+    }
+    if (useTarget['macos']) {
+        macosX64('macos') {
+            mavenPublication {
+                artifactId = "${project.name}-macosX64"
+            }
+        }
+    }
+    if (useTarget['wasm']) {
+        wasm32("wasm") {
+            mavenPublication {
+                artifactId = "${project.name}-wasm32"
+            }
+        }
+    }
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation kotlin('stdlib-common')
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation kotlin('test-common')
+                implementation kotlin('test-annotations-common')
+            }
+        }
+        if (useTarget['jvm']) {
+            jvmMain {
+                dependencies {
+                    implementation kotlin('stdlib-jdk8')
+                }
+            }
+            jvmTest {
+                dependencies {
+                    implementation kotlin('test')
+                    implementation kotlin('test-junit')
+                }
+            }
+        }
+        if (useTarget['js']) {
+            jsMain {
+                dependencies {
+                    implementation kotlin('stdlib-js')
+                }
+            }
+            jsTest {
+                dependencies {
+                    implementation kotlin('test-js')
+                }
+            }
+        }
+        if (useTarget['mingw']) {
+            configureNative(mingwMain, mingwTest)
+        }
+        if (useTarget['linux']) {
+            configureNative(linuxMain, linuxTest)
+        }
+        if (useTarget['macos']) {
+            configureNative(macosMain, macosTest)
+        }
+        if (useTarget['wasm']) {
+            configureNative(wasmMain, wasmTest)
+        }
+    }
+}

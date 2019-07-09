@@ -4,11 +4,11 @@ actor Consumer
 boundary StateMachineInstance
 control Context
 
-Consumer ----> StateMachineInstance : event()
+Consumer ----> StateMachineInstance : sendEvent(event:E)
 
     activate StateMachineInstance
     note right of StateMachineInstance
-        StateMachineInstance determines the transition
+        StateMachineInstance determines the simpleTransition
         or default exit / entry / action(s) needed
     end note
     activate StateMachineInstance

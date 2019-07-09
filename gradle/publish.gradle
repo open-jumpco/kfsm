@@ -1,0 +1,129 @@
+/*
+ * Copyright (c) 2019. Open JumpCO
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply plugin: 'signing'
+
+def useTarget = project.ext.useTarget
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from files('src/commonMain/kotlin')
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+}
+
+signing {
+    sign publishing.publications.kotlinMultiplatform
+    if(useTarget['jvm']) {
+        sign publishing.publications.jvm
+    }
+    if(useTarget['js']) {
+        sign publishing.publications.js
+    }
+    if(useTarget['macos']) {
+        sign publishing.publications.macos
+    }
+    if(useTarget['linux']) {
+        sign publishing.publications.linux
+    }
+    if(useTarget['mingw']) {
+        sign publishing.publications.mingw
+    }
+    if(useTarget['wasm']) {
+        sign publishing.publications.wasm
+    }
+}
+
+gradle.afterProject {
+    tasks.forEach { task ->
+        if (task.name.endsWith('Classes')) {
+            sourcesJar.dependsOn(task)
+        }
+        if (task.name.contains('dokka')) {
+            javadocJar.dependsOn(task)
+        }
+        if (task.name.contains('Publication')) {
+            publish.dependsOn(task)
+        }
+    }
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name 'GNU General Public License v3'
+            url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+            distribution 'repo'
+        }
+    }
+    developers {
+        developer {
+            id 'corneil_jumpco'
+            name 'Corneil @ JumpCO'
+            organization 'Open JumpCO'
+            organizationUrl 'https://open.jumpco.io'
+        }
+    }
+
+    scm {
+        url project.vcs
+    }
+}
+
+def configureMavenCentralMetadata = { pom ->
+    def root = asNode()
+    root.appendNode('name', project.name)
+    root.appendNode('description', project.description)
+    root.appendNode('url', project.vcs)
+    root.children().last() + pomConfig
+}
+
+publishing {
+    publications {
+        kfsm(MavenPublication) {
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+    kotlin.targets.all { target ->
+        def targetPublication = publications.findByName(target.name)
+        if (targetPublication != null) {
+            targetPublication.artifact javadocJar
+        }
+    }
+    repositories {
+        maven {
+            logger.lifecycle("maven:publish:version=$version")
+            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+            url = project.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username rootProject.ext.find('ossJiraUser') ?: System.getenv('OSS_JIRA_USER')
+                password rootProject.ext.find('ossJiraPwd') ?: System.getenv('OSS_JIRA_PWD')
+            }
+        }
+    }
+
+    publications.all { publication ->
+        pom.withXml(configureMavenCentralMetadata)
+        logger.info "publication:$publication.name"
+        if (publication.name == 'kotlinMultiplatform') {
+            publication.artifactId = "${project.name}-common"
+        }
+    }
+
+}

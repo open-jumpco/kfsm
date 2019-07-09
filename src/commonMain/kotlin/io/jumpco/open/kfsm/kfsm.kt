@@ -16,8 +16,8 @@ package io.jumpco.open.kfsm
  * @param C is the class of the Context where the action will be applied.
  */
 class StateMachine<S : Enum<S>, E : Enum<E>, C> {
-    private lateinit var deriveInitialState: ((C) -> S)
-    private val transitions: MutableMap<Pair<S, E>, Transition<S, E, C>> = mutableMapOf()
+    private var deriveInitialState: ((C) -> S)? = null
+    private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
     private val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
     private val entryActions: MutableMap<S, (C, S, S) -> Unit> = mutableMapOf()
     private val exitActions: MutableMap<S, (C, S, S) -> Unit> = mutableMapOf()
@@ -25,173 +25,77 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     private var globalDefault: ((C, S, E) -> Unit)? = null
     private var defaultEntryAction: ((C, S, S) -> Unit)? = null
     private var defaultExitAction: ((C, S, S) -> Unit)? = null
+    /**
+     * @suppress
+     */
+    open class Transition<S : Enum<S>, E : Enum<E>, C>(
+        val endState: S? = null,
+        private val action: ((C) -> Unit)? = null
+    ) {
+        open fun execute(context: C, instance: StateMachineInstance<S, E, C>) {
+            if (endState != null) {
+                instance.executeExit(context, endState)
+            }
+            action?.invoke(context)
+            if (endState != null) {
+                instance.executeEntry(context, endState)
+            }
+
+        }
+    }
 
     /**
      * @suppress
      */
-    data class DefaultTransition<E : Enum<E>, S : Enum<S>, C>(
+    class DefaultTransition<E : Enum<E>, S : Enum<S>, C>(
         val event: E,
-        val endState: S? = null,
-        val action: ((C) -> Unit)? = null
-    ) {
-        fun execute(context: C, instance: StateMachineInstance<S, E, C>) {
-            if (endState != null) {
-                instance.fsm.defaultExitAction?.invoke(context, instance.currentState, endState)
-            }
-            action?.invoke(context)
-            if (endState != null) {
-                instance.fsm.defaultEntryAction?.invoke(context, instance.currentState, endState)
-            }
-        }
-    }
+        endState: S? = null,
+        action: ((C) -> Unit)? = null
+    ) : Transition<S, E, C>(endState, action)
+
     /**
      * @suppress
      */
-    data class Transition<S : Enum<S>, E : Enum<E>, C>(
+    open class SimpleTransition<S : Enum<S>, E : Enum<E>, C>(
         val startState: S,
         val event: E,
-        val endState: S?,
-        val action: ((C) -> Unit)?
+        endState: S?,
+        action: ((C) -> Unit)?
+    ) : Transition<S, E, C>(endState, action)
+
+    /**
+     * @suppress
+     */
+    class GuardedTransition<S : Enum<S>, E : Enum<E>, C>(
+        startState: S,
+        event: E,
+        endState: S?,
+        val guard: ((C) -> Boolean),
+        action: ((C) -> Unit)?
+    ) : SimpleTransition<S, E, C>(startState, event, endState, action) {
+        fun guardMet(context: C): Boolean = guard.invoke(context)
+    }
+
+    /**
+     * @suppress
+     */
+    class TransitionRules<S : Enum<S>, E : Enum<E>, C>(
+        private val guardedTransitions: MutableList<GuardedTransition<S, E, C>> = mutableListOf(),
+        var transition: SimpleTransition<S, E, C>? = null
     ) {
-        fun execute(context: C, instance: StateMachineInstance<S, E, C>) {
-            if (endState != null) {
-                val exitAction = instance.fsm.exitActions[startState]
-                if (exitAction != null) {
-                    exitAction.invoke(context, startState, endState)
-                } else {
-                    instance.fsm.defaultExitAction?.invoke(context, instance.currentState, endState)
-                }
-            }
-            action?.invoke(context)
-            if (endState != null) {
-                val entryAction = instance.fsm.entryActions[endState]
-                if (entryAction != null) {
-                    entryAction.invoke(context, startState, endState)
-                } else {
-                    instance.fsm.defaultEntryAction?.invoke(context, instance.currentState, endState)
-                }
-            }
-        }
-    }
-    /**
-     * @suppress
-     */
-    class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
-        private val currentState: S,
-        private val fsm: StateMachine<S, E, C>
-    ) {
-        /**
-         * Defines a default action when no other transition are matched
-         * @param action The action will be performed
-         */
-        fun default(action: (C, S, E) -> Unit) {
-            fsm.default(currentState, action)
+        fun addGuarded(guardedTransition: GuardedTransition<S, E, C>) {
+            guardedTransitions.add(guardedTransition)
         }
 
-        /**
-         * Defines an action to be performed before transition causes a change in state
-         * @param action The action will be performed
-         */
-        fun entry(action: (C, S, S) -> Unit) {
-            fsm.entry(currentState, action)
-        }
-
-        /**
-         * Defines an action to be performed after a transition has changed the state
-         */
-        fun exit(action: (C, S, S) -> Unit) {
-            fsm.exit(currentState, action)
-        }
-
-        /**
-         * Defines a transition when the state is the currentState and the event is received. The state is changed to the endState.
-         * @param event A Pair with the first being the event and the second being the endState.
-         * @param action The action will be performed
-         */
-        fun event(event: Pair<E, S>, action: ((C) -> Unit)?): DslStateMachineEventHandler<S, E, C> {
-            fsm.transition(currentState, event.first, event.second, action)
-            return this
-        }
-
-        /**
-         * Defines a transition where an event causes an action but doesn't change the state.
-         */
-        fun event(event: E, action: ((C) -> Unit)?): DslStateMachineEventHandler<S, E, C> {
-            fsm.transition(currentState, event, action)
-            return this
-        }
-    }
-
-    /**
-     * @suppress
-     */
-    class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachine<S, E, C>) {
-
-        fun initial(deriveInitialState: (C) -> S): DslStateMachineHandler<S, E, C> {
-            fsm.initial(deriveInitialState)
-            return this
-        }
-
-        fun state(currentState: S, handler: DslStateMachineEventHandler<S, E, C>.() -> Unit):
-                DslStateMachineEventHandler<S, E, C> {
-            return DslStateMachineEventHandler(currentState, fsm).apply(handler)
-        }
-
-        fun default(handler: DslStateMachineDefaultEventHandler<S, E, C>.() -> Unit):
-                DslStateMachineDefaultEventHandler<S, E, C> {
-            return DslStateMachineDefaultEventHandler(fsm).apply(handler)
-        }
-
-        fun build() = fsm
-    }
-    /**
-     * @suppress
-     */
-    class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachine<S, E, C>) {
-        /**
-         * Define a default action that will be applied when no other transitions are matched.
-         */
-        fun action(action: (C, S, E) -> Unit) {
-            fsm.defaultAction(action)
-        }
-
-        /**
-         * Defines an action to perform before a change in the currentState of the FSM
-         * @param action This action will be performed
-         */
-        fun entry(action: (C, S, S) -> Unit) {
-            fsm.defaultEntryAction = action
-        }
-
-        /**
-         * Defines an action to be performed after the currentState was changed.
-         * @param action The action will be performed
-         */
-        fun exit(action: (C, S, S) -> Unit) {
-            fsm.defaultExitAction = action
-        }
-
-        /**
-         * Defines a default transition when an event is received to a specific state.
-         * @param event Pair representing an event and endState for transition. Can be written as EVENT to STATE
-         * @param action The action will be performed before transition is completed
-         */
-        fun event(event: Pair<E, S>, action: ((C) -> Unit)?): DslStateMachineDefaultEventHandler<S, E, C> {
-            require(fsm.defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
-            fsm.defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
-            return this
-        }
-
-        fun event(event: E, action: ((C) -> Unit)?): DslStateMachineDefaultEventHandler<S, E, C> {
-            require(fsm.defaultTransitions[event] == null) { "Default transition for $event already defined" }
-            fsm.defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, action)
-            return this
-        }
+        fun findGuard(context: C): GuardedTransition<S, E, C>? = guardedTransitions.firstOrNull { it.guardMet(context) }
     }
 
     /**
      * This class represents an instance of a state machine.
      * It will process events, matching transitions, invoking entry, transition and exit actions.
+     * @param context The events may trigger actions on the context of class C
+     * @param fsm The defined state machine that provides all the behaviour
+     * @param initialState The initial state of the instance.
      */
     class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
         private val context: C,
@@ -208,51 +112,122 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         var currentState: S = initialState
             private set
 
+        private fun execute(transition: Transition<S, E, C>) {
+            transition.execute(context, this)
+            if (transition.endState != null) {
+                currentState = transition.endState
+            }
+        }
+
+        internal fun executeEntry(context: C, endState: S) {
+            fsm.entryActions[endState]?.invoke(context, currentState, endState)
+            fsm.defaultEntryAction?.invoke(context, currentState, endState)
+        }
+
+        internal fun executeExit(context: C, endState: S) {
+            fsm.exitActions[currentState]?.invoke(context, currentState, endState)
+            fsm.defaultExitAction?.invoke(context, currentState, endState)
+        }
+
         /**
-         * This function will process the event and advance the state machine according to the FSM definition.
-         * @param event The event received,
+         * This function will process the on and advance the state machine according to the FSM definition.
+         * @param event The on received,
          */
-        fun event(event: E) {
-            val transition = fsm.transitions[Pair(currentState, event)]
-            if (transition == null) {
-                val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
-                if (defaultAction == null) {
-                    error("Transition from $currentState on $event not defined")
+        fun sendEvent(event: E) {
+            val transitionRules = fsm.transitionRules[Pair(currentState, event)]
+            if (transitionRules == null) {
+                val transition = fsm.defaultTransitions[event]
+                if (transition != null) {
+                    execute(transition)
                 } else {
-                    defaultAction.invoke(context, currentState, event)
+                    executeDefaultAction(event)
                 }
             } else {
-                transition.execute(context, this)
-                if (transition.endState != null) {
-                    currentState = transition.endState
+                val guardedTransition = transitionRules.findGuard(context)
+                if (guardedTransition != null) {
+                    execute(guardedTransition)
+                } else {
+                    val transition = transitionRules.transition
+                    if (transition != null) {
+                        execute(transition)
+                    } else {
+                        executeDefaultAction(event)
+                    }
                 }
+            }
+        }
+
+        internal fun executeDefaultAction(event: E) {
+            val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
+            if (defaultAction == null) {
+                error("Transition from $currentState on $event not defined")
+            } else {
+                defaultAction.invoke(context, currentState, event)
             }
         }
     }
 
+    fun transition(startState: S, event: E, endState: S, guard: ((C) -> Boolean), action: ((C) -> Unit)?) {
+        val key = Pair(startState, event)
+        val transitionRule = transitionRules[key]
+        if (transitionRule == null) {
+            val rule = TransitionRules<S, E, C>()
+            rule.addGuarded(GuardedTransition(startState, event, endState, guard, action))
+            transitionRules[key] = rule
+        } else {
+            transitionRule.addGuarded(GuardedTransition(startState, event, endState, guard, action))
+        }
+    }
+
+    fun transition(startState: S, event: E, guard: ((C) -> Boolean), action: ((C) -> Unit)?) {
+        val key = Pair(startState, event)
+        val transitionRule = transitionRules[key]
+        if (transitionRule == null) {
+            val rule = TransitionRules<S, E, C>()
+            rule.addGuarded(GuardedTransition(startState, event, null, guard, action))
+            transitionRules[key] = rule
+        } else {
+            transitionRule.addGuarded(GuardedTransition(startState, event, null, guard, action))
+        }
+    }
+
+
     /**
-     * This function defines a transition that will be triggered when the currentState is the same as the startState and event is received. The FSM currentState will change to the endState after the action was executed.
+     * This function defines a transition that will be triggered when the currentState is the same as the startState and on is received. The FSM currentState will change to the endState after the action was executed.
      * Entry and Exit actions will also be performed.
      * @param startState transition applies when FSM currentState is the same as stateState.
-     * @param event transition applies when event received.
+     * @param event transition applies when on received.
      * @param endState FSM will transition to endState.
      * @param action The actions will be invoked
      */
     fun transition(startState: S, event: E, endState: S, action: ((C) -> Unit)?) {
         val key = Pair(startState, event)
-        require(transitions[key] == null) { "Transition for $startState on $event already defined"}
-        transitions[key] = Transition(startState, event, endState, action)
+        val transitionRule = transitionRules[key]
+        if (transitionRule == null) {
+            transitionRules[key] =
+                TransitionRules(transition = SimpleTransition(startState, event, endState, action))
+        } else {
+            require(transitionRule.transition == null) { "Unguarded SimpleTransition for $startState on $event already defined" }
+            transitionRule.transition = SimpleTransition(startState, event, endState, action)
+        }
     }
+
     /**
-     * This function defines a transition that doesn't change the state of the state machine when the currentState is startState and the event is received and after the action was performed. No entry or exit actions performed.
+     * This function defines a transition that doesn't change the state of the state machine when the currentState is startState and the on is received and after the action was performed. No entry or exit actions performed.
      * @param startState transition applies when when FSM currentState is the same as stateState
-     * @param event transition applies when event received
+     * @param event transition applies when on received
      * @param action actions will be invoked
      */
     fun transition(startState: S, event: E, action: ((C) -> Unit)?) {
         val key = Pair(startState, event)
-        require(transitions[key] == null) { "Transition for $startState on $event already defined" }
-        transitions[key] = Transition(startState, event, null, action)
+        val transitionRule = transitionRules[key]
+        if (transitionRule == null) {
+            transitionRules[key] = TransitionRules(transition = SimpleTransition(startState, event, null, action))
+        } else {
+            require(transitionRule.transition == null) { "Unguarded SimpleTransition for $startState on $event already defined" }
+            transitionRule.transition = SimpleTransition(startState, event, null, action)
+        }
+
     }
 
     /**
@@ -264,11 +239,11 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     fun create(context: C, initialState: S? = null) = StateMachineInstance(
         context,
         this,
-        initialState ?: deriveInitialState.invoke(context) ?: error("Definition requires deriveInitialState")
+        initialState ?: deriveInitialState!!.invoke(context) ?: error("Definition requires deriveInitialState")
     )
 
     /**
-     * This function defines an action to be invoked when no action is found matching the current state and event
+     * This function defines an action to be invoked when no action is found matching the current state and on
      * @param action This action will be performed
      */
     fun defaultAction(action: (C, S, E) -> Unit) {
@@ -300,13 +275,23 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     }
 
     /**
-     * This function defined an action to be invoked when no actions are found matching the given state and event.
+     * This function defined an action to be invoked when no actions are found matching the given state and on.
      * @param currentState The provided state
      * @param action This action will be invoked
      */
     fun default(currentState: S, action: (C, S, E) -> Unit) {
         require(defaultActions[currentState] == null) { "Default defaultAction already defined for $currentState" }
         defaultActions[currentState] = action
+    }
+
+    fun default(event: Pair<E, S>, action: ((C) -> Unit)?) {
+        require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
+        defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
+    }
+
+    fun default(event: E, action: ((C) -> Unit)?) {
+        require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
+        defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, action)
     }
 
     /**

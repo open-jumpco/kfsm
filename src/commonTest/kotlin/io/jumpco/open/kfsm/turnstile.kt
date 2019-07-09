@@ -63,10 +63,10 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                 entry { context, startState, endState ->
                     println("entering:$startState -> $endState for $context")
                 }
-                event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
+                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
                     ts.unlock()
                 }
-                event(TurnstileEvents.PASS) { ts ->
+                on(TurnstileEvents.PASS) { ts ->
                     ts.alarm()
                 }
                 exit { context, startState, endState ->
@@ -77,10 +77,10 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                 entry { context, startState, endState ->
                     println("entering:$startState -> $endState for $context")
                 }
-                event(TurnstileEvents.COIN) { ts ->
+                on(TurnstileEvents.COIN) { ts ->
                     ts.returnCoin()
                 }
-                event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
                     ts.lock()
                 }
                 exit { context, startState, endState ->
@@ -92,6 +92,6 @@ class TurnstileFSM(private val turnstile: Turnstile) {
     }
     private val fsm = definition.create(turnstile)
 
-    fun coin() = fsm.event(TurnstileEvents.COIN)
-    fun pass() = fsm.event(TurnstileEvents.PASS)
+    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
+    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
 }
