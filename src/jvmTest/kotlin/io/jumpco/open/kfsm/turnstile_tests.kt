@@ -54,11 +54,11 @@ class TurnstileFsmTests {
     fun `Uncle Bob's Turnstile plain`() {
         val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>()
         definition.initial { if (it.locked) LOCKED else UNLOCKED }
+        definition.defaultAction { ts,_,_ ->
+            ts.alarm()
+        }
         definition.transition(LOCKED, COIN, UNLOCKED) { ts ->
             ts.unlock()
-        }
-        definition.transition(LOCKED, PASS) { ts ->
-            ts.alarm()
         }
         definition.transition(UNLOCKED, COIN) { ts ->
             ts.returnCoin()
@@ -80,12 +80,14 @@ class TurnstileFsmTests {
         // given
         val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (it.locked) LOCKED else UNLOCKED }
+            default {
+                action { ts, _, _ ->
+                    ts.alarm()
+                }
+            }
             state(LOCKED) {
                 on(COIN to UNLOCKED) { ts ->
                     ts.unlock()
-                }
-                on(PASS) { ts ->
-                    ts.alarm()
                 }
             }
             state(UNLOCKED) {
@@ -178,14 +180,14 @@ class TurnstileFsmTests {
         val fsm = TurnstileFSM(turnstile)
         println("--coin1")
         fsm.coin()
+        println("--coin2")
+        fsm.coin()
         println("--pass1")
         fsm.pass()
         println("--pass2")
         fsm.pass()
         println("--pass3")
         fsm.pass()
-        println("--coin2")
-        fsm.coin()
         println("--coin3")
         fsm.coin()
     }

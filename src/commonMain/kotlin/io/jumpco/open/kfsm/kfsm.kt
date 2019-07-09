@@ -9,6 +9,12 @@
 
 package io.jumpco.open.kfsm
 
+typealias StateAction<C> = (C) -> Unit
+typealias StateGuard<C> = (C) -> Boolean
+typealias StateQuery<C, S> = ((C) -> S)
+typealias DefaultChangeAction<C, S> = (C, S, S) -> Unit
+typealias DefaultStateAction<C, S, E> = (C, S, E) -> Unit
+
 /**
  * This class represents the definition of a statemachine.
  * @param S is an enum representing all the states of the FSM
@@ -16,21 +22,22 @@ package io.jumpco.open.kfsm
  * @param C is the class of the Context where the action will be applied.
  */
 class StateMachine<S : Enum<S>, E : Enum<E>, C> {
-    private var deriveInitialState: ((C) -> S)? = null
+    private var deriveInitialState: StateQuery<C, S>? = null
     private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
     private val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
-    private val entryActions: MutableMap<S, (C, S, S) -> Unit> = mutableMapOf()
-    private val exitActions: MutableMap<S, (C, S, S) -> Unit> = mutableMapOf()
-    private val defaultActions: MutableMap<S, (C, S, E) -> Unit> = mutableMapOf()
-    private var globalDefault: ((C, S, E) -> Unit)? = null
-    private var defaultEntryAction: ((C, S, S) -> Unit)? = null
-    private var defaultExitAction: ((C, S, S) -> Unit)? = null
+    private val entryActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
+    private val exitActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
+    private val defaultActions: MutableMap<S, DefaultStateAction<C, S, E>> = mutableMapOf()
+    private var globalDefault: DefaultStateAction<C, S, E>? = null
+    private var defaultEntryAction: DefaultChangeAction<C, S>? = null
+    private var defaultExitAction: DefaultChangeAction<C, S>? = null
+
     /**
      * @suppress
      */
     open class Transition<S : Enum<S>, E : Enum<E>, C>(
-        val endState: S? = null,
-        private val action: ((C) -> Unit)? = null
+        internal val endState: S? = null,
+        private val action: StateAction<C>? = null
     ) {
         open fun execute(context: C, instance: StateMachineInstance<S, E, C>) {
             if (endState != null) {
@@ -48,19 +55,19 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @suppress
      */
     class DefaultTransition<E : Enum<E>, S : Enum<S>, C>(
-        val event: E,
+        internal val event: E,
         endState: S? = null,
-        action: ((C) -> Unit)? = null
+        action: StateAction<C>? = null
     ) : Transition<S, E, C>(endState, action)
 
     /**
      * @suppress
      */
     open class SimpleTransition<S : Enum<S>, E : Enum<E>, C>(
-        val startState: S,
-        val event: E,
+        internal val startState: S,
+        internal val event: E,
         endState: S?,
-        action: ((C) -> Unit)?
+        action: StateAction<C>?
     ) : Transition<S, E, C>(endState, action)
 
     /**
@@ -70,8 +77,8 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         startState: S,
         event: E,
         endState: S?,
-        val guard: ((C) -> Boolean),
-        action: ((C) -> Unit)?
+        private val guard: StateGuard<C>,
+        action: StateAction<C>?
     ) : SimpleTransition<S, E, C>(startState, event, endState, action) {
         fun guardMet(context: C): Boolean = guard.invoke(context)
     }
@@ -81,7 +88,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      */
     class TransitionRules<S : Enum<S>, E : Enum<E>, C>(
         private val guardedTransitions: MutableList<GuardedTransition<S, E, C>> = mutableListOf(),
-        var transition: SimpleTransition<S, E, C>? = null
+        internal var transition: SimpleTransition<S, E, C>? = null
     ) {
         fun addGuarded(guardedTransition: GuardedTransition<S, E, C>) {
             guardedTransitions.add(guardedTransition)
@@ -157,7 +164,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
             }
         }
 
-        internal fun executeDefaultAction(event: E) {
+        private fun executeDefaultAction(event: E) {
             val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
             if (defaultAction == null) {
                 error("Transition from $currentState on $event not defined")
@@ -167,7 +174,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         }
     }
 
-    fun transition(startState: S, event: E, endState: S, guard: ((C) -> Boolean), action: ((C) -> Unit)?) {
+    fun transition(startState: S, event: E, endState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
@@ -179,7 +186,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         }
     }
 
-    fun transition(startState: S, event: E, guard: ((C) -> Boolean), action: ((C) -> Unit)?) {
+    fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
@@ -200,14 +207,14 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param endState FSM will transition to endState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, endState: S, action: ((C) -> Unit)?) {
+    fun transition(startState: S, event: E, endState: S, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
             transitionRules[key] =
                 TransitionRules(transition = SimpleTransition(startState, event, endState, action))
         } else {
-            require(transitionRule.transition == null) { "Unguarded SimpleTransition for $startState on $event already defined" }
+            require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = SimpleTransition(startState, event, endState, action)
         }
     }
@@ -218,13 +225,13 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
-    fun transition(startState: S, event: E, action: ((C) -> Unit)?) {
+    fun transition(startState: S, event: E, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
             transitionRules[key] = TransitionRules(transition = SimpleTransition(startState, event, null, action))
         } else {
-            require(transitionRule.transition == null) { "Unguarded SimpleTransition for $startState on $event already defined" }
+            require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = SimpleTransition(startState, event, null, action)
         }
 
@@ -239,14 +246,14 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     fun create(context: C, initialState: S? = null) = StateMachineInstance(
         context,
         this,
-        initialState ?: deriveInitialState!!.invoke(context) ?: error("Definition requires deriveInitialState")
+        initialState ?: deriveInitialState?.invoke(context) ?: error("Definition requires deriveInitialState")
     )
 
     /**
      * This function defines an action to be invoked when no action is found matching the current state and on
      * @param action This action will be performed
      */
-    fun defaultAction(action: (C, S, E) -> Unit) {
+    fun defaultAction(action: DefaultStateAction<C, S, E>) {
         globalDefault = action
     }
 
@@ -254,15 +261,14 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * This method is the entry point to creating the DSL
      * @sample io.jumpco.open.kfsm.TurnstileFSM.define()
      */
-    fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit): DslStateMachineHandler<S, E, C> {
-        return DslStateMachineHandler(this).apply(handler)
-    }
+    fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit) = DslStateMachineHandler(this).apply(handler)
+
 
     /**
      * This function defines an action to be invoked when no entry action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultEntry(action: (C, S, S) -> Unit) {
+    fun defaultEntry(action: DefaultChangeAction<C, S>) {
         defaultEntryAction = action
     }
 
@@ -270,7 +276,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * This function defines an action to be invoked when no exit action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultExit(action: (C, S, S) -> Unit) {
+    fun defaultExit(action: DefaultChangeAction<C, S>) {
         defaultExitAction = action
     }
 
@@ -279,17 +285,17 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun default(currentState: S, action: (C, S, E) -> Unit) {
+    fun default(currentState: S, action: DefaultStateAction<C, S, E>) {
         require(defaultActions[currentState] == null) { "Default defaultAction already defined for $currentState" }
         defaultActions[currentState] = action
     }
 
-    fun default(event: Pair<E, S>, action: ((C) -> Unit)?) {
+    fun default(event: Pair<E, S>, action: StateAction<C>?) {
         require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
         defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
     }
 
-    fun default(event: E, action: ((C) -> Unit)?) {
+    fun default(event: E, action: StateAction<C>?) {
         require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
         defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, action)
     }
@@ -299,7 +305,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun entry(currentState: S, action: (C, S, S) -> Unit) {
+    fun entry(currentState: S, action: DefaultChangeAction<C, S>) {
         require(entryActions[currentState] == null) { "Entry defaultAction already defined for $currentState" }
         entryActions[currentState] = action
     }
@@ -309,7 +315,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun exit(currentState: S, action: (C, S, S) -> Unit) {
+    fun exit(currentState: S, action: DefaultChangeAction<C, S>) {
         require(exitActions[currentState] == null) { "Exit defaultAction already defined for $currentState" }
         exitActions[currentState] = action
     }
@@ -318,7 +324,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
      */
-    fun initial(init: (C) -> S) {
+    fun initial(init: StateQuery<C, S>) {
         deriveInitialState = init
     }
 }

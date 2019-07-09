@@ -57,7 +57,7 @@ enum class LockEvents {
     UNLOCK
 }
 
-class LockFSM(private val context: Lock) {
+class LockFSM(context: Lock) {
     companion object {
         private fun define() = StateMachine<LockStates, LockEvents, Lock>().stateMachine {
             initial { context ->

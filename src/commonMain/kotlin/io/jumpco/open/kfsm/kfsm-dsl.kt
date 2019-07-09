@@ -130,14 +130,13 @@ class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: State
     }
 
     fun state(currentState: S, handler: DslStateMachineEventHandler<S, E, C>.() -> Unit):
-            DslStateMachineEventHandler<S, E, C> {
-        return DslStateMachineEventHandler(currentState, fsm).apply(handler)
-    }
+            DslStateMachineEventHandler<S, E, C>
+        = DslStateMachineEventHandler(currentState, fsm).apply(handler)
+
 
     fun default(handler: DslStateMachineDefaultEventHandler<S, E, C>.() -> Unit):
-            DslStateMachineDefaultEventHandler<S, E, C> {
-        return DslStateMachineDefaultEventHandler(fsm).apply(handler)
-    }
+            DslStateMachineDefaultEventHandler<S, E, C>
+        = DslStateMachineDefaultEventHandler(fsm).apply(handler)
 
     fun build() = fsm
 }

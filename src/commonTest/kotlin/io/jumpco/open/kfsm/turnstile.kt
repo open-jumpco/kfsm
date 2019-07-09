@@ -55,36 +55,32 @@ enum class TurnstileEvents {
 /**
  * @suppress
  */
-class TurnstileFSM(private val turnstile: Turnstile) {
+class TurnstileFSM(turnstile: Turnstile) {
     companion object {
         private fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
-            state(TurnstileStates.LOCKED) {
+            default {
                 entry { context, startState, endState ->
                     println("entering:$startState -> $endState for $context")
                 }
-                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
-                    ts.unlock()
-                }
-                on(TurnstileEvents.PASS) { ts ->
+                action { ts, _, _ ->
                     ts.alarm()
                 }
                 exit { context, startState, endState ->
                     println("exiting:$startState -> $endState for $context")
                 }
             }
-            state(TurnstileStates.UNLOCKED) {
-                entry { context, startState, endState ->
-                    println("entering:$startState -> $endState for $context")
+            state(TurnstileStates.LOCKED) {
+                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
+                    ts.unlock()
                 }
+            }
+            state(TurnstileStates.UNLOCKED) {
                 on(TurnstileEvents.COIN) { ts ->
                     ts.returnCoin()
                 }
                 on(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
                     ts.lock()
-                }
-                exit { context, startState, endState ->
-                    println("exiting:$startState -> $endState for $context")
                 }
             }
         }.build()

@@ -11,7 +11,7 @@ package io.jumpco.open.kfsm
 
 import io.mockk.*
 import kotlin.test.Test
-import kotlin.test.assertEquals
+
 
 class DetailMockedTests {
     enum class TestStates {
@@ -71,7 +71,7 @@ class DetailMockedTests {
 
     class TestDetailFSM(private val context: TestContext) {
         companion object {
-            fun define() = StateMachine<TestStates, TestEvents, TestContext>().stateMachine {
+            private fun define() = StateMachine<TestStates, TestEvents, TestContext>().stateMachine {
                 initial {
                     when (it.state) {
                         1 -> TestStates.STATE1
@@ -132,7 +132,7 @@ class DetailMockedTests {
                     exit { context, _, _ ->
                         context.exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { it.state == 2 }) { _ ->
+                    on(TestEvents.EVENT2, guard = { it.state == 2 }) {
                         error("should never be called")
                     }
                 }

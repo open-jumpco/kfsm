@@ -67,12 +67,12 @@ class LockFsmTests {
     fun `test plain creation of fsm`() {
         // given
         val definition = StateMachine<LockStates, LockEvents, Lock>()
-        definition.initial { context ->
-            when (context.locked) {
+        definition.initial {
+            when (it.locked) {
                 0 -> UNLOCKED
                 1 -> LOCKED
                 2 -> DOUBLE_LOCKED
-                else -> error("Invalid state locked=${context.locked}")
+                else -> error("Invalid state locked=${it.locked}")
             }
         }
         definition.transition(LOCKED, UNLOCK, UNLOCKED) { context ->
