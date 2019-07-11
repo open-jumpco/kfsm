@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
  */
 class TurnstileFsmTests {
     private fun verifyTurnstileFSM(
-        fsm: StateMachine.StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
+        fsm: StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
         turnstile: Turnstile
     ) {
 

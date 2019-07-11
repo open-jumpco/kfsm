@@ -21,7 +21,7 @@ import kotlin.test.fail
  */
 class LockFsmTests {
 
-    private fun verifyLockFSM(fsm: StateMachine.StateMachineInstance<LockStates, LockEvents, Lock>, lock: Lock) {
+    private fun verifyLockFSM(fsm: StateMachineInstance<LockStates, LockEvents, Lock>, lock: Lock) {
         // then
         assertTrue { fsm.currentState == LOCKED }
         assertTrue { lock.locked == 1 }

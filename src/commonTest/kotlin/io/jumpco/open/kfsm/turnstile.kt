@@ -57,7 +57,7 @@ enum class TurnstileEvents {
  */
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
-        private fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
+        private fun define() = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
             initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
             default {
                 entry { context, startState, endState ->
