@@ -9,11 +9,49 @@
 
 package io.jumpco.open.kfsm
 
+/**
+ * This represents an action that may be invoked during a transition.
+ * @param C The context: C will be available to the lambda.
+ */
 typealias StateAction<C> = (C) -> Unit
+
+/**
+ * This represents a guard expression that may be used to select a specific transition.
+ * @param C The context: C will be available to the lambda
+ */
 typealias StateGuard<C> = (C) -> Boolean
+
+/**
+ * This represents an expression to determine the state of the context. This is useful when creating an instance of a
+ * statemachine multiple times during the lifecycle of a context represented by a persisted or serializable entity.
+ * @param C The context:C will be available to the lambda.
+ * @param S The type of the state that should be returned by the lambda.
+ */
 typealias StateQuery<C, S> = ((C) -> S)
+
+/**
+ * This represents a default action that will be invoked on a change in state as defined with entry or exit.
+ * @param C The context: C will be available to the lambda
+ * @param S currentState: S and endState: S will be available to the lambda.
+ */
 typealias DefaultChangeAction<C, S> = (C, S, S) -> Unit
+
+/**
+ * This represents a default action for a specific event. These action will not cause changes in state.
+ * They are internal transitions.
+ * @param C The context: C will be available to the lambda
+ * @param S The currentState:S will be available to the lambda
+ * @param E The event: E will be available to the lambda
+ */
 typealias DefaultStateAction<C, S, E> = (C, S, E) -> Unit
+
+
+/**
+ * This represents an event and endState pair that can be written as `event to state`
+ * @param E The event: E will be the first element of the pair
+ * @param S The endState: S will be the second element of the pair.
+ */
+typealias EventState<E,S> = Pair<E,S>
 
 /**
  * This class represents the definition of a statemachine.
@@ -136,20 +174,22 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
             fsm.defaultExitAction?.invoke(context, currentState, endState)
         }
 
+        private fun executeDefaultAction(event: E) {
+            val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
+            if (defaultAction == null) {
+                error("Transition from $currentState on $event not defined")
+            } else {
+                defaultAction.invoke(context, currentState, event)
+            }
+        }
+
         /**
          * This function will process the on and advance the state machine according to the FSM definition.
          * @param event The on received,
          */
         fun sendEvent(event: E) {
             val transitionRules = fsm.transitionRules[Pair(currentState, event)]
-            if (transitionRules == null) {
-                val transition = fsm.defaultTransitions[event]
-                if (transition != null) {
-                    execute(transition)
-                } else {
-                    executeDefaultAction(event)
-                }
-            } else {
+            if (transitionRules != null) {
                 val guardedTransition = transitionRules.findGuard(context)
                 if (guardedTransition != null) {
                     execute(guardedTransition)
@@ -161,19 +201,26 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
                         executeDefaultAction(event)
                     }
                 }
-            }
-        }
-
-        private fun executeDefaultAction(event: E) {
-            val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
-            if (defaultAction == null) {
-                error("Transition from $currentState on $event not defined")
             } else {
-                defaultAction.invoke(context, currentState, event)
+                val transition = fsm.defaultTransitions[event]
+                if (transition != null) {
+                    execute(transition)
+                } else {
+                    executeDefaultAction(event)
+                }
             }
         }
     }
 
+    /**
+     * This function defines a transition from the currentState equal to startState to the endState when event is
+     * received and the guard expression is met. The action is executed after any exit action and before entry actions.
+     * @param startState The transition will be considered when currentState matches stateState
+     * @param event The event will trigger the consideration of this transition
+     * @param endState The transition will change currentState to endState after executing the option action
+     * @param guard The guard expression will have to be met to consider the transition
+     * @param action The optional action will be executed when the transition occurs.
+     */
     fun transition(startState: S, event: E, endState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -186,6 +233,14 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         }
     }
 
+    /**
+     * This function defines a transition that doesn't change the state also know as an internal transition.
+     * The transition will only occur if the guard expression is met.
+     * @param startState The transition will be considered when currentState matches stateState
+     * @param event The event will trigger the consideration of this transition
+     * @param guard The guard expression will have to be met to consider the transition
+     * @param action The optional action will be executed when the transition occurs.
+     */
     fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -250,7 +305,8 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     )
 
     /**
-     * This function defines an action to be invoked when no action is found matching the current state and on
+     * This function defines an action to be invoked when no action is found matching the current state and event.
+     * This will be an internal transition and will not cause a change in state or invoke entry or exit functions.
      * @param action This action will be performed
      */
     fun defaultAction(action: DefaultStateAction<C, S, E>) {
@@ -281,7 +337,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     }
 
     /**
-     * This function defined an action to be invoked when no actions are found matching the given state and on.
+     * This function defines an action to be invoked when no transitions are found matching the given state and on.
      * @param currentState The provided state
      * @param action This action will be invoked
      */
@@ -290,11 +346,21 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         defaultActions[currentState] = action
     }
 
+    /**
+     * This function defines an action to be invoked when no transitions match the event. The currentState will be change to second parameter of the Pair.
+     * @param event The Pair holds the event and endState and can be written as `event to state`
+     * @param action The option action will be executed when this default transition occurs.
+     */
     fun default(event: Pair<E, S>, action: StateAction<C>?) {
         require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
         defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
     }
 
+    /**
+     * This function defines an action to be invoked when no transitions are found for given event.
+     * @param The event to match this transition.
+     * @param action The option action will be executed when this default transition occurs.
+     */
     fun default(event: E, action: StateAction<C>?) {
         require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
         defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, action)
@@ -328,6 +394,3 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
         deriveInitialState = init
     }
 }
-
-
-

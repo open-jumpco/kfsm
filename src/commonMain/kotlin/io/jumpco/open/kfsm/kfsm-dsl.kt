@@ -20,7 +20,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * Defines a default action when no other transition are matched
      * @param action The action will be performed
      */
-    fun default(action: (C, S, E) -> Unit) {
+    fun default(action: DefaultStateAction<C, S, E>) {
         fsm.default(currentState, action)
     }
 
@@ -28,14 +28,14 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * Defines an action to be performed before transition causes a change in state
      * @param action The action will be performed
      */
-    fun entry(action: (C, S, S) -> Unit) {
+    fun entry(action: DefaultChangeAction<C, S>) {
         fsm.entry(currentState, action)
     }
 
     /**
      * Defines an action to be performed after a transition has changed the state
      */
-    fun exit(action: (C, S, S) -> Unit) {
+    fun exit(action: DefaultChangeAction<C, S>) {
         fsm.exit(currentState, action)
     }
 
@@ -44,15 +44,22 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * @param event A Pair with the first being the on and the second being the endState.
      * @param action The action will be performed
      */
-    fun on(event: Pair<E, S>, action: ((C) -> Unit)?): DslStateMachineEventHandler<S, E, C> {
+    fun on(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event.first, event.second, action)
         return this
     }
 
     /**
-     * Defines a guarded transition. Where the transition will only be used if the guared expression is met
+     * Defines a guarded transition. Where the transition will only be used if the guarded expression is met
+     * @param event The event and endState the defines the transition
+     * @param guard The guard expression must be met before the transition is considered.
+     * @param action The optional action that may be executed
      */
-    fun on(event: Pair<E, S>, guard: ((C) -> Boolean), action: ((C) -> Unit)?): DslStateMachineEventHandler<S, E, C> {
+    fun on(
+        event: EventState<E, S>,
+        guard: StateGuard<C>,
+        action: StateAction<C>?
+    ): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event.first, event.second, guard, action)
         return this
     }
@@ -60,7 +67,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
     /**
      * Defines a transition where an on causes an action but doesn't change the state.
      */
-    fun on(event: E, action: ((C) -> Unit)?): DslStateMachineEventHandler<S, E, C> {
+    fun on(event: E, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event, action)
         return this
     }
@@ -69,7 +76,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * Defines a guarded transition where an on causes an action but doesn't change the state and will only be used
      * if the guard expression is met
      */
-    fun on(event: E, guard: ((C) -> Boolean), action: ((C) -> Unit)?): DslStateMachineEventHandler<S, E, C> {
+    fun on(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event, guard, action)
         return this
     }
@@ -83,7 +90,7 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
     /**
      * Define a default action that will be applied when no other transitions are matched.
      */
-    fun action(action: (C, S, E) -> Unit) {
+    fun action(action: DefaultStateAction<C, S, E>) {
         fsm.defaultAction(action)
     }
 
@@ -91,7 +98,7 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
      * Defines an action to perform before a change in the currentState of the FSM
      * @param action This action will be performed
      */
-    fun entry(action: (C, S, S) -> Unit) {
+    fun entry(action: DefaultChangeAction<C, S>) {
         fsm.defaultEntry(action)
     }
 
@@ -99,7 +106,7 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
      * Defines an action to be performed after the currentState was changed.
      * @param action The action will be performed
      */
-    fun exit(action: (C, S, S) -> Unit) {
+    fun exit(action: DefaultChangeAction<C, S>) {
         fsm.defaultExit(action)
     }
 
@@ -108,12 +115,12 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
      * @param event Pair representing an on and endState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
-    fun on(event: Pair<E, S>, action: ((C) -> Unit)?): DslStateMachineDefaultEventHandler<S, E, C> {
+    fun on(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {
         fsm.default(event, action)
         return this
     }
 
-    fun on(event: E, action: ((C) -> Unit)?): DslStateMachineDefaultEventHandler<S, E, C> {
+    fun on(event: E, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {
         fsm.default(event, action)
         return this
     }
@@ -124,19 +131,17 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
  */
 class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachine<S, E, C>) {
 
-    fun initial(deriveInitialState: (C) -> S): DslStateMachineHandler<S, E, C> {
+    fun initial(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C> {
         fsm.initial(deriveInitialState)
         return this
     }
 
     fun state(currentState: S, handler: DslStateMachineEventHandler<S, E, C>.() -> Unit):
-            DslStateMachineEventHandler<S, E, C>
-        = DslStateMachineEventHandler(currentState, fsm).apply(handler)
+            DslStateMachineEventHandler<S, E, C> = DslStateMachineEventHandler(currentState, fsm).apply(handler)
 
 
     fun default(handler: DslStateMachineDefaultEventHandler<S, E, C>.() -> Unit):
-            DslStateMachineDefaultEventHandler<S, E, C>
-        = DslStateMachineDefaultEventHandler(fsm).apply(handler)
+            DslStateMachineDefaultEventHandler<S, E, C> = DslStateMachineDefaultEventHandler(fsm).apply(handler)
 
     fun build() = fsm
 }

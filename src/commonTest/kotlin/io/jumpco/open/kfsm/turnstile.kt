@@ -63,7 +63,8 @@ class TurnstileFSM(turnstile: Turnstile) {
                 entry { context, startState, endState ->
                     println("entering:$startState -> $endState for $context")
                 }
-                action { ts, _, _ ->
+                action { ts, state, event ->
+                    println("Default action for state($state) -> on($event) for $ts")
                     ts.alarm()
                 }
                 exit { context, startState, endState ->

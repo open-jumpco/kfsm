@@ -8,13 +8,13 @@ Consumer ----> StateMachineInstance : sendEvent(event:E)
 
     activate StateMachineInstance
     note right of StateMachineInstance
-        StateMachineInstance determines the simpleTransition
+        StateMachineInstance determines the Transition
         or default exit / entry / action(s) needed
     end note
     activate StateMachineInstance
     StateMachineInstance ----> StateMachineInstance : exit {}
-    StateMachineInstance ----> StateMachineInstance : entry {}
     StateMachineInstance ----> Context : action {}
+    StateMachineInstance ----> StateMachineInstance : entry {}
     activate Context
     note right of Context
         Context performs the action(s)
