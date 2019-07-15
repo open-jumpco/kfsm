@@ -29,5 +29,5 @@ class GuardedTransition<S : Enum<S>, E : Enum<E>, C>(
      * @param context The provided context
      * @return result of guard lambda
      */
-    fun guardMet(context: C): Boolean = guard.invoke(context)
+    fun guardMet(context: C, args: Array<out Any>): Boolean = guard.invoke(context, args)
 }

@@ -81,58 +81,58 @@ class DetailMockedTests {
                     }
                 }
                 default {
-                    entry { context, startState, endState ->
+                    entry { context, startState, endState,_ ->
                         println("entering:to $endState from $startState for:$context")
                         context.defaultEntry()
                     }
-                    exit { context, startState, endState ->
+                    exit { context, startState, endState,_ ->
                         println("exiting:from $endState to $startState for:$context")
                         context.defaultExit()
                     }
-                    on(TestEvents.EVENT1 to TestStates.STATE1) { context ->
+                    on(TestEvents.EVENT1 to TestStates.STATE1) { context, _ ->
                         println("default:EVENT1 to STATE1 for $context")
                         context.action1()
 
                     }
-                    on(TestEvents.EVENT2 to TestStates.STATE2) { context ->
+                    on(TestEvents.EVENT2 to TestStates.STATE2) { context, _ ->
                         println("default:on EVENT2 to STATE2 for $context")
                         context.action2()
                     }
-                    on(TestEvents.EVENT3 to TestStates.STATE3) { context ->
+                    on(TestEvents.EVENT3 to TestStates.STATE3) { context, _ ->
                         println("default:on EVENT3 to STATE3 for $context")
                         context.defaultAction()
                     }
-                    action { context, currentState, event ->
+                    action { context, currentState, event,_ ->
                         println("default:$event from $currentState for $context")
                         context.defaultAction()
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) { context ->
+                    on(TestEvents.EVENT1) { context, _ ->
                         context.action1()
                     }
-                    entry { context, _, _ ->
+                    entry { context, _, _,_ ->
                         context.entry1()
                     }
 
                 }
                 state(TestStates.STATE2) {
-                    entry { context, _, _ ->
+                    entry { context, _, _, _ ->
                         context.entry2()
                     }
-                    on(TestEvents.EVENT2, guard = { it.state == 2 }) { context ->
+                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { context, _ ->
                         println("EVENT2:guarded:from STATE2 for $context")
                         context.action2()
                     }
-                    exit { context, _, _ ->
+                    exit { context, _, _, _ ->
                         context.exit2()
                     }
                 }
                 state(TestStates.STATE3) {
-                    exit { context, _, _ ->
+                    exit { context, _, _, _ ->
                         context.exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { it.state == 2 }) {
+                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { _, _ ->
                         error("should never be called")
                     }
                 }
@@ -157,6 +157,7 @@ class DetailMockedTests {
             fsm.sendEvent(TestEvents.EVENT3)
         }
     }
+
     @Test
     fun `test actions mockked`() {
         // given

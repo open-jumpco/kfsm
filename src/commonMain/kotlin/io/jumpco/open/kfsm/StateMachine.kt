@@ -138,7 +138,8 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * This method is the entry point to creating the DSL
      * @sample io.jumpco.open.kfsm.TurnstileFSM.define()
      */
-    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit) = DslStateMachineHandler(this).apply(handler)
+    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit) =
+        DslStateMachineHandler(this).apply(handler)
 
 
     /**
@@ -214,4 +215,26 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     fun initial(init: StateQuery<C, S>) {
         deriveInitialState = init
     }
+
+    /**
+     * This function will provide the set of allowed events given a specific state. It isn't a guarantee that a
+     * subsequent transition will be successful since a guard may prevent a transition. Default state handlers are not considered.
+     * @param given The specific state to consider
+     * @param includeDefault When `true` will include default transitions in the list of allowed events.
+     */
+    fun allowed(given: S, includeDefault: Boolean = false): Set<E> {
+        val result = transitionRules.entries.filter { it.key.first == given }.map { it.key.second }.toSet()
+        if (includeDefault && defaultTransitions.isNotEmpty()) {
+            return result + defaultTransitions.keys
+        }
+        return result
+    }
+
+    /**
+     * This function will provide and indicator if an event is allow for a given state. When no state transition is declared this function will return false unless `includeDefault` is true and there is a default transition of handler for the event.
+     */
+    fun eventAllowed(event: E, given: S, includeDefault: Boolean): Boolean =
+        (includeDefault && hasDefaultStateHandler(given)) || allowed(given, includeDefault).contains(event)
+
+    fun hasDefaultStateHandler(given: S) = defaultActions.contains(given)
 }

@@ -31,29 +31,29 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     var currentState: S = initialState
         private set
 
-    private fun execute(transition: Transition<S, E, C>) {
-        transition.execute(context, this)
-        if (transition.endState != null) {
-            currentState = transition.endState
+    private fun execute(transition: Transition<S, E, C>, args: Array<out Any>) {
+        transition.execute(context, this, args)
+        if (transition.isExternal()) {
+            currentState = transition.endState!!
         }
     }
 
-    internal fun executeEntry(context: C, endState: S) {
-        fsm.entryActions[endState]?.invoke(context, currentState, endState)
-        fsm.defaultEntryAction?.invoke(context, currentState, endState)
+    internal fun executeEntry(context: C, endState: S, args: Array<out Any>) {
+        fsm.entryActions[endState]?.invoke(context, currentState, endState, args)
+        fsm.defaultEntryAction?.invoke(context, currentState, endState, args)
     }
 
-    internal fun executeExit(context: C, endState: S) {
-        fsm.exitActions[currentState]?.invoke(context, currentState, endState)
-        fsm.defaultExitAction?.invoke(context, currentState, endState)
+    internal fun executeExit(context: C, endState: S, args: Array<out Any>) {
+        fsm.exitActions[currentState]?.invoke(context, currentState, endState,args)
+        fsm.defaultExitAction?.invoke(context, currentState, endState, args)
     }
 
-    private fun executeDefaultAction(event: E) {
+    private fun executeDefaultAction(event: E, args: Array<out Any>) {
         val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
         if (defaultAction == null) {
             error("Transition from $currentState on $event not defined")
         } else {
-            defaultAction.invoke(context, currentState, event)
+            defaultAction.invoke(context, currentState, event, args)
         }
     }
 
@@ -61,27 +61,40 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
      * This function will process the on and advance the state machine according to the FSM definition.
      * @param event The on received,
      */
-    fun sendEvent(event: E) {
+    fun sendEvent(event: E, vararg args: Any) {
         val transitionRules = fsm.transitionRules[Pair(currentState, event)]
         if (transitionRules != null) {
-            val guardedTransition = transitionRules.findGuard(context)
+            val guardedTransition = transitionRules.findGuard(context, args)
             if (guardedTransition != null) {
-                execute(guardedTransition)
+                execute(guardedTransition, args)
             } else {
                 val transition = transitionRules.transition
                 if (transition != null) {
-                    execute(transition)
+                    execute(transition, args)
                 } else {
-                    executeDefaultAction(event)
+                    executeDefaultAction(event, args)
                 }
             }
         } else {
             val transition = fsm.defaultTransitions[event]
             if (transition != null) {
-                execute(transition)
+                execute(transition, args)
             } else {
-                executeDefaultAction(event)
+                executeDefaultAction(event, args)
             }
         }
     }
+
+    /**
+     * This function will provide the list of allowed events given the current state of the machine.
+     * @param includeDefault When `true` will include default transitions in the list of allowed events.
+     * @see StateMachine.allowed
+     */
+    fun allowed(includeDefaults: Boolean = false) = fsm.allowed(currentState, includeDefaults)
+
+    /**
+     * This function will provide an indication whether the given event is allow in the current state.
+     * @param event The given event that will be used in combination with current state.
+     */
+    fun eventAllowed(event: E, includeDefault: Boolean): Boolean = fsm.eventAllowed(event, currentState, includeDefault)
 }

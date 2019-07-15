@@ -80,61 +80,68 @@ class DetailTests {
                     }
                 }
                 default {
-                    entry { context, startState, endState ->
-                        println("entering:to $endState from $startState for:$context")
+                    entry { context, startState, endState, args ->
+                        val msg = args[0] as String
+                        println("entering:to $endState from $startState for:$context:$msg")
                         context.defaultEntry()
                     }
-                    exit { context, startState, endState ->
-                        println("exiting:from $endState to $startState for:$context")
+                    exit { context, startState, endState, args ->
+                        val msg = args[0] as String
+                        println("exiting:from $endState to $startState for:$context:$msg")
                         context.defaultExit()
                     }
-                    on(TestEvents.EVENT1 to TestStates.STATE1) { context ->
-                        println("default:EVENT1 to STATE1 for $context")
+                    on(TestEvents.EVENT1 to TestStates.STATE1) { context, args ->
+                        val msg = args[0] as String
+                        println("default:EVENT1 to STATE1 for $context:$msg")
                         context.action1()
                         context.state = 1
 
                     }
-                    on(TestEvents.EVENT2 to TestStates.STATE2) { context ->
-                        println("default:on EVENT2 to STATE2 for $context")
+                    on(TestEvents.EVENT2 to TestStates.STATE2) { context, args ->
+                        val msg = args[0] as String
+                        println("default:on EVENT2 to STATE2 for $context:$msg")
                         context.action2()
                         context.state = 2
                     }
-                    on(TestEvents.EVENT3 to TestStates.STATE3) { context ->
-                        println("default:on EVENT3 to STATE3 for $context")
+                    on(TestEvents.EVENT3 to TestStates.STATE3) { context, args ->
+                        val msg = args[0] as String
+                        println("default:on EVENT3 to STATE3 for $context:$msg")
                         context.defaultAction()
                         context.state = 3
                     }
-                    action { context, currentState, event ->
-                        println("default:$event from $currentState for $context")
+                    action { context, currentState, event, args ->
+                        val msg = args[0] as String
+                        println("default:$event from $currentState for $context:$msg")
                         context.defaultAction()
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) { context ->
+                    on(TestEvents.EVENT1) { context, _ ->
                         context.action1()
                     }
-                    entry { context, _, _ ->
+                    entry { context, _, _, _ ->
                         context.entry1()
                     }
 
                 }
                 state(TestStates.STATE2) {
-                    entry { context, _, _ ->
+                    entry { context, _, _, _ ->
                         context.entry2()
                     }
-                    on(TestEvents.EVENT2, guard = { it.state == 2 }) { context ->
-                        println("EVENT2:guarded:from STATE2 for $context")
+                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { context, args ->
+                        val msg = args[0] as String
+                        println("EVENT2:guarded:from STATE2 for $context:$msg")
                         context.action2()
                     }
-                    exit { context, _, _ ->
+                    exit { context, _, _, _ ->
                         context.exit2()
                     }
                 }
                 state(TestStates.STATE3) {
-                    exit { context, _, _ ->
+                    exit { context, _, _, _ ->
                         context.exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { it.state == 2 }) {
+                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { _, _ ->
                         error("should never be called")
                     }
                 }
@@ -144,19 +151,20 @@ class DetailTests {
         }
 
         private val fsm = definition.create(context)
-        fun event1() {
+        fun allowedEvents() = fsm.allowed()
+        fun event1(msg: String) {
             println("--event1")
-            fsm.sendEvent(TestEvents.EVENT1)
+            fsm.sendEvent(TestEvents.EVENT1, msg)
         }
 
-        fun event2() {
+        fun event2(msg: String) {
             println("--event2")
-            fsm.sendEvent(TestEvents.EVENT2)
+            fsm.sendEvent(TestEvents.EVENT2, msg)
         }
 
-        fun event3() {
+        fun event3(msg: String) {
             println("--event3")
-            fsm.sendEvent(TestEvents.EVENT3)
+            fsm.sendEvent(TestEvents.EVENT3, msg)
         }
     }
 
@@ -165,20 +173,24 @@ class DetailTests {
         // given
         val context = TestContext(3)
         val fsm = TestDetailFSM(context)
+        var msgNo: Int = 1
         // when
-        fsm.event1()
+        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
+        fsm.event1((++msgNo).toString())
         assertEquals(1, context.state)
-        fsm.event2()
+        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT1))
+        fsm.event2((++msgNo).toString())
         assertEquals(2, context.state)
-        fsm.event2()
+        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
+        fsm.event2((++msgNo).toString())
         assertEquals(2, context.state)
-        fsm.event3()
+        fsm.event3((++msgNo).toString())
         assertEquals(3, context.state)
-        fsm.event2()
+        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
+        fsm.event2((++msgNo).toString())
         assertEquals(3, context.state)
-        fsm.event1()
+        fsm.event1((++msgNo).toString())
         assertEquals(1, context.state)
-
-
+        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT1))
     }
 }

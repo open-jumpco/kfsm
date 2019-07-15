@@ -8,12 +8,14 @@
  */
 package io.jumpco.open.kfsm
 
-import io.jumpco.open.kfsm.LockEvents.*
+import io.jumpco.open.kfsm.LockEvents.LOCK
+import io.jumpco.open.kfsm.LockEvents.UNLOCK
 import io.jumpco.open.kfsm.LockStates.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+
 /**
  * @suppress
  */
@@ -71,22 +73,22 @@ class LockFsmTests {
                 else -> error("Invalid state locked=${context.locked}")
             }
         }
-        definition.transition(LOCKED, UNLOCK, UNLOCKED) { context ->
+        definition.transition(LOCKED, UNLOCK, UNLOCKED) { context, _ ->
             context.unlock()
         }
-        definition.transition(LOCKED, LOCK, DOUBLE_LOCKED) { context ->
+        definition.transition(LOCKED, LOCK, DOUBLE_LOCKED) { context, _ ->
             context.doubleLock()
         }
-        definition.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) { context ->
+        definition.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) { context, _ ->
             context.doubleUnlock()
         }
-        definition.transition(DOUBLE_LOCKED, LOCK) {
+        definition.transition(DOUBLE_LOCKED, LOCK) { _, _ ->
             error("Already double locked")
         }
-        definition.transition(UNLOCKED, LOCK, LOCKED) { context ->
+        definition.transition(UNLOCKED, LOCK, LOCKED) { context, _ ->
             context.lock()
         }
-        definition.transition(UNLOCKED, UNLOCK) {
+        definition.transition(UNLOCKED, UNLOCK) { _, _ ->
             error("Already unlocked")
         }
         // when
@@ -111,26 +113,26 @@ class LockFsmTests {
             }
 
             state(LOCKED) {
-                on(LOCK to DOUBLE_LOCKED) { context ->
+                on(LOCK to DOUBLE_LOCKED) { context, _ ->
                     context.doubleLock()
                 }
-                on(UNLOCK to UNLOCKED) { context ->
+                on(UNLOCK to UNLOCKED) { context, _ ->
                     context.unlock()
                 }
             }
             state(DOUBLE_LOCKED) {
-                on(UNLOCK to LOCKED) { context ->
+                on(UNLOCK to LOCKED) { context, _ ->
                     context.doubleUnlock()
                 }
-                on(LOCK) {
+                on(LOCK) { _, _ ->
                     error("Already double locked")
                 }
             }
             state(UNLOCKED) {
-                on(LOCK to LOCKED) { context ->
+                on(LOCK to LOCKED) { context, _ ->
                     context.lock()
                 }
-                on(UNLOCK) {
+                on(UNLOCK) { _, _ ->
                     error("Already unlocked")
                 }
             }

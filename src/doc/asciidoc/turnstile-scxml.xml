@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<scxml initial="Locked" name="Turnstile" version="1.0" datamodel="ts" binding="early" exmode="lax"
+       xmlns="http://www.w3.org/2005/07/scxml" xmlns:ts="http://turnstiles.com">
+    <state id="Locked">
+        <transition event="coin" target="Unlocked">
+            <ts:unlock/>
+        </transition>
+        <transition event="pass">
+            <ts:alarm/>
+        </transition>
+    </state>
+    <state id="Unlocked">
+        <transition event="coin">
+            <ts:return_coin/>
+        </transition>
+        <transition event="pass" target="Locked">
+            <ts:lock/>
+        </transition>
+    </state>
+</scxml>

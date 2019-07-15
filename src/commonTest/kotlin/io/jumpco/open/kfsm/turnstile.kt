@@ -37,6 +37,7 @@ class Turnstile(var locked: Boolean = true) {
     }
 
 }
+
 /**
  * @suppress
  */
@@ -44,6 +45,7 @@ enum class TurnstileStates {
     LOCKED,
     UNLOCKED
 }
+
 /**
  * @suppress
  */
@@ -60,33 +62,35 @@ class TurnstileFSM(turnstile: Turnstile) {
         private fun define() = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
             initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
             default {
-                entry { context, startState, endState ->
+                entry { context, startState, endState, _ ->
                     println("entering:$startState -> $endState for $context")
                 }
-                action { ts, state, event ->
+                action { ts, state, event, _ ->
                     println("Default action for state($state) -> on($event) for $ts")
                     ts.alarm()
                 }
-                exit { context, startState, endState ->
+                exit { context, startState, endState, _ ->
                     println("exiting:$startState -> $endState for $context")
                 }
             }
             state(TurnstileStates.LOCKED) {
-                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
+                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts, _ ->
                     ts.unlock()
                 }
             }
             state(TurnstileStates.UNLOCKED) {
-                on(TurnstileEvents.COIN) { ts ->
+                on(TurnstileEvents.COIN) { ts, _ ->
                     ts.returnCoin()
                 }
-                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts, _ ->
                     ts.lock()
                 }
             }
         }.build()
+
         private val definition by lazy { define() }
     }
+
     private val fsm = definition.create(turnstile)
 
     fun coin() = fsm.sendEvent(TurnstileEvents.COIN)

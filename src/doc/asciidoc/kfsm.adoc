@@ -56,19 +56,19 @@ enum class TurnstileEvents {
 val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
     initial { if(it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
     state(TurnstileStates.LOCKED) {
-        event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
+        event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts, _ ->
             ts.unlock()
         }
-        event(TurnstileEvents.PASS) { ts ->
+        event(TurnstileEvents.PASS) { ts, _ ->
             ts.alarm()
         }
     }
     state(TurnstileStates.UNLOCKED) {
         // event without an endState will not trigger entry or exit actions
-        event(TurnstileEvents.COIN) { ts ->
+        event(TurnstileEvents.COIN) { ts, _ ->
             ts.returnCoin()
         }
-        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts, _ ->
             ts.lock();
         }
     }
@@ -94,7 +94,7 @@ val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().sta
 ```
 
 With this We are saying:
-When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the code in the lambda `{ ts -> ts.unlock() }`
+When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the code in the lambda `{ ts, _ -> ts.unlock() }`
 
 When the state is `LOCKED` and on `event(PASS)` we are perform the action `alarm()` without changing the end state.
 
@@ -136,18 +136,18 @@ class TurnstileFSM(private val turnstile: Turnstile) {
                 }
             }
             state(TurnstileStates.LOCKED) {
-                event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts ->
+                event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts, _ ->
                     ts.unlock()
                 }
-                event(TurnstileEvents.PASS) { ts ->
+                event(TurnstileEvents.PASS) { ts, _ ->
                     ts.alarm()
                 }
             }
             state(TurnstileStates.UNLOCKED) {
-                event(TurnstileEvents.COIN) { ts ->
+                event(TurnstileEvents.COIN) { ts, _ ->
                     ts.returnCoin()
                 }
-                event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts ->
+                event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts, _ ->
                     ts.lock();
                 }
             }

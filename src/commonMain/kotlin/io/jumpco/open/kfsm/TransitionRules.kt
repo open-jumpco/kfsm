@@ -29,5 +29,6 @@ class TransitionRules<S : Enum<S>, E : Enum<E>, C>(
      * Find the first entry in the list of guarded transitions that match/
      * @param context The given context.
      */
-    fun findGuard(context: C): GuardedTransition<S, E, C>? = guardedTransitions.firstOrNull { it.guardMet(context) }
+    fun findGuard(context: C, args: Array<out Any>): GuardedTransition<S, E, C>? =
+        guardedTransitions.firstOrNull { it.guardMet(context, args) }
 }

@@ -1,0 +1,28 @@
+@startuml
+
+class Context {
+}
+enum States {
+}
+enum Events {
+}
+
+class StateMachine<States : Enum<States>, Events : Enum<Events>, Context> {
+    create(context: Context, initialState: States?) : StateMachineInstance<States,Events,Context>
+    stateMachine()
+}
+
+class StateMachineInstance<States: Enum<States>, Events: Enum<Events>, Context> {
+    Context: context
+    fsm: StateMachine<States,Events,Context>
+    sendEvent(event: Events, Any[])
+}
+
+StateMachine ..left..> States : <<states>>
+StateMachine ..right..> Events : <<events>>
+StateMachine ..up.> Context : <<context>>
+
+StateMachineInstance *---> StateMachine : fsm
+StateMachineInstance *-left-> Context : context
+
+@enduml

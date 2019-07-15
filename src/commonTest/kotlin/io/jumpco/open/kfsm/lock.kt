@@ -59,7 +59,7 @@ enum class LockEvents {
 
 class LockFSM(context: Lock) {
     companion object {
-        private fun define() = stateMachine(LockStates::class,LockEvents::class,Lock::class) {
+        private fun define() = stateMachine(LockStates::class, LockEvents::class, Lock::class) {
             initial { context ->
                 when (context.locked) {
                     0 -> LockStates.UNLOCKED
@@ -69,31 +69,31 @@ class LockFSM(context: Lock) {
                 }
             }
             default {
-                action { context, state, event ->
+                action { context, state, event, _ ->
                     println("Default action for state($state) -> on($event) for $context")
                 }
-                entry { context, startState, endState ->
+                entry { context, startState, endState, _ ->
                     println("entering:$startState -> $endState for $context")
                 }
-                exit { context, startState, endState ->
+                exit { context, startState, endState, _ ->
                     println("exiting:$startState -> $endState for $context")
                 }
             }
             state(LockStates.LOCKED) {
-                on(LockEvents.LOCK to LockStates.DOUBLE_LOCKED) { context ->
+                on(LockEvents.LOCK to LockStates.DOUBLE_LOCKED) { context, _ ->
                     context.doubleLock()
                 }
-                on(LockEvents.UNLOCK to LockStates.UNLOCKED) { context ->
+                on(LockEvents.UNLOCK to LockStates.UNLOCKED) { context, _ ->
                     context.unlock()
                 }
             }
             state(LockStates.DOUBLE_LOCKED) {
-                on(LockEvents.UNLOCK to LockStates.LOCKED) { context ->
+                on(LockEvents.UNLOCK to LockStates.LOCKED) { context, _ ->
                     context.doubleUnlock()
                 }
             }
             state(LockStates.UNLOCKED) {
-                on(LockEvents.LOCK to LockStates.LOCKED) { context ->
+                on(LockEvents.LOCK to LockStates.LOCKED) { context, _ ->
                     context.lock()
                 }
             }
@@ -103,7 +103,7 @@ class LockFSM(context: Lock) {
     }
 
     private val fsm = definition.create(context)
-
+    fun allowedEvents() = fsm.allowed()
     fun unlock() = fsm.sendEvent(LockEvents.UNLOCK)
     fun lock() = fsm.sendEvent(LockEvents.LOCK)
 }

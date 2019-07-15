@@ -21,14 +21,21 @@ open class Transition<S : Enum<S>, E : Enum<E>, C>(
     /**
      * Executed exit, optional and entry actions specific in the transition.
      */
-    open fun execute(context: C, instance: StateMachineInstance<S, E, C>) {
-        if (endState != null) {
-            instance.executeExit(context, endState)
+    open fun execute(context: C, instance: StateMachineInstance<S, E, C>, args: Array<out Any>) {
+
+        if (isExternal()) {
+            instance.executeExit(context, endState!!, args)
         }
-        action?.invoke(context)
-        if (endState != null) {
-            instance.executeEntry(context, endState)
+        action?.invoke(context, args)
+        if (isExternal()) {
+            instance.executeEntry(context, endState!!, args)
         }
 
     }
+
+    /**
+     * This function provides an indicator if a Transition is internal or external.
+     * When there is no endState defined a Transition is considered internal and will not trigger entry or exit actions.
+     */
+    fun isExternal(): Boolean = endState != null
 }

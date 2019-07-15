@@ -8,17 +8,19 @@ enum E {
 }
 
 class StateMachine<S : Enum<S>, E : Enum<E>, C> {
-    initial(action: (C) -> S)
-    transition(startState: S, event: E, endState: S, action: (C) -> Unit)
-    transition(startState: S, event: E, action: (C) -> Unit)
-    entry(currentState: S, action: (C) -> Unit)
-    exit(currentState: S, action: (C) -> Unit)
-    defaultTransition(startState: S, event: E, endState: S, action: (C) -> Unit)
-    defaultTransition(startState: S, event: E, action: (C) -> Unit)
-    defaultAction(action: (C, S, E) -> Unit)
-    defaultEntry(action: (C, S, S) -> Unit)
-    defaultExit(action: (C, S, S) -> Unit)
-    default(currentState: S, action: (C, S, E) -> Unit)
+    initial(action: (C, Any[]) -> S)
+    transition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
+    transition(startState: S, event: E, action: (C, Any[]) -> Unit)
+    entry(currentState: S, action: (C, Any[]) -> Unit)
+    exit(currentState: S, action: (C, Any[]) -> Unit)
+    defaultTransition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
+    defaultTransition(startState: S, event: E, action: (C, Any[]) -> Unit)
+    defaultAction(action: (C, S, E, Any[]) -> Unit)
+    defaultEntry(action: (C, S, S, Any[]) -> Unit)
+    defaultExit(action: (C, S, S, Any[]) -> Unit)
+    default(currentState: S, action: (C, S, E, Any[]) -> Unit)
+    allowed(currentState: S, includeDefaults: Boolean): Set<E>
+    eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
     create(context: C, initialState: S?) : StateMachineInstance<S,E,C>
     stateMachine()
 }
@@ -26,8 +28,11 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
 class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
     C: context
     fsm: StateMachine<S,E,C>
-    sendEvent(event: E)
+    sendEvent(event: E, Any[])
+    allowed(includeDefaults: Boolean): Set<E>
+    eventAllowed(event: E, includeDefault: Boolean): Boolean
 }
+
 StateMachine .left.> S : <<states>>
 StateMachine .right.> E : <<events>>
 StateMachine .up.> C : <<context>>
