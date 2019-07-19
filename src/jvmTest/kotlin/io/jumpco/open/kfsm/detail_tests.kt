@@ -173,7 +173,7 @@ class DetailTests {
         // given
         val context = TestContext(3)
         val fsm = TestDetailFSM(context)
-        var msgNo: Int = 1
+        var msgNo = 1
         // when
         assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
         fsm.event1((++msgNo).toString())

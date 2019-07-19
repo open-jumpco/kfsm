@@ -93,7 +93,7 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
 
     /**
      * This function will provide the list of allowed events given the current state of the machine.
-     * @param includeDefault When `true` will include default transitions in the list of allowed events.
+     * @param includeDefaults When `true` will include default transitions in the list of allowed events.
      * @see StateMachine.allowed
      */
     fun allowed(includeDefaults: Boolean = false) = fsm.allowed(currentState, includeDefaults)

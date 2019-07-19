@@ -192,7 +192,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
 
     /**
      * This function defines an action to be invoked when no transitions are found for given event.
-     * @param The event to match this transition.
+     * @param event The event to match this transition.
      * @param action The option action will be executed when this default transition occurs.
      */
     fun default(event: E, action: StateAction<C>?) {

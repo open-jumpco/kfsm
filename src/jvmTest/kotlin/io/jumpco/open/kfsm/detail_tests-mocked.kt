@@ -69,7 +69,7 @@ class DetailMockedTests {
 
     }
 
-    class TestDetailFSM(private val context: TestContext) {
+    class TestDetailFSM(context: TestContext) {
         companion object {
             private fun define() = StateMachine<TestStates, TestEvents, TestContext>().stateMachine {
                 initial {
