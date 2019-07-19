@@ -32,37 +32,37 @@ repositories {
 ### JVM Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.2.0-SNAPSHOT'
+    implementation 'io.jumpco.open:kfsm-jvm:0.4.0-SNAPSHOT'
 }
 ```
 ### KotlinJS Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.2.0-SNAPSHOT'
+    implementation 'io.jumpco.open:kfsm-js:0.4.0-SNAPSHOT'
 }
 ```
 ### Kotlin/Native Projects using WASM
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-wasm32:0.2.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-wasm32:0.4.0-SNAPSHOT'    
 }
 ```
 ### Kotlin/Native Projects using LinuxX64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.2.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.4.0-SNAPSHOT'    
 }
 ```
 ### Kotlin/Native Projects using MinGW64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.2.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.4.0-SNAPSHOT'    
 }
 ```
 ### Kotlin/Native Projects using macOS
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.2.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-macosX64:0.4.0-SNAPSHOT'    
 }
 ```
 
