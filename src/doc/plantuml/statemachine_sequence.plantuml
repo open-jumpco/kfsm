@@ -14,13 +14,13 @@ Consumer ----> StateMachineInstance : sendEvent(event:E)
     activate StateMachineInstance
     StateMachineInstance ----> StateMachineInstance : exit {}
     StateMachineInstance ----> Context : action {}
-    StateMachineInstance ----> StateMachineInstance : entry {}
     activate Context
     note right of Context
         Context performs the action(s)
     end note
     Context ---->  StateMachineInstance
     deactivate Context
+    StateMachineInstance ----> StateMachineInstance : entry {}
     deactivate StateMachineInstance
     return
 

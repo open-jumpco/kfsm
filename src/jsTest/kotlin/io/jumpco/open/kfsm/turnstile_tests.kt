@@ -64,6 +64,7 @@ class TurnstileFsmTests {
         definition.transition(UNLOCKED, PASS, LOCKED) { ts, _ ->
             ts.lock()
         }
+        definition.complete()
         // when
         val turnstile = Turnstile()
 

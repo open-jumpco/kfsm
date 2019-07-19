@@ -43,7 +43,7 @@ class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: State
     ).apply(handler)
 
     /**
-     * Returns the fsm.
+     * Returns the completed fsm.
      */
-    fun build() = fsm
+    fun build() = fsm.complete()
 }

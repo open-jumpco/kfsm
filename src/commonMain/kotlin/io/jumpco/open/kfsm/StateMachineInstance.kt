@@ -17,12 +17,18 @@ package io.jumpco.open.kfsm
  * @param initialState The initial state of the instance.
  */
 class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
+    /**
+     * The transition actions are performed by manipulating the context.
+     */
     private val context: C,
     /**
      * The fsm contains the definition of the state machine.
      */
     val fsm: StateMachine<S, E, C>,
-    private val initialState: S
+    /**
+     * The initialState will be assigned to the currentState
+     */
+    initialState: S
 ) {
     /**
      * This represents the current state of the state machine.

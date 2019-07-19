@@ -16,6 +16,7 @@ package io.jumpco.open.kfsm
  * @param C is the class of the Context where the action will be applied.
  */
 class StateMachine<S : Enum<S>, E : Enum<E>, C> {
+    private var completed = false
     internal var deriveInitialState: StateQuery<C, S>? = null
     internal val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
     internal val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
@@ -36,6 +37,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action The optional action will be executed when the transition occurs.
      */
     fun transition(startState: S, event: E, endState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+        require(!completed) { "Statemachine has been completed" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
@@ -56,6 +58,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action The optional action will be executed when the transition occurs.
      */
     fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) {
+        require(!completed) { "Statemachine has been completed" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
@@ -77,6 +80,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action The actions will be invoked
      */
     fun transition(startState: S, event: E, endState: S, action: StateAction<C>?) {
+        require(!completed) { "Statemachine has been completed" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
@@ -95,6 +99,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action actions will be invoked
      */
     fun transition(startState: S, event: E, action: StateAction<C>?) {
+        require(!completed) { "Statemachine has been completed" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
@@ -119,11 +124,14 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param initialState If this is not provided the function defined in `initial` will be invoked to derive the initialState.
      * @see initial
      */
-    fun create(context: C, initialState: S? = null) = StateMachineInstance(
-        context,
-        this,
-        initialState ?: deriveInitialState?.invoke(context) ?: error("Definition requires deriveInitialState")
-    )
+    fun create(context: C, initialState: S? = null): StateMachineInstance<S, E, C> {
+        require(completed) { "Statemachine has not been completed" }
+        return StateMachineInstance(
+            context,
+            this,
+            initialState ?: deriveInitialState?.invoke(context) ?: error("Definition requires deriveInitialState")
+        )
+    }
 
     /**
      * This function defines an action to be invoked when no action is found matching the current state and event.
@@ -131,6 +139,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action This action will be performed
      */
     fun defaultAction(action: DefaultStateAction<C, S, E>) {
+        require(!completed) { "Statemachine has been completed" }
         globalDefault = action
     }
 
@@ -141,12 +150,12 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit) =
         DslStateMachineHandler(this).apply(handler)
 
-
     /**
      * This function defines an action to be invoked when no entry action is defined for the current state.
      * @param action This action will be invoked
      */
     fun defaultEntry(action: DefaultChangeAction<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
         defaultEntryAction = action
     }
 
@@ -155,6 +164,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action This action will be invoked
      */
     fun defaultExit(action: DefaultChangeAction<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
         defaultExitAction = action
     }
 
@@ -164,6 +174,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action This action will be invoked
      */
     fun default(currentState: S, action: DefaultStateAction<C, S, E>) {
+        require(!completed) { "Statemachine has been completed" }
         require(defaultActions[currentState] == null) { "Default defaultAction already defined for $currentState" }
         defaultActions[currentState] = action
     }
@@ -174,6 +185,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action The option action will be executed when this default transition occurs.
      */
     fun default(event: EventState<E, S>, action: StateAction<C>?) {
+        require(!completed) { "Statemachine has been completed" }
         require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
         defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
     }
@@ -184,6 +196,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action The option action will be executed when this default transition occurs.
      */
     fun default(event: E, action: StateAction<C>?) {
+        require(!completed) { "Statemachine has been completed" }
         require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
         defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, action)
     }
@@ -194,6 +207,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action This action will be invoked
      */
     fun entry(currentState: S, action: DefaultChangeAction<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
         require(entryActions[currentState] == null) { "Entry defaultAction already defined for $currentState" }
         entryActions[currentState] = action
     }
@@ -204,6 +218,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param action This action will be invoked
      */
     fun exit(currentState: S, action: DefaultChangeAction<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
         require(exitActions[currentState] == null) { "Exit defaultAction already defined for $currentState" }
         exitActions[currentState] = action
     }
@@ -213,6 +228,7 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
      * @param init Is a function that receives a context and returns the state that represents the context
      */
     fun initial(init: StateQuery<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
         deriveInitialState = init
     }
 
@@ -231,10 +247,24 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     }
 
     /**
-     * This function will provide and indicator if an event is allow for a given state. When no state transition is declared this function will return false unless `includeDefault` is true and there is a default transition of handler for the event.
+     * This function will provide an indicator if an event is allow for a given state.
+     * When no state transition is declared this function will return false unless `includeDefault` is true and
+     * there is a default transition of handler for the event.
      */
     fun eventAllowed(event: E, given: S, includeDefault: Boolean): Boolean =
         (includeDefault && hasDefaultStateHandler(given)) || allowed(given, includeDefault).contains(event)
 
+    /**
+     * This function will provide an indicator if a default action has been defined for a given state.
+     */
     fun hasDefaultStateHandler(given: S) = defaultActions.contains(given)
+
+    /**
+     * This function enables completed for the state machine definition prevent further changes to the state
+     * machine behaviour.
+     */
+    fun complete(): StateMachine<S, E, C> {
+        completed = true
+        return this
+    }
 }

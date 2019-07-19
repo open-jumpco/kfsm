@@ -91,6 +91,7 @@ class LockFsmTests {
         definition.transition(UNLOCKED, UNLOCK) { _, _ ->
             error("Already unlocked")
         }
+        definition.complete()
         // when
         val lock = Lock()
         val fsm = definition.create(lock)

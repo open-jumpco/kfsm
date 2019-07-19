@@ -1,0 +1,35 @@
+@startuml
+
+class Turnstile {
+    lock()
+    unlock()
+    alarm()
+    returnCoin()
+}
+
+class TurnstileFSM {
+    TurnstileFSM(context: Turnstile)
+    coin()
+    pass()
+}
+
+class StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile> {
+    Turnstile: context
+    currentState: TurnstileStates
+    sendEvent(event: TurnstileEvents)
+}
+
+class StateMachine<TurnstileStates, TurnstileEvents, Turnstile> {
+    transition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
+    create(context: Turnstile, initialState: TurnstileStates?) : StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>
+    stateMachine(): StateMachine<TurnstileStates, TurnstileEvents, Turnstile>
+}
+
+
+TurnstileFSM *--> StateMachineInstance: stateMachine
+StateMachineInstance *--> StateMachine : fsm
+StateMachineInstance *-up-> Turnstile : context
+TurnstileFSM ...left...> Turnstile
+TurnstileFSM ....> StateMachine : <<instantiate>>
+
+@enduml

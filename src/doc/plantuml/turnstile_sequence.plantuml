@@ -3,13 +3,13 @@ actor Consumer
 boundary TurnStileFSM
 control Turnstile
 
-Consumer ----> TurnStileFSM : COIN
-TurnStileFSM ----> Turnstile : unlock()
-Consumer ----> TurnStileFSM : COIN
-TurnStileFSM ----> Turnstile : returnCoin()
-Consumer ----> TurnStileFSM : PASS
-TurnStileFSM ----> Turnstile : lock()
-Consumer ----> TurnStileFSM : PASS
-TurnStileFSM ----> Turnstile : alarm()
+Consumer -------> TurnStileFSM : coin()
+TurnStileFSM ------> Turnstile : unlock()
+Consumer -------> TurnStileFSM : coin()
+TurnStileFSM ------> Turnstile : returnCoin()
+Consumer -------> TurnStileFSM : pass()
+TurnStileFSM ------> Turnstile : lock()
+Consumer -------> TurnStileFSM : pass()
+TurnStileFSM ------> Turnstile : alarm()
 
 @enduml

@@ -26,8 +26,8 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
 }
 
 class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
-    C: context
-    fsm: StateMachine<S,E,C>
+    StateMachineInstance(context: Context, fsm: StateMachine<States,Events,Context>, initialState: S?)
+    currentState: S
     sendEvent(event: E, Any[])
     allowed(includeDefaults: Boolean): Set<E>
     eventAllowed(event: E, includeDefault: Boolean): Boolean

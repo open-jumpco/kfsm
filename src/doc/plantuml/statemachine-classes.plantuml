@@ -8,13 +8,14 @@ enum Events {
 }
 
 class StateMachine<States : Enum<States>, Events : Enum<Events>, Context> {
+    transition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
     create(context: Context, initialState: States?) : StateMachineInstance<States,Events,Context>
-    stateMachine()
 }
 
 class StateMachineInstance<States: Enum<States>, Events: Enum<Events>, Context> {
+    StateMachineInstance(context: Context, fsm: StateMachine<States,Events,Context>, initialState: S?)
     Context: context
-    fsm: StateMachine<States,Events,Context>
+    var currentState: S
     sendEvent(event: Events, Any[])
 }
 
@@ -23,6 +24,6 @@ StateMachine ..right..> Events : <<events>>
 StateMachine ..up.> Context : <<context>>
 
 StateMachineInstance *---> StateMachine : fsm
-StateMachineInstance *-left-> Context : context
+StateMachineInstance *--left--> Context : context
 
 @enduml
