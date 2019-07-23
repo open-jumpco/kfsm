@@ -11,6 +11,7 @@ package io.jumpco.open.kfsm
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class DetailTests {
     enum class TestStates {
@@ -72,76 +73,76 @@ class DetailTests {
         companion object {
             private fun define() = StateMachine<TestStates, TestEvents, TestContext>().stateMachine {
                 initial {
-                    when (it.state) {
+                    when (state) {
                         1 -> TestStates.STATE1
                         2 -> TestStates.STATE2
                         3 -> TestStates.STATE3
-                        else -> error("Invalid state ${it.state}")
+                        else -> error("Invalid state $state")
                     }
                 }
                 default {
-                    entry { context, startState, endState, args ->
+                    entry { startState, endState, args ->
                         val msg = args[0] as String
-                        println("entering:to $endState from $startState for:$context:$msg")
-                        context.defaultEntry()
+                        println("entering:to $endState from $startState for:$this:$msg")
+                        defaultEntry()
                     }
-                    exit { context, startState, endState, args ->
+                    exit { startState, endState, args ->
                         val msg = args[0] as String
-                        println("exiting:from $endState to $startState for:$context:$msg")
-                        context.defaultExit()
+                        println("exiting:from $endState to $startState for:$this:$msg")
+                        defaultExit()
                     }
-                    on(TestEvents.EVENT1 to TestStates.STATE1) { context, args ->
+                    on(TestEvents.EVENT1 to TestStates.STATE1) { args ->
                         val msg = args[0] as String
-                        println("default:EVENT1 to STATE1 for $context:$msg")
-                        context.action1()
-                        context.state = 1
+                        println("default:EVENT1 to STATE1 for $this:$msg")
+                        action1()
+                        state = 1
 
                     }
-                    on(TestEvents.EVENT2 to TestStates.STATE2) { context, args ->
+                    on(TestEvents.EVENT2 to TestStates.STATE2) { args ->
                         val msg = args[0] as String
-                        println("default:on EVENT2 to STATE2 for $context:$msg")
-                        context.action2()
-                        context.state = 2
+                        println("default:on EVENT2 to STATE2 for $this:$msg")
+                        action2()
+                        state = 2
                     }
-                    on(TestEvents.EVENT3 to TestStates.STATE3) { context, args ->
+                    on(TestEvents.EVENT3 to TestStates.STATE3) { args ->
                         val msg = args[0] as String
-                        println("default:on EVENT3 to STATE3 for $context:$msg")
-                        context.defaultAction()
-                        context.state = 3
+                        println("default:on EVENT3 to STATE3 for $this:$msg")
+                        defaultAction()
+                        state = 3
                     }
-                    action { context, currentState, event, args ->
+                    action { currentState, event, args ->
                         val msg = args[0] as String
-                        println("default:$event from $currentState for $context:$msg")
-                        context.defaultAction()
+                        println("default:$event from $currentState for $this:$msg")
+                        defaultAction()
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) { context, _ ->
-                        context.action1()
+                    on(TestEvents.EVENT1) { _ ->
+                        action1()
                     }
-                    entry { context, _, _, _ ->
-                        context.entry1()
+                    entry { _, _, _ ->
+                        entry1()
                     }
 
                 }
                 state(TestStates.STATE2) {
-                    entry { context, _, _, _ ->
-                        context.entry2()
+                    entry { _, _, _ ->
+                        entry2()
                     }
-                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { context, args ->
+                    on(TestEvents.EVENT2, guard = { state == 2 }) { args ->
                         val msg = args[0] as String
-                        println("EVENT2:guarded:from STATE2 for $context:$msg")
-                        context.action2()
+                        println("EVENT2:guarded:from STATE2 for $this:$msg")
+                        action2()
                     }
-                    exit { context, _, _, _ ->
-                        context.exit2()
+                    exit { _, _, _ ->
+                        exit2()
                     }
                 }
                 state(TestStates.STATE3) {
-                    exit { context, _, _, _ ->
-                        context.exit3()
+                    exit { _, _, _ ->
+                        exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { _, _ ->
+                    on(TestEvents.EVENT2, guard = { state == 2 }) {
                         error("should never be called")
                     }
                 }
@@ -152,6 +153,7 @@ class DetailTests {
 
         private val fsm = definition.create(context)
         fun allowedEvents() = fsm.allowed()
+        fun eventAllowed(event: TestEvents, includeDefaults: Boolean = false) = fsm.eventAllowed(event, includeDefaults)
         fun event1(msg: String) {
             println("--event1")
             fsm.sendEvent(TestEvents.EVENT1, msg)
@@ -175,20 +177,26 @@ class DetailTests {
         val fsm = TestDetailFSM(context)
         var msgNo = 1
         // when
-        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
         fsm.event1((++msgNo).toString())
+        // then
         assertEquals(1, context.state)
-        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT1))
+        assertTrue(fsm.eventAllowed(TestEvents.EVENT1))
+        // when
+        fsm.event2((++msgNo).toString())
+        // then
+        assertEquals(2, context.state)
+        assertTrue(fsm.eventAllowed(TestEvents.EVENT2))
+        // when
         fsm.event2((++msgNo).toString())
         assertEquals(2, context.state)
-        assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
-        fsm.event2((++msgNo).toString())
-        assertEquals(2, context.state)
+        // then
         fsm.event3((++msgNo).toString())
         assertEquals(3, context.state)
         assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT2))
+        // when
         fsm.event2((++msgNo).toString())
         assertEquals(3, context.state)
+        // then
         fsm.event1((++msgNo).toString())
         assertEquals(1, context.state)
         assertEquals(fsm.allowedEvents(), setOf(TestEvents.EVENT1))

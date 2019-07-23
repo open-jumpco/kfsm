@@ -60,30 +60,30 @@ enum class TurnstileEvents {
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
         private fun define() = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
-            initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
+            initial { if (locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
             default {
-                entry { context, startState, endState, _ ->
-                    println("entering:$startState -> $endState for $context")
+                entry { startState, endState, _ ->
+                    println("entering:$startState -> $endState for $this")
                 }
-                action { ts, state, event, _ ->
-                    println("Default action for state($state) -> on($event) for $ts")
-                    ts.alarm()
+                action { state, event, _ ->
+                    println("Default action for state($state) -> on($event) for $this")
+                    alarm()
                 }
-                exit { context, startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $context")
+                exit { startState, endState, _ ->
+                    println("exiting:$startState -> $endState for $this")
                 }
             }
             state(TurnstileStates.LOCKED) {
-                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts, _ ->
-                    ts.unlock()
+                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                    unlock()
                 }
             }
             state(TurnstileStates.UNLOCKED) {
-                on(TurnstileEvents.COIN) { ts, _ ->
-                    ts.returnCoin()
+                on(TurnstileEvents.COIN) {
+                    returnCoin()
                 }
-                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts, _ ->
-                    ts.lock()
+                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                    lock()
                 }
             }
         }.build()

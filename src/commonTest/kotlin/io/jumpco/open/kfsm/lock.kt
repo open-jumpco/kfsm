@@ -60,41 +60,41 @@ enum class LockEvents {
 class LockFSM(context: Lock) {
     companion object {
         private fun define() = stateMachine(LockStates::class, LockEvents::class, Lock::class) {
-            initial { context ->
-                when (context.locked) {
+            initial {
+                when (locked) {
                     0 -> LockStates.UNLOCKED
                     1 -> LockStates.LOCKED
                     2 -> LockStates.DOUBLE_LOCKED
-                    else -> error("Invalid state locked=${context.locked}")
+                    else -> error("Invalid state locked=$locked")
                 }
             }
             default {
-                action { context, state, event, _ ->
-                    println("Default action for state($state) -> on($event) for $context")
+                action { state, event, _ ->
+                    println("Default action for state($state) -> on($event) for $this")
                 }
-                entry { context, startState, endState, _ ->
-                    println("entering:$startState -> $endState for $context")
+                entry { startState, endState, _ ->
+                    println("entering:$startState -> $endState for $this")
                 }
-                exit { context, startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $context")
+                exit { startState, endState, _ ->
+                    println("exiting:$startState -> $endState for $this")
                 }
             }
             state(LockStates.LOCKED) {
-                on(LockEvents.LOCK to LockStates.DOUBLE_LOCKED) { context, _ ->
-                    context.doubleLock()
+                on(LockEvents.LOCK to LockStates.DOUBLE_LOCKED) {
+                    doubleLock()
                 }
-                on(LockEvents.UNLOCK to LockStates.UNLOCKED) { context, _ ->
-                    context.unlock()
+                on(LockEvents.UNLOCK to LockStates.UNLOCKED) {
+                    unlock()
                 }
             }
             state(LockStates.DOUBLE_LOCKED) {
-                on(LockEvents.UNLOCK to LockStates.LOCKED) { context, _ ->
-                    context.doubleUnlock()
+                on(LockEvents.UNLOCK to LockStates.LOCKED) {
+                    doubleUnlock()
                 }
             }
             state(LockStates.UNLOCKED) {
-                on(LockEvents.LOCK to LockStates.LOCKED) { context, _ ->
-                    context.lock()
+                on(LockEvents.LOCK to LockStates.LOCKED) {
+                    lock()
                 }
             }
         }.build()

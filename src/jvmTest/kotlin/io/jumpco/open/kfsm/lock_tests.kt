@@ -70,29 +70,29 @@ class LockFsmTests {
         // given
         val definition = StateMachine<LockStates, LockEvents, Lock>()
         definition.initial {
-            when (it.locked) {
+            when (locked) {
                 0 -> UNLOCKED
                 1 -> LOCKED
                 2 -> DOUBLE_LOCKED
-                else -> error("Invalid state locked=${it.locked}")
+                else -> error("Invalid state locked=$locked")
             }
         }
-        definition.transition(LOCKED, UNLOCK, UNLOCKED) { context, _ ->
-            context.unlock()
+        definition.transition(LOCKED, UNLOCK, UNLOCKED) {
+            unlock()
         }
-        definition.transition(LOCKED, LOCK, DOUBLE_LOCKED) { context, _ ->
-            context.doubleLock()
+        definition.transition(LOCKED, LOCK, DOUBLE_LOCKED) {
+            doubleLock()
         }
-        definition.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) { context, _ ->
-            context.doubleUnlock()
+        definition.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) {
+            doubleUnlock()
         }
-        definition.transition(DOUBLE_LOCKED, LOCK) { _, _ ->
+        definition.transition(DOUBLE_LOCKED, LOCK) {
             error("Already double locked")
         }
-        definition.transition(UNLOCKED, LOCK, LOCKED) { context, _ ->
-            context.lock()
+        definition.transition(UNLOCKED, LOCK, LOCKED) {
+            lock()
         }
-        definition.transition(UNLOCKED, UNLOCK) { _, _ ->
+        definition.transition(UNLOCKED, UNLOCK) {
             error("Already unlocked")
         }
         definition.complete()
@@ -109,36 +109,36 @@ class LockFsmTests {
     fun `test dsl creation of fsm`() {
         // given
         val definition = StateMachine<LockStates, LockEvents, Lock>().stateMachine {
-            initial { context ->
-                when (context.locked) {
+            initial {
+                when (locked) {
                     0 -> UNLOCKED
                     1 -> LOCKED
                     2 -> DOUBLE_LOCKED
-                    else -> error("Invalid state locked=${context.locked}")
+                    else -> error("Invalid state locked=$locked")
                 }
             }
 
             state(LOCKED) {
-                on(LOCK to DOUBLE_LOCKED) { context, _ ->
-                    context.doubleLock()
+                on(LOCK to DOUBLE_LOCKED) {
+                    doubleLock()
                 }
-                on(UNLOCK to UNLOCKED) { context, _ ->
-                    context.unlock()
+                on(UNLOCK to UNLOCKED) {
+                    unlock()
                 }
             }
             state(DOUBLE_LOCKED) {
-                on(UNLOCK to LOCKED) { context, _ ->
-                    context.doubleUnlock()
+                on(UNLOCK to LOCKED) {
+                    doubleUnlock()
                 }
-                on(LOCK) { _, _ ->
+                on(LOCK) {
                     error("Already double locked")
                 }
             }
             state(UNLOCKED) {
-                on(LOCK to LOCKED) { context, _ ->
-                    context.lock()
+                on(LOCK to LOCKED) {
+                    lock()
                 }
-                on(UNLOCK) { _, _ ->
+                on(UNLOCK) {
                     error("Already unlocked")
                 }
             }

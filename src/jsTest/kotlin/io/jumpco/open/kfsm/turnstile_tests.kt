@@ -51,18 +51,18 @@ class TurnstileFsmTests {
     @Test
     fun uncleBobsTurnstilePlain() {
         val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>()
-        definition.initial { if (it.locked) LOCKED else UNLOCKED }
-        definition.transition(LOCKED, COIN, UNLOCKED) { ts, _ ->
-            ts.unlock()
+        definition.initial { if (locked) LOCKED else UNLOCKED }
+        definition.transition(LOCKED, COIN, UNLOCKED) {
+            unlock()
         }
-        definition.transition(LOCKED, PASS) { ts, _ ->
-            ts.alarm()
+        definition.transition(LOCKED, PASS) {
+            alarm()
         }
-        definition.transition(UNLOCKED, COIN) { ts, _ ->
-            ts.returnCoin()
+        definition.transition(UNLOCKED, COIN) {
+            returnCoin()
         }
-        definition.transition(UNLOCKED, PASS, LOCKED) { ts, _ ->
-            ts.lock()
+        definition.transition(UNLOCKED, PASS, LOCKED) {
+            lock()
         }
         definition.complete()
         // when
@@ -77,21 +77,21 @@ class TurnstileFsmTests {
     fun uncleBobsTurnstileDSL() {
         // given
         val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-            initial { if (it.locked) LOCKED else UNLOCKED }
+            initial { if (locked) LOCKED else UNLOCKED }
             state(LOCKED) {
-                on(COIN to UNLOCKED) { ts, _ ->
-                    ts.unlock()
+                on(COIN to UNLOCKED) {
+                    unlock()
                 }
-                on(PASS) { ts, _ ->
-                    ts.alarm()
+                on(PASS) {
+                    alarm()
                 }
             }
             state(UNLOCKED) {
-                on(COIN) { ts, _ ->
-                    ts.returnCoin()
+                on(COIN) {
+                    returnCoin()
                 }
-                on(PASS to LOCKED) { ts, _ ->
-                    ts.lock()
+                on(PASS to LOCKED) {
+                    lock()
                 }
             }
         }.build()
@@ -106,33 +106,33 @@ class TurnstileFsmTests {
     @Test
     fun simpleTurnstileTest() {
         val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-            initial { if (it.locked) LOCKED else UNLOCKED }
+            initial { if (locked) LOCKED else UNLOCKED }
             state(LOCKED) {
-                entry { context, startState, endState, _ ->
-                    println("entering:$startState -> $endState for $context")
+                entry { startState, endState, _ ->
+                    println("entering:$startState -> $endState for $this")
                 }
-                on(COIN to UNLOCKED) { ts, _ ->
-                    ts.unlock()
+                on(COIN to UNLOCKED) {
+                    unlock()
                 }
-                on(PASS) { ts, _ ->
-                    ts.alarm()
+                on(PASS) {
+                    alarm()
                 }
-                exit { context, startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $context")
+                exit { startState, endState, _ ->
+                    println("exiting:$startState -> $endState for $this")
                 }
             }
             state(UNLOCKED) {
-                entry { context, startState, endState, _ ->
-                    println("entering:$startState -> $endState for $context")
+                entry { startState, endState, _ ->
+                    println("entering:$startState -> $endState for $this")
                 }
-                on(COIN) { ts, _ ->
-                    ts.returnCoin()
+                on(COIN) {
+                    returnCoin()
                 }
-                on(PASS to LOCKED) { ts, _ ->
-                    ts.lock()
+                on(PASS to LOCKED) {
+                    lock()
                 }
-                exit { context, startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $context")
+                exit { startState, endState, _ ->
+                    println("exiting:$startState -> $endState for $this")
                 }
             }
         }.build()

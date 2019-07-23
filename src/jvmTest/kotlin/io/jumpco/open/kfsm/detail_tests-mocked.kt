@@ -73,66 +73,66 @@ class DetailMockedTests {
         companion object {
             private fun define() = StateMachine<TestStates, TestEvents, TestContext>().stateMachine {
                 initial {
-                    when (it.state) {
+                    when (state) {
                         1 -> TestStates.STATE1
                         2 -> TestStates.STATE2
                         3 -> TestStates.STATE3
-                        else -> error("Invalid state ${it.state}")
+                        else -> error("Invalid state $state")
                     }
                 }
                 default {
-                    entry { context, startState, endState,_ ->
-                        println("entering:to $endState from $startState for:$context")
-                        context.defaultEntry()
+                    entry { startState, endState, _ ->
+                        println("entering:to $endState from $startState for:$this")
+                        defaultEntry()
                     }
-                    exit { context, startState, endState,_ ->
-                        println("exiting:from $endState to $startState for:$context")
-                        context.defaultExit()
+                    exit { startState, endState, _ ->
+                        println("exiting:from $endState to $startState for:$this")
+                        defaultExit()
                     }
-                    on(TestEvents.EVENT1 to TestStates.STATE1) { context, _ ->
-                        println("default:EVENT1 to STATE1 for $context")
-                        context.action1()
+                    on(TestEvents.EVENT1 to TestStates.STATE1) {
+                        println("default:EVENT1 to STATE1 for $this")
+                        action1()
 
                     }
-                    on(TestEvents.EVENT2 to TestStates.STATE2) { context, _ ->
-                        println("default:on EVENT2 to STATE2 for $context")
-                        context.action2()
+                    on(TestEvents.EVENT2 to TestStates.STATE2) {
+                        println("default:on EVENT2 to STATE2 for $this")
+                        action2()
                     }
-                    on(TestEvents.EVENT3 to TestStates.STATE3) { context, _ ->
-                        println("default:on EVENT3 to STATE3 for $context")
-                        context.defaultAction()
+                    on(TestEvents.EVENT3 to TestStates.STATE3) {
+                        println("default:on EVENT3 to STATE3 for $this")
+                        defaultAction()
                     }
-                    action { context, currentState, event,_ ->
-                        println("default:$event from $currentState for $context")
-                        context.defaultAction()
+                    action { currentState, event, _ ->
+                        println("default:$event from $currentState for $this")
+                        defaultAction()
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) { context, _ ->
-                        context.action1()
+                    on(TestEvents.EVENT1) {
+                        action1()
                     }
-                    entry { context, _, _,_ ->
-                        context.entry1()
+                    entry { _, _, _ ->
+                        entry1()
                     }
 
                 }
                 state(TestStates.STATE2) {
-                    entry { context, _, _, _ ->
-                        context.entry2()
+                    entry { _, _, _ ->
+                        entry2()
                     }
-                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { context, _ ->
-                        println("EVENT2:guarded:from STATE2 for $context")
-                        context.action2()
+                    on(TestEvents.EVENT2, guard = { state == 2 }) {
+                        println("EVENT2:guarded:from STATE2 for $this")
+                        action2()
                     }
-                    exit { context, _, _, _ ->
-                        context.exit2()
+                    exit { _, _, _ ->
+                        exit2()
                     }
                 }
                 state(TestStates.STATE3) {
-                    exit { context, _, _, _ ->
-                        context.exit3()
+                    exit { _, _, _ ->
+                        exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { it, _ -> it.state == 2 }) { _, _ ->
+                    on(TestEvents.EVENT2, guard = { state == 2 }) {
                         error("should never be called")
                     }
                 }

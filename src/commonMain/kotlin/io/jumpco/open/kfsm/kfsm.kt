@@ -15,13 +15,13 @@ import kotlin.reflect.KClass
  * This represents an action that may be invoked during a transition.
  * @param C The context: C will be available to the lambda.
  */
-typealias StateAction<C> = (C, Array<out Any>) -> Unit
+typealias StateAction<C> = C.(Array<out Any>) -> Unit
 
 /**
  * This represents a guard expression that may be used to select a specific transition.
  * @param C The context: C will be available to the lambda
  */
-typealias StateGuard<C> = (C, Array<out Any>) -> Boolean
+typealias StateGuard<C> = C.(Array<out Any>) -> Boolean
 
 /**
  * This represents an expression to determine the state of the context. This is useful when creating an instance of a
@@ -29,14 +29,14 @@ typealias StateGuard<C> = (C, Array<out Any>) -> Boolean
  * @param C The context:C will be available to the lambda.
  * @param S The type of the state that should be returned by the lambda.
  */
-typealias StateQuery<C, S> = ((C) -> S)
+typealias StateQuery<C, S> = (C.() -> S)
 
 /**
  * This represents a default action that will be invoked on a change in state as defined with entry or exit.
  * @param C The context: C will be available to the lambda
  * @param S currentState: S and endState: S will be available to the lambda.
  */
-typealias DefaultChangeAction<C, S> = (C, S, S, Array<out Any>) -> Unit
+typealias DefaultChangeAction<C, S> = C.(S, S, Array<out Any>) -> Unit
 
 /**
  * This represents a default action for a specific event. These action will not cause changes in state.
@@ -45,7 +45,7 @@ typealias DefaultChangeAction<C, S> = (C, S, S, Array<out Any>) -> Unit
  * @param S The currentState:S will be available to the lambda
  * @param E The event: E will be available to the lambda
  */
-typealias DefaultStateAction<C, S, E> = (C, S, E, Array<out Any>) -> Unit
+typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
 
 
 /**
