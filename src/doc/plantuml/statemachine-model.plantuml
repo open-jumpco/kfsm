@@ -8,17 +8,17 @@ enum E {
 }
 
 class StateMachine<S : Enum<S>, E : Enum<E>, C> {
-    initial(action: (C, Any[]) -> S)
-    transition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
-    transition(startState: S, event: E, action: (C, Any[]) -> Unit)
-    entry(currentState: S, action: (C, Any[]) -> Unit)
-    exit(currentState: S, action: (C, Any[]) -> Unit)
-    defaultTransition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
-    defaultTransition(startState: S, event: E, action: (C, Any[]) -> Unit)
-    defaultAction(action: (C, S, E, Any[]) -> Unit)
-    defaultEntry(action: (C, S, S, Any[]) -> Unit)
-    defaultExit(action: (C, S, S, Any[]) -> Unit)
-    default(currentState: S, action: (C, S, E, Any[]) -> Unit)
+    initial(action: C.(Any[]) -> S)
+    transition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
+    transition(startState: S, event: E, endState: S, guard: C.()->Boolean, action: C.(Any[]) -> Unit)
+    entry(currentState: S, action: C.(Any[]) -> Unit)
+    exit(currentState: S, action: C.(Any[]) -> Unit)
+    defaultTransition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
+    defaultTransition(startState: S, event: E, action: C.(Any[]) -> Unit)
+    defaultAction(action: C.( S, E, Any[]) -> Unit)
+    defaultEntry(action: C.( S, S, Any[]) -> Unit)
+    defaultExit(action: C.( S, S, Any[]) -> Unit)
+    default(currentState: S, action: C.( S, E, Any[]) -> Unit)
     allowed(currentState: S, includeDefaults: Boolean): Set<E>
     eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
     create(context: C, initialState: S?) : StateMachineInstance<S,E,C>

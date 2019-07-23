@@ -53,44 +53,45 @@ enum class TurnstileEvents {
 ```
 
 ```kotlin
-val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-    initial { if(it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
-    state(TurnstileStates.LOCKED) {
-        event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts, _ ->
-            ts.unlock()
-        }
-        event(TurnstileEvents.PASS) { ts, _ ->
-            ts.alarm()
-        }
+class TurnstileFSM(turnstile: Turnstile) {
+    companion object {
+        private fun define() = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
+            initial { if (locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
+            default {
+                entry { startState, endState, _ ->
+                    println("entering:$startState -> $endState for $this")
+                }
+                action { state, event, _ ->
+                    println("Default action for state($state) -> on($event) for $this")
+                    alarm()
+                }
+                exit { startState, endState, _ ->
+                    println("exiting:$startState -> $endState for $this")
+                }
+            }
+            state(TurnstileStates.LOCKED) {
+                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                    unlock()
+                }
+            }
+            state(TurnstileStates.UNLOCKED) {
+                on(TurnstileEvents.COIN) {
+                    returnCoin()
+                }
+                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                    lock()
+                }
+            }
+        }.build()
+
+        private val definition by lazy { define() }
     }
-    state(TurnstileStates.UNLOCKED) {
-        // event without an endState will not trigger entry or exit actions
-        event(TurnstileEvents.COIN) { ts, _ ->
-            ts.returnCoin()
-        }
-        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts, _ ->
-            ts.lock();
-        }
-    }
-    default { // default state handler
-        action { context, state, event ->
-            println("Default action for $event in $state for $context")
-            error("Should not be called with this definition")
-        }
-        entry { context, startState, endState ->
-            println("Entering:$stateState -> $endState for $context")
-        }
-        exit { context, startState, endState ->
-            // will be invoke if state doesn't have exit defined.
-            println("Existing:$stateState -> $endState for $context")
-        }
-        event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { context, currentState, event ->
-            // will be invoked for PASS event and will transition to LOCKED if no event it defined for the currentState
-            // in this specific case the definition covers all possibilities to this will never be called
-            error("Should not be called with this definition")
-        }
-    }
-}.build()
+
+    private val fsm = definition.create(turnstile)
+
+    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
+    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
+}
 ```
 
 With this We are saying:
@@ -102,105 +103,25 @@ Then we instantiate the FSM and provide a context to operate on:
 
 ```kotlin
 val turnstile = Turnstile()
-val fsm = definition.instance(turnstile)
+val fsm = TurnstileFSM(turnstile)
 ```
 Now we have a context that is independent of the FSM.
 
 Sending events may invoke actions:
 ```kotlin
 // State state is LOCKED
-fsm.event(COIN)
+fsm.coin()
 // Expect unlock action end state is UNLOCKED
-fsm.event(PASS)
+fsm.pass()
 // Expect lock() action and end state is LOCKED
-fsm.event(PASS)
+fsm.pass()
 // Expect alarm() action and end state is LOCKED
-fsm.event(COIN)
+fsm.coin()
 // Expect unlock() and end state is UNLOCKED
-fsm.event(COIN)
+fsm.coin()
 // Expect returnCoin() and end state is UNLOCKED
 ```
 
-The FSM can then be packaged as follows:
-```kotlin
-class TurnstileFSM(private val turnstile: Turnstile) {
-    companion object {
-        fun define() = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-            initial { if (it.locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
-            default {
-                entry { context, startState, endState ->
-                    println("entering:$startState -> $endState for $context")
-                }
-                exit { context, startState, endState ->
-                    println("exiting:$startState -> $endState for $context")
-                }
-            }
-            state(TurnstileStates.LOCKED) {
-                event(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) { ts, _ ->
-                    ts.unlock()
-                }
-                event(TurnstileEvents.PASS) { ts, _ ->
-                    ts.alarm()
-                }
-            }
-            state(TurnstileStates.UNLOCKED) {
-                event(TurnstileEvents.COIN) { ts, _ ->
-                    ts.returnCoin()
-                }
-                event(TurnstileEvents.PASS to TurnstileStates.LOCKED) { ts, _ ->
-                    ts.lock();
-                }
-            }
-        }.build()
-    }
-    private lazy val definition = define()
-    private val fsm = definition.create(turnstile)
-
-    fun coin() = fsm.event(TurnstileEvents.COIN)
-    fun pass() = fsm.event(TurnstileEvents.PASS)
-}
-```
-Providing for simple code like:
-
-```kotlin
-val turnstile = Turnstile()
-val fsm = TurnstileFSM(turnstile)
-
-fsm.coin()
-fsm.pass()
-```
-
 https://github.com/open-jumpco/kfsm-samples[Samples]
-
-
-Questions:
-
-Considering:
-```kotlin
-stateMachine {
-    state(LOCKED) {
-        event(COIN to UNLOCKED) { it.unlock() }
-        event(PASS) { it.alarm() }
-    }
-}
-```
-* Will it be better to use `transition` than `event` in the DSL?
-```kotlin
-stateMachine {
-    state(LOCKED) {
-        transition(COIN to UNLOCKED) { it.unlock() }
-        transition(PASS) { it.alarm() }
-    }
-}
-```
-* Will it be better to use `on` than `event` in the DSL?
-```kotlin
-stateMachine {
-    state(LOCKED) {
-        on(COIN to UNLOCKED) { it.unlock() }
-        on(PASS) { it.alarm() }
-    }
-}
-```
 
 image::statemachine_model.png[StateMachineModel]

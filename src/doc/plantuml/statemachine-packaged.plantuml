@@ -20,7 +20,7 @@ class StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile> {
 }
 
 class StateMachine<TurnstileStates, TurnstileEvents, Turnstile> {
-    transition(startState: S, event: E, endState: S, action: (C, Any[]) -> Unit)
+    transition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
     create(context: Turnstile, initialState: TurnstileStates?) : StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>
     stateMachine(): StateMachine<TurnstileStates, TurnstileEvents, Turnstile>
 }
