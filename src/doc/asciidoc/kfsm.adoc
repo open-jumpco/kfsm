@@ -142,6 +142,7 @@ on(EVENT1) { args ->
 }
 ```
 If we update the turnstile to include the value of the coin in the coin event we could implement the following:
+Various guard expression determine the specific transitions.
 
 image::paying_turnstile_fsm.png[Paying Turnstile]
 
@@ -322,30 +323,30 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
 ### Test
 ```kotlin
 val turnstile = PayingTurnstile(50)
-        val fsm = PayingTurnstileFSM(turnstile)
-        assertTrue(turnstile.locked)
-        println("--coin1")
-        fsm.coin(10)
-        assertTrue(turnstile.locked)
-        assertTrue(turnstile.coins == 10)
-        println("--coin2")
-        fsm.coin(60)
-        assertTrue(turnstile.coins == 0)
-        assertTrue(!turnstile.locked)
-        println("--pass1")
-        fsm.pass()
-        assertTrue(turnstile.locked)
-        println("--pass2")
-        fsm.pass()
-        println("--pass3")
-        fsm.pass()
-        println("--coin3")
-        fsm.coin(40)
-        assertTrue(turnstile.coins == 40)
-        println("--coin4")
-        fsm.coin(10)
-        assertTrue(turnstile.coins == 0)
-        assertTrue(!turnstile.locked)
+val fsm = PayingTurnstileFSM(turnstile)
+assertTrue(turnstile.locked)
+println("--coin1")
+fsm.coin(10)
+assertTrue(turnstile.locked)
+assertTrue(turnstile.coins == 10)
+println("--coin2")
+fsm.coin(60)
+assertTrue(turnstile.coins == 0)
+assertTrue(!turnstile.locked)
+println("--pass1")
+fsm.pass()
+assertTrue(turnstile.locked)
+println("--pass2")
+fsm.pass()
+println("--pass3")
+fsm.pass()
+println("--coin3")
+fsm.coin(40)
+assertTrue(turnstile.coins == 40)
+println("--coin4")
+fsm.coin(10)
+assertTrue(turnstile.coins == 0)
+assertTrue(!turnstile.locked)
 ```
 
 ### Output
