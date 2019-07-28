@@ -1,0 +1,14 @@
+@startuml
+
+[*] --> LOCKED
+LOCKED -down-> UNLOCKED : COIN(value) guard={ value + coins == requiredCoins } { coin(value); unlock() }
+LOCKED --> UNLOCKED : COIN(value) guard={ value + coins > requiredCoins } { coin(value); returnCoin(); unlock(); }
+LOCKED --> COINS : COIN(value) guard={ value + coins < requiredCoins } { coin(value); }
+COINS --> UNLOCKED : COIN(value) guard={ value + coins == requiredCoins } { coin(value); unlock() }
+COINS ---> COINS : COIN(value) guard={ value + coins < requiredCoins } { coin(value); }
+COINS --> UNLOCKED : COIN(value) guard={ value + coins > requiredCoins } { coin(value); returnCoin(); unlock(); }
+UNLOCKED ---> LOCKED : PASS { lock() }
+LOCKED ---> LOCKED : PASS { alarm() }
+UNLOCKED ---> UNLOCKED : COIN { coin(value); returnCoin() }
+
+@enduml

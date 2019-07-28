@@ -11,7 +11,10 @@ package io.jumpco.open.kfsm
 /**
  * @suppress
  */
-class Turnstile(var locked: Boolean = true) {
+class Turnstile(locked: Boolean = true) {
+    var locked: Boolean = locked
+        private set
+
     fun unlock() {
         require(locked) { "Cannot unlock when not locked" }
         println("Unlock")
