@@ -9,11 +9,11 @@ enum E {
 
 class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
     initial(action: C.(Any[]) -> S)
-    transition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
-    transition(startState: S, event: E, endState: S, guard: C.()->Boolean, action: C.(Any[]) -> Unit)
+    transition(startState: S, event: E, targetState: S, action: C.(Any[]) -> Unit)
+    transition(startState: S, event: E, targetState: S, guard: C.()->Boolean, action: C.(Any[]) -> Unit)
     entry(currentState: S, action: C.(Any[]) -> Unit)
     exit(currentState: S, action: C.(Any[]) -> Unit)
-    defaultTransition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
+    defaultTransition(startState: S, event: E, targetState: S, action: C.(Any[]) -> Unit)
     defaultTransition(startState: S, event: E, action: C.(Any[]) -> Unit)
     defaultAction(action: C.( S, E, Any[]) -> Unit)
     defaultEntry(action: C.( S, S, Any[]) -> Unit)

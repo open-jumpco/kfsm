@@ -81,12 +81,12 @@ class DetailMockedTests {
                     }
                 }
                 default {
-                    entry { startState, endState, _ ->
-                        println("entering:to $endState from $startState for:$this")
+                    entry { startState, targetState, _ ->
+                        println("entering:to $targetState from $startState for:$this")
                         defaultEntry()
                     }
-                    exit { startState, endState, _ ->
-                        println("exiting:from $endState to $startState for:$this")
+                    exit { startState, targetState, _ ->
+                        println("exiting:from $targetState to $startState for:$this")
                         defaultExit()
                     }
                     on(TestEvents.EVENT1 to TestStates.STATE1) {

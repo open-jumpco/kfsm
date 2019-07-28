@@ -72,11 +72,11 @@ class LockFSM(context: Lock) {
                 action { state, event, _ ->
                     println("Default action for state($state) -> on($event) for $this")
                 }
-                entry { startState, endState, _ ->
-                    println("entering:$startState -> $endState for $this")
+                entry { startState, targetState, _ ->
+                    println("entering:$startState -> $targetState for $this")
                 }
-                exit { startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $this")
+                exit { startState, targetState, _ ->
+                    println("exiting:$startState -> $targetState for $this")
                 }
             }
             state(LockStates.LOCKED) {

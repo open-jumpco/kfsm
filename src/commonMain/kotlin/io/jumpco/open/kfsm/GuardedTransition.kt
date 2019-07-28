@@ -13,17 +13,17 @@ package io.jumpco.open.kfsm
  * Represents a guarded transition. The transition will be considered if the guard expression is true
  * @param startState The given state
  * @param event The given event
- * @param endState when optional represents an internal transition
+ * @param targetState when optional represents an internal transition
  * @param guard Expression lambda returning a Boolean
  * @param action An optional lambda that will be invoked.
  */
 class GuardedTransition<S : Enum<S>, E : Enum<E>, C>(
     startState: S,
     event: E,
-    endState: S?,
+    targetState: S?,
     private val guard: StateGuard<C>,
     action: StateAction<C>?
-) : SimpleTransition<S, E, C>(startState, event, endState, action) {
+) : SimpleTransition<S, E, C>(startState, event, targetState, action) {
     /**
      * This function will invoke the guard expression using the provided context to determine if transition can be considered.
      * @param context The provided context

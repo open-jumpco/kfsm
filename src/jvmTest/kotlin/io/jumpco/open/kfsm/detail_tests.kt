@@ -81,14 +81,14 @@ class DetailTests {
                     }
                 }
                 default {
-                    entry { startState, endState, args ->
+                    entry { startState, targetState, args ->
                         val msg = args[0] as String
-                        println("entering:to $endState from $startState for:$this:$msg")
+                        println("entering:to $targetState from $startState for:$this:$msg")
                         defaultEntry()
                     }
-                    exit { startState, endState, args ->
+                    exit { startState, targetState, args ->
                         val msg = args[0] as String
-                        println("exiting:from $endState to $startState for:$this:$msg")
+                        println("exiting:from $targetState to $startState for:$this:$msg")
                         defaultExit()
                     }
                     on(TestEvents.EVENT1 to TestStates.STATE1) { args ->

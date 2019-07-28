@@ -41,8 +41,8 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
     }
 
     /**
-     * Defines a transition when the state is the currentState and the on is received. The state is changed to the endState.
-     * @param event A Pair with the first being the on and the second being the endState.
+     * Defines a transition when the state is the currentState and the on is received. The state is changed to the targetState.
+     * @param event A Pair with the first being the on and the second being the targetState.
      * @param action The action will be performed
      */
     fun on(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
@@ -52,7 +52,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
 
     /**
      * Defines a guarded transition. Where the transition will only be used if the guarded expression is met
-     * @param event The event and endState the defines the transition
+     * @param event The event and targetState the defines the transition
      * @param guard The guard expression must be met before the transition is considered.
      * @param action The optional action that may be executed
      */
@@ -67,7 +67,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
 
     /**
      * Defines a transition where an on causes an action but doesn't change the state.
-     * @param event The event and endState the defines the transition
+     * @param event The event and targetState the defines the transition
      * @param action The optional action that may be executed
      */
     fun on(event: E, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {

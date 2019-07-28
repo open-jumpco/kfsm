@@ -40,18 +40,18 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     private fun execute(transition: Transition<S, E, C>, args: Array<out Any>) {
         transition.execute(context, this, args)
         if (transition.isExternal()) {
-            currentState = transition.endState!!
+            currentState = transition.targetState!!
         }
     }
 
-    internal fun executeEntry(context: C, endState: S, args: Array<out Any>) {
-        definition.entryActions[endState]?.invoke(context, currentState, endState, args)
-        definition.defaultEntryAction?.invoke(context, currentState, endState, args)
+    internal fun executeEntry(context: C, targetState: S, args: Array<out Any>) {
+        definition.entryActions[targetState]?.invoke(context, currentState, targetState, args)
+        definition.defaultEntryAction?.invoke(context, currentState, targetState, args)
     }
 
-    internal fun executeExit(context: C, endState: S, args: Array<out Any>) {
-        definition.exitActions[currentState]?.invoke(context, currentState, endState,args)
-        definition.defaultExitAction?.invoke(context, currentState, endState, args)
+    internal fun executeExit(context: C, targetState: S, args: Array<out Any>) {
+        definition.exitActions[currentState]?.invoke(context, currentState, targetState,args)
+        definition.defaultExitAction?.invoke(context, currentState, targetState, args)
     }
 
     private fun executeDefaultAction(event: E, args: Array<out Any>) {
@@ -94,7 +94,7 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     /**
      * This function will provide the list of allowed events given the current state of the machine.
      * @param includeDefaults When `true` will include default transitions in the list of allowed events.
-     * @see StateMachineBuilder.allowed
+     * @see StateMachineDefinition.allowed
      */
     fun allowed(includeDefaults: Boolean = false) = definition.allowed(currentState, includeDefaults)
 

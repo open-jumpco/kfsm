@@ -11,11 +11,11 @@ package io.jumpco.open.kfsm
 
 /**
  * The base for all transitions.
- * @param endState when optional represents an internal transition
+ * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.
  */
 open class Transition<S : Enum<S>, E : Enum<E>, C>(
-    internal val endState: S? = null,
+    internal val targetState: S? = null,
     private val action: StateAction<C>? = null
 ) {
     /**
@@ -24,18 +24,18 @@ open class Transition<S : Enum<S>, E : Enum<E>, C>(
     open fun execute(context: C, instance: StateMachineInstance<S, E, C>, args: Array<out Any>) {
 
         if (isExternal()) {
-            instance.executeExit(context, endState!!, args)
+            instance.executeExit(context, targetState!!, args)
         }
         action?.invoke(context, args)
         if (isExternal()) {
-            instance.executeEntry(context, endState!!, args)
+            instance.executeEntry(context, targetState!!, args)
         }
 
     }
 
     /**
      * This function provides an indicator if a Transition is internal or external.
-     * When there is no endState defined a Transition is considered internal and will not trigger entry or exit actions.
+     * When there is no targetState defined a Transition is considered internal and will not trigger entry or exit actions.
      */
-    fun isExternal(): Boolean = endState != null
+    fun isExternal(): Boolean = targetState != null
 }

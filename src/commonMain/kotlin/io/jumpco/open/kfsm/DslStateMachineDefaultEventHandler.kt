@@ -39,7 +39,7 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
 
     /**
      * Defines a default transition when an on is received to a specific state.
-     * @param event Pair representing an on and endState for transition. Can be written as EVENT to STATE
+     * @param event Pair representing an on and targetState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
     fun on(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {

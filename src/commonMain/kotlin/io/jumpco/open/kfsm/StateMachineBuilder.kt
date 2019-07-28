@@ -17,35 +17,35 @@ package io.jumpco.open.kfsm
  */
 class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
     private var completed = false
-    internal var deriveInitialState: StateQuery<C, S>? = null
-    internal val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
-    internal val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
-    internal val entryActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
-    internal val exitActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
-    internal val defaultActions: MutableMap<S, DefaultStateAction<C, S, E>> = mutableMapOf()
-    internal var globalDefault: DefaultStateAction<C, S, E>? = null
-    internal var defaultEntryAction: DefaultChangeAction<C, S>? = null
-    internal var defaultExitAction: DefaultChangeAction<C, S>? = null
+    private var deriveInitialState: StateQuery<C, S>? = null
+    private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
+    private val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
+    private val entryActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
+    private val exitActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
+    private val defaultActions: MutableMap<S, DefaultStateAction<C, S, E>> = mutableMapOf()
+    private var globalDefault: DefaultStateAction<C, S, E>? = null
+    private var defaultEntryAction: DefaultChangeAction<C, S>? = null
+    private var defaultExitAction: DefaultChangeAction<C, S>? = null
 
     /**
-     * This function defines a transition from the currentState equal to startState to the endState when event is
+     * This function defines a transition from the currentState equal to startState to the targetState when event is
      * received and the guard expression is met. The action is executed after any exit action and before entry actions.
      * @param startState The transition will be considered when currentState matches stateState
      * @param event The event will trigger the consideration of this transition
-     * @param endState The transition will change currentState to endState after executing the option action
+     * @param targetState The transition will change currentState to targetState after executing the option action
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, endState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         require(!completed) { "Statemachine has been completed" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
             val rule = TransitionRules<S, E, C>()
-            rule.addGuarded(GuardedTransition(startState, event, endState, guard, action))
+            rule.addGuarded(GuardedTransition(startState, event, targetState, guard, action))
             transitionRules[key] = rule
         } else {
-            transitionRule.addGuarded(GuardedTransition(startState, event, endState, guard, action))
+            transitionRule.addGuarded(GuardedTransition(startState, event, targetState, guard, action))
         }
     }
 
@@ -72,23 +72,23 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
 
 
     /**
-     * This function defines a transition that will be triggered when the currentState is the same as the startState and on is received. The FSM currentState will change to the endState after the action was executed.
+     * This function defines a transition that will be triggered when the currentState is the same as the startState and on is received. The FSM currentState will change to the targetState after the action was executed.
      * Entry and Exit actions will also be performed.
      * @param startState transition applies when FSM currentState is the same as stateState.
      * @param event transition applies when on received.
-     * @param endState FSM will transition to endState.
+     * @param targetState FSM will transition to targetState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, endState: S, action: StateAction<C>?) {
+    fun transition(startState: S, event: E, targetState: S, action: StateAction<C>?) {
         require(!completed) { "Statemachine has been completed" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         if (transitionRule == null) {
             transitionRules[key] =
-                TransitionRules(transition = SimpleTransition(startState, event, endState, action))
+                TransitionRules(transition = SimpleTransition(startState, event, targetState, action))
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
-            transitionRule.transition = SimpleTransition(startState, event, endState, action)
+            transitionRule.transition = SimpleTransition(startState, event, targetState, action)
         }
     }
 
@@ -167,7 +167,7 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
 
     /**
      * This function defines an action to be invoked when no transitions match the event. The currentState will be change to second parameter of the Pair.
-     * @param event The Pair holds the event and endState and can be written as `event to state`
+     * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
     fun default(event: EventState<E, S>, action: StateAction<C>?) {

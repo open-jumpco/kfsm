@@ -12,11 +12,11 @@ package io.jumpco.open.kfsm
 /**
  * Represents a DefaultTransition
  * @param event The event identifies the transition
- * @param endState when optional represents an internal transition
+ * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.
  */
 class DefaultTransition<E : Enum<E>, S : Enum<S>, C>(
     internal val event: E,
-    endState: S? = null,
+    targetState: S? = null,
     action: StateAction<C>? = null
-) : Transition<S, E, C>(endState, action)
+) : Transition<S, E, C>(targetState, action)

@@ -108,8 +108,8 @@ class TurnstileFsmTests {
         val definition = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (locked) LOCKED else UNLOCKED }
             state(LOCKED) {
-                entry { startState, endState, _ ->
-                    println("entering:$startState -> $endState for $this")
+                entry { startState, targetState, _ ->
+                    println("entering:$startState -> $targetState for $this")
                 }
                 on(COIN to UNLOCKED) {
                     unlock()
@@ -117,13 +117,13 @@ class TurnstileFsmTests {
                 on(PASS) {
                     alarm()
                 }
-                exit { startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $this")
+                exit { startState, targetState, _ ->
+                    println("exiting:$startState -> $targetState for $this")
                 }
             }
             state(UNLOCKED) {
-                entry { startState, endState, _ ->
-                    println("entering:$startState -> $endState for $this")
+                entry { startState, targetState, _ ->
+                    println("entering:$startState -> $targetState for $this")
                 }
                 on(COIN) {
                     returnCoin()
@@ -131,8 +131,8 @@ class TurnstileFsmTests {
                 on(PASS to LOCKED) {
                     lock()
                 }
-                exit { startState, endState, _ ->
-                    println("exiting:$startState -> $endState for $this")
+                exit { startState, targetState, _ ->
+                    println("exiting:$startState -> $targetState for $this")
                 }
             }
         }.build()

@@ -34,7 +34,7 @@ typealias StateQuery<C, S> = (C.() -> S)
 /**
  * This represents a default action that will be invoked on a change in state as defined with entry or exit.
  * @param C The context: C will be available to the lambda
- * @param S currentState: S and endState: S will be available to the lambda.
+ * @param S currentState: S and targetState: S will be available to the lambda.
  */
 typealias DefaultChangeAction<C, S> = C.(S, S, Array<out Any>) -> Unit
 
@@ -49,9 +49,9 @@ typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
 
 
 /**
- * This represents an event and endState pair that can be written as `event to state`
+ * This represents an event and targetState pair that can be written as `event to state`
  * @param E The event: E will be the first element of the pair
- * @param S The endState: S will be the second element of the pair.
+ * @param S The targetState: S will be the second element of the pair.
  */
 typealias EventState<E, S> = Pair<E, S>
 

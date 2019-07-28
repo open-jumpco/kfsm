@@ -8,7 +8,7 @@ enum Events {
 }
 
 class StateMachineBuilder<States : Enum<States>, Events : Enum<Events>, Context> {
-    transition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
+    transition(startState: S, event: E, targetState: S, action: C.(Any[]) -> Unit)
     create(context: Context, initialState: States?) : StateMachineInstance<States,Events,Context>
 }
 

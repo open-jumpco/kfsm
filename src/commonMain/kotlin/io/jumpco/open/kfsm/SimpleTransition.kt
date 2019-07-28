@@ -13,12 +13,12 @@ package io.jumpco.open.kfsm
  * Represents a transition from a given state and event.
  * @param startState The given state
  * @param event The given event
- * @param endState when optional represents an internal transition
+ * @param targetState when optional represents an internal transition
  * @param action An optional lambda that will be invoked.
  */
 open class SimpleTransition<S : Enum<S>, E : Enum<E>, C>(
     internal val startState: S,
     internal val event: E,
-    endState: S?,
+    targetState: S?,
     action: StateAction<C>?
-) : Transition<S, E, C>(endState, action)
+) : Transition<S, E, C>(targetState, action)
