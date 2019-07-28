@@ -141,8 +141,11 @@ on(EVENT1) { args ->
     // use value
 }
 ```
-## Context class
 If we update the turnstile to include the value of the coin in the coin event we could implement the following:
+
+image::paying_turnstile_fsm.png[Paying Turnstile]
+
+## Context class
 
 The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
