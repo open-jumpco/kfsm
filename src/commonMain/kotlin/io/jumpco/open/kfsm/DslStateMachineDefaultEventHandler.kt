@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the default section of the statemachine.
  */
-class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachine<S, E, C>) {
+class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachineBuilder<S, E, C>) {
     /**
      * Define a default action that will be applied when no other transitions are matched.
      * @param action Will be invoked when no transitions matches

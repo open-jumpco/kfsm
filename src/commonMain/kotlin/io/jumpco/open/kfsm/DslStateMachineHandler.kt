@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
-class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachine<S, E, C>) {
+class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: StateMachineBuilder<S, E, C>) {
     /**
      * Defines an expression that will determine the initial state of the state machine based on the values of the context.
      * @param deriveInitialState A lambda expression receiving context:C and returning state S.

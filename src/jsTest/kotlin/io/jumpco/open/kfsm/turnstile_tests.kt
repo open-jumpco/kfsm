@@ -50,24 +50,24 @@ class TurnstileFsmTests {
 
     @Test
     fun uncleBobsTurnstilePlain() {
-        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>()
-        definition.initial { if (locked) LOCKED else UNLOCKED }
-        definition.transition(LOCKED, COIN, UNLOCKED) {
+        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>()
+        builder.initial { if (locked) LOCKED else UNLOCKED }
+        builder.transition(LOCKED, COIN, UNLOCKED) {
             unlock()
         }
-        definition.transition(LOCKED, PASS) {
+        builder.transition(LOCKED, PASS) {
             alarm()
         }
-        definition.transition(UNLOCKED, COIN) {
+        builder.transition(UNLOCKED, COIN) {
             returnCoin()
         }
-        definition.transition(UNLOCKED, PASS, LOCKED) {
+        builder.transition(UNLOCKED, PASS, LOCKED) {
             lock()
         }
-        definition.complete()
+        builder.complete()
         // when
         val turnstile = Turnstile()
-
+        val definition = builder.complete()
         val fsm = definition.create(turnstile)
         // then
         verifyTurnstileFSM(fsm, turnstile)
@@ -76,7 +76,7 @@ class TurnstileFsmTests {
     @Test
     fun uncleBobsTurnstileDSL() {
         // given
-        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
+        val definition = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (locked) LOCKED else UNLOCKED }
             state(LOCKED) {
                 on(COIN to UNLOCKED) {
@@ -105,7 +105,7 @@ class TurnstileFsmTests {
 
     @Test
     fun simpleTurnstileTest() {
-        val definition = StateMachine<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
+        val definition = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
             initial { if (locked) LOCKED else UNLOCKED }
             state(LOCKED) {
                 entry { startState, endState, _ ->

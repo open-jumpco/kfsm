@@ -68,4 +68,4 @@ inline fun <S : Enum<S>, E : Enum<E>, C: Any> stateMachine(
     eventClass: KClass<E>,
     contextClass: KClass<out C>,
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
-) = StateMachine<S, E, C>().stateMachine(handler)
+) = StateMachineBuilder<S, E, C>().stateMachine(handler)

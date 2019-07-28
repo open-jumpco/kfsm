@@ -55,8 +55,13 @@ enum class TurnstileEvents {
 ```kotlin
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
-        private fun define() = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
-            initial { if (locked) TurnstileStates.LOCKED else TurnstileStates.UNLOCKED }
+        private val definition = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
+            initial {
+            if (locked)
+                TurnstileStates.LOCKED
+            else
+                TurnstileStates.UNLOCKED
+            }
             default {
                 entry { startState, endState, _ ->
                     println("entering:$startState -> $endState for $this")
@@ -83,8 +88,6 @@ class TurnstileFSM(turnstile: Turnstile) {
                 }
             }
         }.build()
-
-        private val definition by lazy { define() }
     }
 
     private val fsm = definition.create(turnstile)

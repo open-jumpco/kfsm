@@ -7,9 +7,15 @@ enum States {
 enum Events {
 }
 
-class StateMachine<States : Enum<States>, Events : Enum<Events>, Context> {
+class StateMachineBuilder<States : Enum<States>, Events : Enum<Events>, Context> {
     transition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
     create(context: Context, initialState: States?) : StateMachineInstance<States,Events,Context>
+}
+
+class StateMachineDefinition<S : Enum<S>, E : Enum<E>, C> {
+    allowed(currentState: S, includeDefaults: Boolean): Set<E>
+    eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
+    create(context: C, initialState: S?) : StateMachineInstance<S,E,C>
 }
 
 class StateMachineInstance<States: Enum<States>, Events: Enum<Events>, Context> {
@@ -19,11 +25,15 @@ class StateMachineInstance<States: Enum<States>, Events: Enum<Events>, Context> 
     sendEvent(event: Events, Any[])
 }
 
-StateMachine ..left..> States : <<states>>
-StateMachine ..right..> Events : <<events>>
-StateMachine ..up.> Context : <<context>>
+StateMachineBuilder ..left..> States : <<states>>
+StateMachineBuilder ..right..> Events : <<events>>
+StateMachineBuilder ..up.> Context : <<context>>
 
-StateMachineInstance *---> StateMachine : fsm
+StateMachineDefinition .left.> S : <<states>>
+StateMachineDefinition .right.> E : <<events>>
+StateMachineDefinition .up.> C : <<context>>
+
+StateMachineInstance *---> StateMachineDefinition : definition
 StateMachineInstance *--left--> Context : context
 
 @enduml

@@ -15,7 +15,7 @@ package io.jumpco.open.kfsm
  * @param E is en enum representing all the events the FSM may receive
  * @param C is the class of the Context where the action will be applied.
  */
-class StateMachine<S : Enum<S>, E : Enum<E>, C> {
+class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
     private var completed = false
     internal var deriveInitialState: StateQuery<C, S>? = null
     internal val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
@@ -118,20 +118,6 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
 
     }
 
-    /**
-     * This function will create a state machine instance provided with content and optional initialState.
-     * @param context The context will be provided to actions
-     * @param initialState If this is not provided the function defined in `initial` will be invoked to derive the initialState.
-     * @see initial
-     */
-    fun create(context: C, initialState: S? = null): StateMachineInstance<S, E, C> {
-        require(completed) { "Statemachine has not been completed" }
-        return StateMachineInstance(
-            context,
-            this,
-            initialState ?: deriveInitialState?.invoke(context) ?: error("Definition requires deriveInitialState")
-        )
-    }
 
     /**
      * This function defines an action to be invoked when no action is found matching the current state and event.
@@ -233,38 +219,21 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     }
 
     /**
-     * This function will provide the set of allowed events given a specific state. It isn't a guarantee that a
-     * subsequent transition will be successful since a guard may prevent a transition. Default state handlers are not considered.
-     * @param given The specific state to consider
-     * @param includeDefault When `true` will include default transitions in the list of allowed events.
-     */
-    fun allowed(given: S, includeDefault: Boolean = false): Set<E> {
-        val result = transitionRules.entries.filter { it.key.first == given }.map { it.key.second }.toSet()
-        if (includeDefault && defaultTransitions.isNotEmpty()) {
-            return result + defaultTransitions.keys
-        }
-        return result
-    }
-
-    /**
-     * This function will provide an indicator if an event is allow for a given state.
-     * When no state transition is declared this function will return false unless `includeDefault` is true and
-     * there is a default transition of handler for the event.
-     */
-    fun eventAllowed(event: E, given: S, includeDefault: Boolean): Boolean =
-        (includeDefault && hasDefaultStateHandler(given)) || allowed(given, includeDefault).contains(event)
-
-    /**
-     * This function will provide an indicator if a default action has been defined for a given state.
-     */
-    fun hasDefaultStateHandler(given: S) = defaultActions.contains(given)
-
-    /**
      * This function enables completed for the state machine definition prevent further changes to the state
      * machine behaviour.
      */
-    fun complete(): StateMachine<S, E, C> {
+    fun complete(): StateMachineDefinition<S, E, C> {
         completed = true
-        return this
+        return StateMachineDefinition(
+            this.deriveInitialState,
+            this.transitionRules.toMap(),
+            this.defaultTransitions.toMap(),
+            this.entryActions.toMap(),
+            this.exitActions.toMap(),
+            this.defaultActions.toMap(),
+            this.globalDefault,
+            this.defaultEntryAction,
+            this.defaultExitAction
+        )
     }
 }

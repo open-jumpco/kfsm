@@ -13,7 +13,7 @@ package io.jumpco.open.kfsm
  * This class represents an instance of a state machine.
  * It will process events, matching transitions, invoking entry, transition and exit actions.
  * @param context The events may trigger actions on the context of class C
- * @param fsm The defined state machine that provides all the behaviour
+ * @param definition The defined state machine that provides all the behaviour
  * @param initialState The initial state of the instance.
  */
 class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
@@ -22,9 +22,9 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
      */
     private val context: C,
     /**
-     * The fsm contains the definition of the state machine.
+     * The Immutable definition of the state machine.
      */
-    val fsm: StateMachine<S, E, C>,
+    val definition: StateMachineDefinition<S, E, C>,
     /**
      * The initialState will be assigned to the currentState
      */
@@ -45,17 +45,17 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     }
 
     internal fun executeEntry(context: C, endState: S, args: Array<out Any>) {
-        fsm.entryActions[endState]?.invoke(context, currentState, endState, args)
-        fsm.defaultEntryAction?.invoke(context, currentState, endState, args)
+        definition.entryActions[endState]?.invoke(context, currentState, endState, args)
+        definition.defaultEntryAction?.invoke(context, currentState, endState, args)
     }
 
     internal fun executeExit(context: C, endState: S, args: Array<out Any>) {
-        fsm.exitActions[currentState]?.invoke(context, currentState, endState,args)
-        fsm.defaultExitAction?.invoke(context, currentState, endState, args)
+        definition.exitActions[currentState]?.invoke(context, currentState, endState,args)
+        definition.defaultExitAction?.invoke(context, currentState, endState, args)
     }
 
     private fun executeDefaultAction(event: E, args: Array<out Any>) {
-        val defaultAction = fsm.defaultActions[currentState] ?: fsm.globalDefault
+        val defaultAction = definition.defaultActions[currentState] ?: definition.globalDefault
         if (defaultAction == null) {
             error("Transition from $currentState on $event not defined")
         } else {
@@ -68,7 +68,7 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
      * @param event The on received,
      */
     fun sendEvent(event: E, vararg args: Any) {
-        val transitionRules = fsm.transitionRules[Pair(currentState, event)]
+        val transitionRules = definition.transitionRules[Pair(currentState, event)]
         if (transitionRules != null) {
             val guardedTransition = transitionRules.findGuard(context, args)
             if (guardedTransition != null) {
@@ -82,7 +82,7 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
                 }
             }
         } else {
-            val transition = fsm.defaultTransitions[event]
+            val transition = definition.defaultTransitions[event]
             if (transition != null) {
                 execute(transition, args)
             } else {
@@ -94,13 +94,13 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     /**
      * This function will provide the list of allowed events given the current state of the machine.
      * @param includeDefaults When `true` will include default transitions in the list of allowed events.
-     * @see StateMachine.allowed
+     * @see StateMachineBuilder.allowed
      */
-    fun allowed(includeDefaults: Boolean = false) = fsm.allowed(currentState, includeDefaults)
+    fun allowed(includeDefaults: Boolean = false) = definition.allowed(currentState, includeDefaults)
 
     /**
      * This function will provide an indication whether the given event is allow in the current state.
      * @param event The given event that will be used in combination with current state.
      */
-    fun eventAllowed(event: E, includeDefault: Boolean): Boolean = fsm.eventAllowed(event, currentState, includeDefault)
+    fun eventAllowed(event: E, includeDefault: Boolean): Boolean = definition.eventAllowed(event, currentState, includeDefault)
 }

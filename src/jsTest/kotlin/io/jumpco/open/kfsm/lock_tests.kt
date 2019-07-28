@@ -64,8 +64,8 @@ class LockFsmTests {
     @Test
     fun testPlainCreationOfFsm() {
         // given
-        val definition = StateMachine<LockStates, LockEvents, Lock>()
-        definition.initial {
+        val builder = StateMachineBuilder<LockStates, LockEvents, Lock>()
+        builder.initial {
             when (locked) {
                 0 -> UNLOCKED
                 1 -> LOCKED
@@ -73,25 +73,25 @@ class LockFsmTests {
                 else -> error("Invalid state locked=$locked")
             }
         }
-        definition.transition(LOCKED, UNLOCK, UNLOCKED) {
+        builder.transition(LOCKED, UNLOCK, UNLOCKED) {
             unlock()
         }
-        definition.transition(LOCKED, LOCK, DOUBLE_LOCKED) {
+        builder.transition(LOCKED, LOCK, DOUBLE_LOCKED) {
             doubleLock()
         }
-        definition.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) {
+        builder.transition(DOUBLE_LOCKED, UNLOCK, LOCKED) {
             doubleUnlock()
         }
-        definition.transition(DOUBLE_LOCKED, LOCK) {
+        builder.transition(DOUBLE_LOCKED, LOCK) {
             error("Already double locked")
         }
-        definition.transition(UNLOCKED, LOCK, LOCKED) {
+        builder.transition(UNLOCKED, LOCK, LOCKED) {
             lock()
         }
-        definition.transition(UNLOCKED, UNLOCK) {
+        builder.transition(UNLOCKED, UNLOCK) {
             error("Already unlocked")
         }
-        definition.complete()
+        val definition = builder.complete()
         // when
         val lock = Lock()
         val fsm = definition.create(lock)
@@ -103,7 +103,7 @@ class LockFsmTests {
     @Test
     fun testDslCreationOfFsm() {
         // given
-        val definition = StateMachine<LockStates, LockEvents, Lock>().stateMachine {
+        val definition = StateMachineBuilder<LockStates, LockEvents, Lock>().stateMachine {
             initial {
                 when (locked) {
                     0 -> UNLOCKED

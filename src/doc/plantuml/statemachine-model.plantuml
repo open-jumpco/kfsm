@@ -7,7 +7,7 @@ enum S {
 enum E {
 }
 
-class StateMachine<S : Enum<S>, E : Enum<E>, C> {
+class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
     initial(action: C.(Any[]) -> S)
     transition(startState: S, event: E, endState: S, action: C.(Any[]) -> Unit)
     transition(startState: S, event: E, endState: S, guard: C.()->Boolean, action: C.(Any[]) -> Unit)
@@ -19,10 +19,13 @@ class StateMachine<S : Enum<S>, E : Enum<E>, C> {
     defaultEntry(action: C.( S, S, Any[]) -> Unit)
     defaultExit(action: C.( S, S, Any[]) -> Unit)
     default(currentState: S, action: C.( S, E, Any[]) -> Unit)
+    stateMachine()
+}
+
+class StateMachineDefinition<S : Enum<S>, E : Enum<E>, C> {
     allowed(currentState: S, includeDefaults: Boolean): Set<E>
     eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
     create(context: C, initialState: S?) : StateMachineInstance<S,E,C>
-    stateMachine()
 }
 
 class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
@@ -33,11 +36,15 @@ class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
     eventAllowed(event: E, includeDefault: Boolean): Boolean
 }
 
-StateMachine .left.> S : <<states>>
-StateMachine .right.> E : <<events>>
-StateMachine .up.> C : <<context>>
+StateMachineBuilder .left.> S : <<states>>
+StateMachineBuilder .right.> E : <<events>>
+StateMachineBuilder .up.> C : <<context>>
 
-StateMachineInstance *---> StateMachine : fsm
+StateMachineDefinition .left.> S : <<states>>
+StateMachineDefinition .right.> E : <<events>>
+StateMachineDefinition .up.> C : <<context>>
+
+StateMachineInstance *---> StateMachineDefinition : definition
 StateMachineInstance *-left-> C : context
 
 @enduml

@@ -59,7 +59,7 @@ enum class LockEvents {
 
 class LockFSM(context: Lock) {
     companion object {
-        private fun define() = stateMachine(LockStates::class, LockEvents::class, Lock::class) {
+        private val definition = stateMachine(LockStates::class, LockEvents::class, Lock::class) {
             initial {
                 when (locked) {
                     0 -> LockStates.UNLOCKED
@@ -98,11 +98,10 @@ class LockFSM(context: Lock) {
                 }
             }
         }.build()
-
-        private val definition by lazy { define() }
     }
 
     private val fsm = definition.create(context)
+
     fun allowedEvents() = fsm.allowed()
     fun unlock() = fsm.sendEvent(LockEvents.UNLOCK)
     fun lock() = fsm.sendEvent(LockEvents.LOCK)
