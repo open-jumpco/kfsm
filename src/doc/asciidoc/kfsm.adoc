@@ -130,8 +130,20 @@ https://github.com/open-jumpco/kfsm-samples[Samples]
 image::statemachine_model.png[StateMachineModel]
 
 ## Events with arguments
-If we update the turnstile to include the value of the coin in the coin event we could implement the following:
+Arguments are sent as follows:
+```kotlin
+fsm.sendEvent(EVENT1, arg1)
+```
+The argument is references in the action as follows:
+```kotlin
+on(EVENT1) { args ->
+    val value = args[0] as Int
+    // use value
+}
+```
 ## Context class
+If we update the turnstile to include the value of the coin in the coin event we could implement the following:
+
 The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
 ```kotlin
