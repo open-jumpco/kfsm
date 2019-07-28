@@ -98,15 +98,15 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                 }
             }
             default {
-                entry { startState, targetState, args ->
-                    if (args != null && args.isNotEmpty()) {
+                entry { _, targetState, args ->
+                    if (args.isNotEmpty()) {
                         println("entering:$targetState (${args.toList()}) for $this")
                     } else {
                         println("entering:$targetState for $this")
                     }
                 }
                 action { state, event, args ->
-                    if (args != null && args.isNotEmpty()) {
+                    if (args.isNotEmpty()) {
                         println("Default action for state($state) -> on($event, ${args.toList()}) for $this")
                     } else {
                         println("Default action for state($state) -> on($event) for $this")
@@ -114,7 +114,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                     alarm()
                 }
                 exit { startState, _, args ->
-                    if (args != null && args.isNotEmpty()) {
+                    if (args.isNotEmpty()) {
                         println("entering:$startState (${args.toList()}) for $this")
                     } else {
                         println("exiting:$startState for $this")
@@ -122,52 +122,57 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                 }
             }
             state(PayingTurnstileStates.LOCKED) {
+                // The coins add up to more than required
                 on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> args[0] as Int + this.coins > this.requiredCoins }) { args ->
-                    val value = args[0] as Int
+                    guard = { args -> val value = args[0] as Int;
+                        value + this.coins > this.requiredCoins
+                    }) { args -> val value = args[0] as Int
                     returnCoin(coin(value) - requiredCoins)
                     unlock()
                     reset()
                 }
+                // The coins add up to more than required
                 on(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                    guard = { args -> args[0] as Int + this.coins < this.requiredCoins }) { args ->
-                    val value = args[0] as Int
+                    guard = { args -> val value = args[0] as Int;
+                        value + this.coins < this.requiredCoins
+                    }) { args -> val value = args[0] as Int
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
                 }
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> args[0] as Int + coins == requiredCoins }) { args ->
-                    val value = args[0] as Int
+                // The coin brings amount to exact amount
+                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args -> val value = args[0] as Int
                     coin(value)
                     unlock()
                     reset()
                 }
             }
             state(PayingTurnstileStates.COINS) {
+                // The coins add up to more than required.
                 on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> args[0] as Int + this.coins > this.requiredCoins }) { args ->
-                    val value = args[0] as Int
+                    guard = { args -> val value = args[0] as Int
+                        value + this.coins > this.requiredCoins
+                    }) { args -> val value = args[0] as Int
                     returnCoin(coin(value) - requiredCoins)
                     unlock()
                     reset()
                 }
+                // The coins isn't enough to make total match required
                 on(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                    guard = { args -> args[0] as Int + this.coins < this.requiredCoins }) { args ->
-                    val value = args[0] as Int
+                    guard = { args -> val value = args[0] as Int;
+                        value + this.coins < this.requiredCoins
+                    }) { args -> val value = args[0] as Int
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
                 }
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
-                    val value = args[0] as Int
+                // The coin is exact amount required
+                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args -> val value = args[0] as Int
                     coin(value)
-                    returnCoin(coins - requiredCoins)
                     unlock()
                     reset()
                 }
             }
             state(PayingTurnstileStates.UNLOCKED) {
-                on(PayingTurnstileEvents.COIN) { args ->
-                    val value = args[0] as Int
+                on(PayingTurnstileEvents.COIN) { args -> val value = args[0] as Int
                     returnCoin(coin(value))
                 }
                 on(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {

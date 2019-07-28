@@ -9,6 +9,12 @@
 
 package io.jumpco.open.kfsm
 
+import io.jumpco.open.kfsm.EventState
+import io.jumpco.open.kfsm.DefaultChangeAction
+import io.jumpco.open.kfsm.DefaultStateAction
+import io.jumpco.open.kfsm.StateAction
+import io.jumpco.open.kfsm.StateGuard
+
 /**
  * This handler will be active inside the default section of the statemachine.
  */

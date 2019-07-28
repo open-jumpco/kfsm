@@ -117,7 +117,7 @@ class DetailTests {
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) { _ ->
+                    on(TestEvents.EVENT1) {
                         action1()
                     }
                     entry { _, _, _ ->

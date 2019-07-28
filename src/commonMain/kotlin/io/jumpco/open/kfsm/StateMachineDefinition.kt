@@ -9,15 +9,43 @@
 
 package io.jumpco.open.kfsm
 
+/**
+ * This class represents an immutable definition of a state machine.
+ */
 class StateMachineDefinition<S : Enum<S>, E : Enum<E>, C>(
     private val deriveInitialState: StateQuery<C, S>?,
+    /**
+     * transitionRule contains a map of TransitionRules that is keyed by a Pair of state,event
+     * This will be the most common transition rule.
+     */
     val transitionRules: Map<Pair<S, E>, TransitionRules<S, E, C>>,
+    /**
+     * The default transitions will be used if no transition of found matching a given event
+     */
     val defaultTransitions: Map<E, DefaultTransition<E, S, C>>,
+    /**
+     * This is a map of actions keyed by the state. A specific action will be invoked when a state is entered.
+     */
     val entryActions: Map<S, DefaultChangeAction<C, S>>,
+    /**
+     * This is a map of actions keyed by the state. A specific action will be invoked when a state is exited.
+     */
     val exitActions: Map<S, DefaultChangeAction<C, S>>,
+    /**
+     * This is a map of default actions for event on specific startState.
+     */
     val defaultActions: Map<S, DefaultStateAction<C, S, E>>,
+    /**
+     * This is the action that will be invoked of no other has been matched
+     */
     val globalDefault: DefaultStateAction<C, S, E>?,
+    /**
+     * This is the default action that will be invoked when entering any state when no other action has been matched.
+     */
     val defaultEntryAction: DefaultChangeAction<C, S>?,
+    /**
+     * This is the default action that will be invoked when exiting any state when no other action has been matched.
+     */
     val defaultExitAction: DefaultChangeAction<C, S>?
 ) {
     /**

@@ -70,7 +70,7 @@ class LockFsmTests {
                 0 -> UNLOCKED
                 1 -> LOCKED
                 2 -> DOUBLE_LOCKED
-                else -> error("Invalid state locked=${locked}")
+                else -> error("Invalid state locked=$locked")
             }
         }
         builder.transition(LOCKED, UNLOCK, UNLOCKED) {
@@ -109,7 +109,7 @@ class LockFsmTests {
                     0 -> UNLOCKED
                     1 -> LOCKED
                     2 -> DOUBLE_LOCKED
-                    else -> error("Invalid state locked=${locked}")
+                    else -> error("Invalid state locked=$locked")
                 }
             }
 
