@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-./gradlew publishLinuxPublicationToMavenRepository
+./gradlew publishToMavenLocal publishLinuxPublicationToMavenRepository
