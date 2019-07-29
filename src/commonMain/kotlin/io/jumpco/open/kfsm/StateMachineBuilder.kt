@@ -131,9 +131,9 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
 
     /**
      * This method is the entry point to creating the DSL
-     * @sample io.jumpco.open.kfsm.TurnstileFSM.define()
+     * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
      */
-    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit) =
+    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit): DslStateMachineHandler<S, E, C> =
         DslStateMachineHandler(this).apply(handler)
 
     /**

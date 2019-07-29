@@ -62,7 +62,7 @@ enum class TurnstileEvents {
  */
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
-        private fun define() = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
+        private val definition = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
             initial {
                 if (locked)
                     TurnstileStates.LOCKED
@@ -95,8 +95,6 @@ class TurnstileFSM(turnstile: Turnstile) {
                 }
             }
         }.build()
-
-        private val definition by lazy { define() }
     }
 
     private val fsm = definition.create(turnstile)

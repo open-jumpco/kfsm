@@ -44,10 +44,7 @@ kotlin {
 
 
 dokka {
+    // master configuration in gradle/dokka.gradle
     samples = ['src/commonTest/kotlin/io/jumpco/open/kfsm/turnstile.kt']
 }
-
-
-
-
 

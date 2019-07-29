@@ -62,7 +62,7 @@ typealias EventState<E, S> = Pair<E, S>
  * @param stateClass The class of the possible states
  * @param eventClass The class of the possible events
  * @param contextClass The class of the context
- * @sample io.jumpco.open.kfsm.TurnstileFSM.define
+ * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
 inline fun <S : Enum<S>, E : Enum<E>, C: Any> stateMachine(
     stateClass: KClass<S>,

@@ -13,10 +13,8 @@ dokka {
     outputFormat = 'html'
     outputDirectory = "$buildDir/javadoc"
     includeNonPublic = false
-    impliedPlatforms = ["Common"] // This will force platform tags for all non-common sources e.g. "JVM"
+    impliedPlatforms = ['Common'] // This will force platform tags for all non-common sources e.g. "JVM"
     kotlinTasks {
-        // dokka fails to retrieve sources from MPP-tasks so they must be set empty to avoid exception
-        // use sourceRoot instead (see below)
         []
     }
     sourceRoot {
