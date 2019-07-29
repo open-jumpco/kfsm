@@ -154,7 +154,7 @@ Various guard expression determine the specific transitions.
 
 image::paying_turnstile_fsm.png[Paying Turnstile]
 
-== Context class
+=== Context class
 
 The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
