@@ -11,16 +11,6 @@ The model supports events when triggered may cause a simpleTransition from one s
 
 ## How to get it?
 
-### Building locally
-
-```cmd
-git clone https://github.com/open-jumpco/kfsm.git
-./gradlew publishToMavenLocal -Pprofile=default
-```
-The property `defaultProfile` is configured to `jvm,js,wasm,default`
-
-The `profile=default` will detect and add the current native platform.
-
 ### Repository
 ```groovy
 repositories {
@@ -30,7 +20,7 @@ repositories {
 }
 ```
 
-### JVM Projects
+### Kotlin/JVM Projects
 ```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm-jvm:0.6.0-SNAPSHOT'
@@ -66,6 +56,15 @@ dependencies {
     implementation 'io.jumpco.open:kfsm-macosX64:0.6.0-SNAPSHOT'    
 }
 ```
+### Building locally
+
+```cmd
+git clone https://github.com/open-jumpco/kfsm.git
+./gradlew publishToMavenLocal -Pprofile=default
+```
+The property `defaultProfile` is configured to `jvm,js,wasm,default`
+
+The `profile=default` will detect and add the current native platform.
 
 ## Questions:
 * Should entry / exit action receive state or event as arguments?
