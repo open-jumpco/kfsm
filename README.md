@@ -67,8 +67,8 @@ The property `defaultProfile` is configured to `jvm,js,wasm,default`
 The `profile=default` will detect and add the current native platform.
 
 ## Questions:
-* Should entry / exit action receive state or event as arguments?
-* Should default actions recieve state or event as arguments?
+* Should entry / exit actions receive state or event as arguments?
+* Should default actions receive state or event as arguments?
 * Is there a more elegant way to define States and Events using sealed classes?
 * Are any features missing from the implementation?
 
