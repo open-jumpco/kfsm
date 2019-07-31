@@ -1,3 +1,69 @@
+== Getting Started
+
+=== Repository
+
+[source,groovy]
+----
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/groups/public'
+    }
+}
+----
+
+=== JVM Projects
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm-jvm:0.6.0-SNAPSHOT'
+}
+----
+
+=== KotlinJS Projects
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm-js:0.6.0-SNAPSHOT'
+}
+----
+
+=== Kotlin/Native Projects using WASM
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm-wasm32:0.6.0-SNAPSHOT'
+}
+----
+
+=== Kotlin/Native Projects using LinuxX64
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.6.0-SNAPSHOT'
+}
+----
+
+=== Kotlin/Native Projects using MinGW64
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.6.0-SNAPSHOT'
+}
+----
+
+=== Kotlin/Native Projects using macOS
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm-macosX64:0.6.0-SNAPSHOT'
+}
+----
 
 == DSL
 The DSL provides a way of configuring the statemachine.
