@@ -1,6 +1,6 @@
 = KFSM - Kotlin Finite Statemachine
 :toc:
-:toclevels: 2
+:toclevels: 3
 
 == Introduction
 Having used various incarnations of link:http://smc.sourceforge.net/[SMC] over the years we decided to try it again and
@@ -17,7 +17,7 @@ The <<Tutorial>> provides examples of how to compose a DSL and FSM.
 
 == Documentation
 
-link:javadoc/kfsm/index.html[API Docs]
+=== link:javadoc/kfsm/index.html[API Docs]
 
 include::documentation.adoc[]
 
