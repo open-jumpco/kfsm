@@ -5,7 +5,8 @@ This is a small implementation of an FSM in Kotlin.
 The model supports events when triggered may cause a simpleTransition from one state to another while performing an optional action as well as entry and exit actions.
 
 ## Resources
-* [Documentation](src/doc/asciidoc/kfsm.adoc)
+* [Documentation](https://open.jumpco.io/projects/kfsm/index.html)
+* [API Docs](https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html)
 * [Sample Project](https://github.com/open-jumpco/kfsm-samples)
 
 ## How to get it?

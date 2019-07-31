@@ -74,6 +74,8 @@ The statemachine supports:
 * Entry and exit actions per state and globally
 * Default actions per state and globally
 
+All configuration calls are eventually applied to link:javadoc/kfsm/io.jumpco.open.kfsm/-state-machine-builder/index.html[StateMachineBuilder]
+
 === `stateMachine {}`
 The top level element is `stateMachine` either by using the function
 
