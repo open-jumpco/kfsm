@@ -10,8 +10,8 @@ repositories {
     }
 }
 ----
-
-=== JVM Projects
+=== Dependencies
+==== JVM Projects
 
 [source,groovy]
 ----
@@ -20,7 +20,7 @@ dependencies {
 }
 ----
 
-=== KotlinJS Projects
+==== KotlinJS Projects
 
 [source,groovy]
 ----
@@ -29,7 +29,7 @@ dependencies {
 }
 ----
 
-=== Kotlin/Native Projects using WASM
+==== Kotlin/Native Projects using WASM
 
 [source,groovy]
 ----
@@ -38,7 +38,7 @@ dependencies {
 }
 ----
 
-=== Kotlin/Native Projects using LinuxX64
+==== Kotlin/Native Projects using LinuxX64
 
 [source,groovy]
 ----
@@ -47,7 +47,7 @@ dependencies {
 }
 ----
 
-=== Kotlin/Native Projects using MinGW64
+==== Kotlin/Native Projects using MinGW64
 
 [source,groovy]
 ----
@@ -56,7 +56,7 @@ dependencies {
 }
 ----
 
-=== Kotlin/Native Projects using macOS
+==== Kotlin/Native Projects using macOS
 
 [source,groovy]
 ----
