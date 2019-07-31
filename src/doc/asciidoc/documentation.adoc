@@ -1,0 +1,244 @@
+
+== DSL
+The DSL provides a way of configuring the statemachine.
+The statemachine supports:
+
+* Transitions: internal and external
+* Guard expressions
+* Entry and exit actions per state and globally
+* Default actions per state and globally
+
+The top level element is `stateMachine` either by using the function
+
+* link:javadoc/kfsm/io.jumpco.open.kfsm/-state-machine-builder/state-machine.html[StateMachineBuilder::stateMachine]
+* link:javadoc/kfsm/io.jumpco.open.kfsm/state-machine.html[stateMachine]
+
+[source,kotlin]
+----
+// using builder function
+val definition = StateMachineBuilder<StateEnum,EventEnum,ContextType>().stateMachine {
+    default { // global defaults
+    }
+    initial { // initial state expression
+    }
+    state { // state definition
+    }
+}.build()
+// using global function
+val definition = stateMachine(StateEnum::class, EventEnum::class,ContextType::class) {
+    default { // global defaults
+    }
+    initial { // initial state expression
+    }
+    state { // state definition
+    }
+}.build()
+----
+
+=== `default {}`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/default.html[DslStateMachineHandler::default]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+Provide default configuration for entry and exit actions as well as a default action.
+
+Example:
+[source,kotlin]
+----
+default {
+    action { // global action
+    }
+    entry { // global state entry action
+    }
+    exit { // global state exit action
+    }
+    on { // default transitions
+    }
+}
+----
+
+==== action {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/action.html[DslStateMachineDefaultEventHandler::action]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+Provide a lambda `C.(S,E, Array<out Any>)->Unit` that will be invoked when no other transitions are matched.
+
+Example:
+[source,kotlin]
+----
+action { currentState, event, args -> // global default action
+    contextFunction()
+    anotherContextFunction()
+}
+----
+
+==== entry {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/entry.html[DslStateMachineDefaultEventHandler::entry]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+Provide a lambda `C.(S,S,Array<out Any>) -> Unit` that will be invoked before a change in the state of the FSM.
+Global entry actions will be called for all external transitions after state specific entry actions.
+
+Example:
+[source,kotlin]
+----
+entry { fromState, targetState, args ->
+    println("Entering:$targetState from $fromState with ${args.toList()}")
+}
+----
+
+==== exit {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/exit.html[DslStateMachineDefaultEventHandler::exit]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+Provide a lambda `C.(S,S,Array<out Any>) -> Unit` that will be invoked after a change in the state of the FSM.
+Global exit actions will be called for all external transitions after state specific entry actions.
+
+Example:
+[source,kotlin]
+----
+exit { fromState, targetState, args ->
+    println("Exiting:$fromState to $targetState with ${args.toList()}")
+}
+----
+
+==== on(E [to S]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/on.html[DslStateMachineDefaultEventHandler::on]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+This defines a transition when a specific event is receive and no other transition was matched.
+There are 2 variations, the first is internal and doesn't define a target state, the second is external and defines a target state.
+In both cases the lambda type is `C.(Array<out Any) -> Unit`
+
+Example:
+[source,kotlin]
+----
+on(Event.EVENT) { args -> // default internal state action for given event
+    someFunction()
+}
+
+on(Event.EVENT to State.STATE) { args-> // default external state action for given event
+    anotherFunction()
+}
+----
+
+=== `initial {}`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/initial.html[DslStateMachineHandler::initial]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+Provide a lambda `C.() -> S` that will determine the state of the state machine.
+
+Example:
+[source,kotlin]
+----
+initial {
+    when(flag) {
+        1 -> State.S1
+        2 -> State.S2
+        else -> error("Invalid state")
+    }
+}
+----
+
+=== `state(S) {}`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/state.html[DslStateMachineHandler::state]
+* Mandatory: _Mandatory_
+* Cardinality: _Multiple_
+
+Each `state` block decribes the transitions for a given state.
+
+Example:
+[source,kotlin]
+----
+state(State.STATE) {
+    default { // default action for State.STATE
+    }
+    entry { // entry action for State.STATE
+    }
+    exit { // exit action for State.STATE
+    }
+    on(Event.EV2 to State.S1, guard = {flag == 1 }) { // external transition with guard expression
+    }
+    on(Event.EV2 to State.S1) { // external transition
+    }
+    on(Event.EV1, guard = { flag == 2 }) { // internal transition with guard expression
+    }
+    on(Event.EV1) { // internal guard expression
+    }
+}
+----
+
+==== default {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/default.html[DslStateMachineEventHandler::default]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+A state block may have one default action which is a lambda of type `C.(S,E,Array<out Any>) -> Unit` that is invoked when no other transition is found for the given state and event and guard expressions.
+
+Example:
+[source,kotlin]
+----
+default { fromState, event, args -> // default state action
+    someDefaultAction()
+}
+----
+
+==== entry {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/entry.html[DslStateMachineEventHandler::entry]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+This defines a lambda of type `C.(S,S,Array<out Any>) -> Unit` that will be invoked after the transition action for an external transition.
+
+Example:
+[source,kotlin]
+----
+
+entry { fromState, targetState, args -> // state entry action
+    println("Entering:$targetState from $fromState with ${args.toList()}")
+}
+----
+==== exit {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/exit.html[DslStateMachineEventHandler::exit]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+This defines a lambda of type `C.(S,S,Array<out Any>) -> Unit` that will be invoked before the transition action for an external transitions.
+
+Example:
+[source,kotlin]
+----
+exit { fromState, targetState, args -> // state exit action
+    println("Exiting:$fromState to $targetState with ${args.toList()}")
+}
+----
+==== on(E [to S],[guard = {}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/on.html[DslStateMachineEventHandler::on]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 4 variations of transitions: External and internal, with and without a guard expression.
+
+This defines a transition action for a given event.
+For an external transition a target state must be provided, while an internal transition must have no targetState.
+An optional guard expression can be provided. The order in which the DSL encounters guard expression determine the evaluation order.
+The first matching guard expression will determine the transition that will be used.
+Their may be only one transition without a guard expression.
+
+Examples:
+[source,kotlin]
+----
+on(Event.EV1, guard = { flag == 1 }) { args -> // internal transition with guard expression
+}
+on(Event.EV1 to State.S2, guard = { flag == 2}) { args -> // external transition with guard expression
+}
+on(Event.EV1) { args -> // internal transition
+}
+on(Event.EV2 to State.S2) { args -> // external transition
+}
+----

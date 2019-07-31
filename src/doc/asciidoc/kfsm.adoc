@@ -1,23 +1,15 @@
-= Kotlin Finite-state machine
-:toc:
-
-== Introduction
-This is a small implementation of an FSM in Kotlin.
-This model supports events that trigger may cause a transition from one state to another while performing an optional action.
-
+=== Simple turnstile example
 Assume we and to manage the state on a simple lock.
 We want to ensure that the `lock()` function is only called when the lock is not locked and we want `unlock()` to be called when locked.
 
-link:http://smc.sourceforge.net/slides/SMC_Tutorial.pdf[SMC Tutorial]
-
-== Simple turnstile example
 Then we use the DSL to declare a definition of a statemachine matching the diagram:
 
-=== State Diagram
+==== State Diagram
 image::turnstile_fsm.png[LockStateDiagram]
 
-=== Context class
-```kotlin
+==== Context class
+[source,kotlin]
+----
 class Turnstile(var locked: Boolean = true) {
     fun unlock() {
         assert(locked) { "Cannot unlock when not locked" }
@@ -42,11 +34,13 @@ class Turnstile(var locked: Boolean = true) {
         return "Turnstile(locked=$locked)"
     }
 }
-```
-=== Enums for States and Events
+----
+
+==== Enums for States and Events
 We declare 2 enums, one for the possible states and one for the possible events.
 
-```kotlin
+[source,kotlin]
+----
 enum class TurnstileStates {
     LOCKED,
     UNLOCKED
@@ -56,9 +50,11 @@ enum class TurnstileEvents {
     COIN,
     PASS
 }
-```
-=== Packaged definition and execution
-```kotlin
+----
+
+==== Packaged definition and execution
+[source,kotlin]
+----
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
         private val definition = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
@@ -101,7 +97,7 @@ class TurnstileFSM(turnstile: Turnstile) {
     fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
     fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
 }
-```
+----
 
 With this We are saying:
 When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the lambda which is treated
@@ -109,17 +105,20 @@ as a member of the context `{ unlock() }`
 
 When the state is `LOCKED` and on `event(PASS)` we are perform the action `alarm()` without changing the end state.
 
-=== Usage
+==== Usage
 Then we instantiate the FSM and provide a context to operate on:
 
-```kotlin
+[source,kotlin]
+----
 val turnstile = Turnstile()
 val fsm = TurnstileFSM(turnstile)
-```
+----
+
 Now we have a context that is independent of the FSM.
 
 Sending events may invoke actions:
-```kotlin
+[source,kotlin]
+----
 // State state is LOCKED
 fsm.coin()
 // Expect unlock action end state is UNLOCKED
@@ -131,34 +130,38 @@ fsm.coin()
 // Expect unlock() and end state is UNLOCKED
 fsm.coin()
 // Expect returnCoin() and end state is UNLOCKED
-```
+----
 
 https://github.com/open-jumpco/kfsm-samples[Samples]
 
 image::statemachine_model.png[StateMachineModel]
 
-== Events with arguments
+=== Events with arguments
 Arguments are sent as follows:
-```kotlin
+[source,kotlin]
+----
 fsm.sendEvent(EVENT1, arg1)
-```
+----
+
 The argument is references in the action as follows:
-```kotlin
+[source,kotlin]
+----
 on(EVENT1) { args ->
     val value = args[0] as Int
     // use value
 }
-```
+----
 If we update the turnstile to include the value of the coin in the coin event we could implement the following:
 Various guard expression determine the specific transitions.
 
 image::paying_turnstile_fsm.png[Paying Turnstile]
 
-=== Context class
+==== Context class
 
 The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
-```kotlin
+[source,kotlin]
+----
 class PayingTurnstile(
     val requiredCoins: Int,
     locked: Boolean = true,
@@ -208,9 +211,10 @@ class PayingTurnstile(
     }
 
 }
-```
-=== States and Events
-```kotlin
+----
+==== States and Events
+[source,kotlin]
+----
 enum class PayingTurnstileStates {
     LOCKED,
     COINS,
@@ -221,9 +225,9 @@ enum class PayingTurnstileEvents {
     COIN,
     PASS
 }
-```
+----
 
-=== State machine definition packaged
+==== State machine definition packaged
 ```kotlin
 class PayingTurnstileFSM(turnstile: PayingTurnstile) {
     companion object {
@@ -333,7 +337,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
 }
 ```
 
-=== Test
+==== Test
 ```kotlin
 val turnstile = PayingTurnstile(50)
 val fsm = PayingTurnstileFSM(turnstile)
@@ -362,7 +366,7 @@ assertTrue(turnstile.coins == 0)
 assertTrue(!turnstile.locked)
 ```
 
-=== Output
+==== Output
 ```
 --coin1
 entering:LOCKED ([10]) for Turnstile(locked=true,coins=0)

@@ -1,0 +1,25 @@
+= KFSM - Kotlin Finite Statemachine
+:toc:
+:toclevels: 2
+
+== Introduction
+Having used various incarnations of link:http://smc.sourceforge.net/[SMC] over the years we decided to try it again and
+discovered it didn't have specific support for Kotlin. Instead of creating a generator for Kotlin we decided to attempt
+a Kotlin DSL along with a simple implementation.
+
+To learn more about Finite State Machines visit:
+
+* link:https://en.wikipedia.org/wiki/Finite-state_machine[Wikipedia - Finite-state machine]
+* link:https://brilliant.org/wiki/finite-state-machines/[Brilliant - Finite State Machines]
+* link:http://smc.sourceforge.net/slides/SMC_Tutorial.pdf[SMC Tutorial]
+
+The <<Tutorial>> provides examples of how to compose a DSL and FSM.
+
+== Documentation
+
+link:javadoc/kfsm/index.html[API Docs]
+
+include::documentation.adoc[]
+
+== Tutorial
+include::kfsm.adoc[]
