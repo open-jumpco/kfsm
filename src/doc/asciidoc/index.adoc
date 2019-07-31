@@ -1,4 +1,4 @@
-= KFSM - Kotlin Finite Statemachine
+= KFSM - Kotlin Finite-state machine
 :toc:
 :toclevels: 3
 
