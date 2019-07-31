@@ -19,7 +19,7 @@ java {
 }
 
 apply from: "$rootProject.projectDir/gradle/platform.gradle"
-apply from: "$rootProject.projectDir/gradle/dokka.gradle"
+apply from: "$rootProject.projectDir/gradle/docs.gradle"
 apply from: "$rootProject.projectDir/gradle/publish.gradle"
 
 def useTarget = project.ext.useTarget
@@ -43,47 +43,7 @@ kotlin {
 
 
 dokka {
-    // master configuration in gradle/dokka.gradle
+    // master configuration in gradle/docsgradle
     samples = ['src/commonTest/kotlin/io/jumpco/open/kfsm/turnstile.kt']
 }
 
-asciidoctor {
-    sourceDir = file('src/doc/asciidoc')
-    outputDir = file('build/docs')
-    sources {
-        include 'index.adoc'
-    }
-    resources {
-        from(sourceDir) {
-            include '**/*.png'
-            include '**/*.xml'
-            include '**/*.js'
-            include '**/*.css'
-        }
-    }
-    attributes toc: 'left',
-            'source-highlighter': 'prism',
-            idprefix: '',
-            idseparator: '-',
-            docinfo1: ''
-}
-
-task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {
-    archiveBaseName = 'kfsm'
-    archiveClassifier = 'doc'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    from(file('build/docs/html5'))
-
-    from(file('build/javadoc')) {
-        into('javadoc')
-    }
-}
-
-publishing {
-    publications {
-        kfsm(MavenPublication) {
-            artifact docs
-        }
-    }
-}

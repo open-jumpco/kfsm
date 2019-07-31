@@ -8,6 +8,7 @@
  */
 
 apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'org.asciidoctor.convert'
 
 dokka {
     outputFormat = 'html'
@@ -48,6 +49,47 @@ dokka {
             // assuming there is only a single source dir...
             path = kotlin.sourceSets.macosMain.kotlin.srcDirs[0]
             platforms << 'macOS'
+        }
+    }
+}
+
+asciidoctor {
+    sourceDir = file('src/doc/asciidoc')
+    outputDir = file('build/docs')
+    sources {
+        include 'index.adoc'
+    }
+    resources {
+        from(sourceDir) {
+            include '**/*.png'
+            include '**/*.xml'
+            include '**/*.js'
+            include '**/*.css'
+        }
+    }
+    attributes toc: 'left',
+            'source-highlighter': 'prism',
+            idprefix: '',
+            idseparator: '-',
+            docinfo1: ''
+}
+
+task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {
+    archiveBaseName = project.name
+    archiveClassifier = 'doc'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(file('build/docs/html5'))
+
+    from(file('build/javadoc')) {
+        into('javadoc')
+    }
+}
+
+publishing {
+    publications {
+        documentation(MavenPublication) {
+            artifact docs
         }
     }
 }

@@ -94,7 +94,7 @@ def configureMavenCentralMetadata = { pom ->
 
 publishing {
     publications {
-        kfsm(MavenPublication) {
+        archives(MavenPublication) {
             artifact javadocJar
             artifact sourcesJar
         }
