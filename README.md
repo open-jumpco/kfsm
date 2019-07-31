@@ -67,3 +67,9 @@ dependencies {
 }
 ```
 
+## Questions:
+* Should entry / exit action receive state or event as arguments?
+* Should default actions recieve state or event as arguments?
+* Is there a more elegant way to define States and Events using sealed classes?
+* Are any features missing from the implementation?
+
