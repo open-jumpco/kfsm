@@ -50,16 +50,17 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     }
 
     internal fun executeExit(context: C, targetState: S, args: Array<out Any>) {
-        definition.exitActions[currentState]?.invoke(context, currentState, targetState,args)
+        definition.exitActions[currentState]?.invoke(context, currentState, targetState, args)
         definition.defaultExitAction?.invoke(context, currentState, targetState, args)
     }
 
     private fun executeDefaultAction(event: E, args: Array<out Any>) {
-        val defaultAction = definition.defaultActions[currentState] ?: definition.globalDefault
-        if (defaultAction == null) {
-            error("Transition from $currentState on $event not defined")
-        } else {
-            defaultAction.invoke(context, currentState, event, args)
+        with(
+            definition.defaultActions[currentState]
+                ?: definition.globalDefault
+                ?: error("Transition from $currentState on $event not defined")
+        ) {
+            invoke(context, currentState, event, args)
         }
     }
 
@@ -68,24 +69,20 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
      * @param event The on received,
      */
     fun sendEvent(event: E, vararg args: Any) {
-        val transitionRules = definition.transitionRules[Pair(currentState, event)]
-        if (transitionRules != null) {
-            val guardedTransition = transitionRules.findGuard(context, args)
-            if (guardedTransition != null) {
-                execute(guardedTransition, args)
-            } else {
-                val transition = transitionRules.transition
-                if (transition != null) {
-                    execute(transition, args)
-                } else {
+        ifApply(definition.transitionRules[Pair(currentState, event)]) rule@{
+            ifApply(this.findGuard(context, args)) {
+                execute(this, args)
+            }.ifNot {
+                ifApply(this@rule.transition) {
+                    execute(this, args)
+                }.ifNot {
                     executeDefaultAction(event, args)
                 }
             }
-        } else {
-            val transition = definition.defaultTransitions[event]
-            if (transition != null) {
-                execute(transition, args)
-            } else {
+        }.ifNot {
+            ifApply(definition.defaultTransitions[event]) {
+                execute(this, args)
+            }.ifNot {
                 executeDefaultAction(event, args)
             }
         }
@@ -102,5 +99,6 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
      * This function will provide an indication whether the given event is allow in the current state.
      * @param event The given event that will be used in combination with current state.
      */
-    fun eventAllowed(event: E, includeDefault: Boolean): Boolean = definition.eventAllowed(event, currentState, includeDefault)
+    fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
+        definition.eventAllowed(event, currentState, includeDefault)
 }

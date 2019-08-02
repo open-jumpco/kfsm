@@ -58,8 +58,9 @@ class StateMachineDefinition<S : Enum<S>, E : Enum<E>, C>(
         return StateMachineInstance(
             context,
             this,
-            initialState ?:
-                        deriveInitialState?.invoke(context) ?: error("Definition requires deriveInitialState")
+            initialState
+                ?: deriveInitialState?.invoke(context)
+                ?: error("Definition requires deriveInitialState")
         )
     }
 

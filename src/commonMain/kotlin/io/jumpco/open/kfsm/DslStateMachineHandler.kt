@@ -28,19 +28,16 @@ class DslStateMachineHandler<S : Enum<S>, E : Enum<E>, C>(private val fsm: State
      * @param handler A lambda with definitions for the given state
      */
     fun state(currentState: S, handler: DslStateMachineEventHandler<S, E, C>.() -> Unit):
-            DslStateMachineEventHandler<S, E, C> = DslStateMachineEventHandler(
-        currentState,
-        fsm
-    ).apply(handler)
+            DslStateMachineEventHandler<S, E, C> =
+        DslStateMachineEventHandler(currentState, fsm).apply(handler)
 
     /**
      * Defines a section for default behaviour for the state machine.
      * @param handler A lambda with definition for the default behaviour of the state machine.
      */
     fun default(handler: DslStateMachineDefaultEventHandler<S, E, C>.() -> Unit):
-            DslStateMachineDefaultEventHandler<S, E, C> = DslStateMachineDefaultEventHandler(
-        fsm
-    ).apply(handler)
+            DslStateMachineDefaultEventHandler<S, E, C> =
+        DslStateMachineDefaultEventHandler(fsm).apply(handler)
 
     /**
      * Returns the completed fsm.

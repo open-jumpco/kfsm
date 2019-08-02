@@ -10,7 +10,6 @@
 package io.jumpco.open.kfsm
 
 import kotlin.reflect.KClass
-import kotlin.Pair
 
 /**
  * This represents an action that may be invoked during a transition.
@@ -64,9 +63,23 @@ typealias EventState<E, S> = Pair<E, S>
  * @param contextClass The class of the context
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
-inline fun <S : Enum<S>, E : Enum<E>, C: Any> stateMachine(
+inline fun <S : Enum<S>, E : Enum<E>, C : Any> stateMachine(
     stateClass: KClass<S>,
     eventClass: KClass<E>,
     contextClass: KClass<out C>,
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
 ) = StateMachineBuilder<S, E, C>().stateMachine(handler)
+
+inline fun <T> ifApply(receiver: T?, block: T.() -> Any?): T? {
+    if (receiver != null) {
+        receiver.block()
+    }
+    return receiver
+}
+
+inline fun <T> T?.ifNot(block: () -> T?): T? {
+    if (this == null) {
+        block()
+    }
+    return this
+}
