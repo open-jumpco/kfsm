@@ -69,20 +69,20 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
      * @param event The on received,
      */
     fun sendEvent(event: E, vararg args: Any) {
-        ifApply(definition.transitionRules[Pair(currentState, event)]) rule@{
-            ifApply(this.findGuard(context, args)) {
+        definition.transitionRules[Pair(currentState, event)]?.apply rule@{
+            this.findGuard(context, args)?.apply {
                 execute(this, args)
-            }.ifNot {
-                ifApply(this@rule.transition) {
+            } ?: run {
+                this@rule.transition?.apply {
                     execute(this, args)
-                }.ifNot {
+                } ?: run {
                     executeDefaultAction(event, args)
                 }
             }
-        }.ifNot {
-            ifApply(definition.defaultTransitions[event]) {
+        } ?: run {
+            definition.defaultTransitions[event]?.apply {
                 execute(this, args)
-            }.ifNot {
+            } ?: run {
                 executeDefaultAction(event, args)
             }
         }

@@ -64,5 +64,7 @@ The `profile=default` will detect and add the current native platform.
 * Should entry / exit actions receive state or event as arguments?
 * Should default actions receive state or event as arguments?
 * Is there a more elegant way to define States and Events using sealed classes?
+* Would support for multiple named state maps be useful? 
+* Push / Pop into named map with pop providing optional new state?
 * Are any features missing from the implementation?
 

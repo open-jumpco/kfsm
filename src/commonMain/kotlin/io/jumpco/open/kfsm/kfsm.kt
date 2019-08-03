@@ -70,16 +70,3 @@ inline fun <S : Enum<S>, E : Enum<E>, C : Any> stateMachine(
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
 ) = StateMachineBuilder<S, E, C>().stateMachine(handler)
 
-inline fun <T> ifApply(receiver: T?, block: T.() -> Any?): T? {
-    if (receiver != null) {
-        receiver.block()
-    }
-    return receiver
-}
-
-inline fun <T> T?.ifNot(block: () -> T?): T? {
-    if (this == null) {
-        block()
-    }
-    return this
-}
