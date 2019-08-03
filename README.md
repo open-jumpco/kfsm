@@ -23,31 +23,31 @@ repositories {
 ### Kotlin/JVM Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.7.0-SNAPSHOT'
+    implementation 'io.jumpco.open:kfsm-jvm:0.7.0'
 }
 ```
 ### KotlinJS Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.7.0-SNAPSHOT'
+    implementation 'io.jumpco.open:kfsm-js:0.7.0'
 }
 ```
 ### Kotlin/Native Projects using LinuxX64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.7.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.7.0'    
 }
 ```
 ### Kotlin/Native Projects using MinGW64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.7.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.7.0'    
 }
 ```
 ### Kotlin/Native Projects using macOS
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.7.0-SNAPSHOT'    
+    implementation 'io.jumpco.open:kfsm-macosX64:0.7.0'    
 }
 ```
 ### Building locally

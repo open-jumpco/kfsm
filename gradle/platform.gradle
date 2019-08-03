@@ -59,6 +59,10 @@ kotlin {
         }
     }
     if (useTarget['js']) {
+        if(project.ext.has('nodeInstall')) {
+            // tasks.findByPath(':compileKotlinsJs')?.dependsOn('kotlinNodeJsSetup')
+            tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
+        }
         js {
             browser {
             }

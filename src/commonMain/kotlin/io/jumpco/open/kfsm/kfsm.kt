@@ -70,3 +70,18 @@ inline fun <S : Enum<S>, E : Enum<E>, C : Any> stateMachine(
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
 ) = StateMachineBuilder<S, E, C>().stateMachine(handler)
 
+
+inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit, otherwise: T.() -> Unit) : T {
+    return if(expression) {
+        this.apply(block)
+    } else {
+        this.apply(otherwise)
+    }
+}
+
+inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit) : T {
+    if(expression) {
+        this.apply(block)
+    }
+    return this
+}

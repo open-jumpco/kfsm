@@ -100,10 +100,7 @@ publishing {
         }
     }
     kotlin.targets.all { target ->
-        def targetPublication = publications.findByName(target.name)
-        if (targetPublication != null) {
-            targetPublication.artifact javadocJar
-        }
+        publications.findByName(target.name)?.artifact javadocJar
     }
     repositories {
         maven {
@@ -125,5 +122,4 @@ publishing {
             publication.artifactId = "${project.name}-common"
         }
     }
-
 }
