@@ -51,6 +51,7 @@ def configureNative(srcSetMain, srcSetTest) {
 }
 
 kotlin {
+
     if (useTarget['jvm']) {
         jvm() {
             mavenPublication {
@@ -152,3 +153,4 @@ kotlin {
         }
     }
 }
+

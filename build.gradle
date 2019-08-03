@@ -11,7 +11,8 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '0.7.0'
+version = '0.7.1'
+description = 'Kotlin Finite-state machine'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

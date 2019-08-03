@@ -11,42 +11,17 @@ apply plugin: 'signing'
 
 def useTarget = project.ext.useTarget
 
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from files('src/commonMain/kotlin')
-}
-
 task javadocJar(type: Jar) {
+    archivesBaseName = 'kfsm'
     archiveClassifier = 'javadoc'
     from dokka.outputDirectory
 }
 
-signing {
-    sign publishing.publications.kotlinMultiplatform
-    if(useTarget['jvm']) {
-        sign publishing.publications.jvm
-    }
-    if(useTarget['js']) {
-        sign publishing.publications.js
-    }
-    if(useTarget['macos']) {
-        sign publishing.publications.macos
-    }
-    if(useTarget['linux']) {
-        sign publishing.publications.linux
-    }
-    if(useTarget['mingw']) {
-        sign publishing.publications.mingw
-    }
-    if(useTarget['wasm']) {
-        sign publishing.publications.wasm
-    }
-}
 
 gradle.afterProject {
     tasks.forEach { task ->
         if (task.name.endsWith('Classes')) {
-            sourcesJar.dependsOn(task)
+            commonSourcesJar.dependsOn(task)
         }
         if (task.name.contains('dokka')) {
             javadocJar.dependsOn(task)
@@ -56,10 +31,15 @@ gradle.afterProject {
         }
     }
 }
+task commonSourcesJar(type: Jar) {
+    archivesBaseName = 'kfsm-common'
+    archiveClassifier = 'sources'
+    from files('src/commonMain/kotlin')
+}
 
 artifacts {
     archives javadocJar
-    archives sourcesJar
+    archives commonSourcesJar
 }
 
 def pomConfig = {
@@ -93,15 +73,6 @@ def configureMavenCentralMetadata = { pom ->
 }
 
 publishing {
-    publications {
-        archives(MavenPublication) {
-            artifact javadocJar
-            artifact sourcesJar
-        }
-    }
-    kotlin.targets.all { target ->
-        publications.findByName(target.name)?.artifact javadocJar
-    }
     repositories {
         maven {
             logger.lifecycle("maven:publish:version=$version")
@@ -114,12 +85,45 @@ publishing {
             }
         }
     }
-
+    def platforms = ['js', 'jvm', 'linux', 'mingw', 'macos', 'wasm']
     publications.all { publication ->
         pom.withXml(configureMavenCentralMetadata)
         logger.info "publication:$publication.name"
-        if (publication.name == 'kotlinMultiplatform') {
-            publication.artifactId = "${project.name}-common"
+        if(platforms.contains(publication.name)) {
+            publication.artifact javadocJar
         }
+    }
+
+    publications {
+        kotlinMultiplatform {
+            artifactId = 'kfsm-common'
+            artifact commonSourcesJar
+        }
+    }
+}
+
+
+signing {
+    sign publishing.publications.kotlinMultiplatform
+    sign publishing.publications.metadata
+    sign publishing.publications.documentation
+
+    if(useTarget['jvm']) {
+        sign publishing.publications.jvm
+    }
+    if(useTarget['js']) {
+        sign publishing.publications.js
+    }
+    if(useTarget['macos']) {
+        sign publishing.publications.macos
+    }
+    if(useTarget['linux']) {
+        sign publishing.publications.linux
+    }
+    if(useTarget['mingw']) {
+        sign publishing.publications.mingw
+    }
+    if(useTarget['wasm']) {
+        sign publishing.publications.wasm
     }
 }
