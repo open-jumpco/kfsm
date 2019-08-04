@@ -8,6 +8,7 @@
  */
 package io.jumpco.open.kfsm
 
+import io.jumpco.open.kfsm.LockEvents
 import io.jumpco.open.kfsm.LockEvents.LOCK
 import io.jumpco.open.kfsm.LockEvents.UNLOCK
 import io.jumpco.open.kfsm.LockStates.*

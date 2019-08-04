@@ -2,9 +2,12 @@
 
 This is a small implementation of an FSM in Kotlin.
 
-## Getting Started
+## Resources
+* [Documentation](https://open.jumpco.io/projects/kfsm/index.html)
+* [API Docs](https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html)
+* [Sample Project](https://github.com/open-jumpco/kfsm-samples)
 
-![turnstile-fsm](src/doc/asciidoc/turnstile_fsm.png)
+## Getting Started
 
 The state machine implementation supports events triggering transitions from one state to another while performing an optional action as well as entry and exit actions. 
 
@@ -14,15 +17,125 @@ The state machine implementation supports events triggering transitions from one
 * State entty and exit actions.
 * Default state actions.
 * Default entry and exit actions.
+* Determine allowed events.
 
 ## Todo
-[ ] Multiple state maps
-[ ] Push / pop transitions
+- [ ] Multiple state maps
+- [ ] Push / pop transitions
 
-## Resources
-* [Documentation](https://open.jumpco.io/projects/kfsm/index.html)
-* [API Docs](https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html)
-* [Sample Project](https://github.com/open-jumpco/kfsm-samples)
+## Quick Tutorial
+This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
+
+![turnstile-fsm](src/doc/asciidoc/turnstile_fsm.png)
+
+### Context class
+
+The context class will perform the relevant actions. As an extra precaution we can build assertions or checks into the context class to ensure it cannot be misused.
+
+```kotlin
+class Turnstile(var locked: Boolean = true) {
+    fun unlock() {
+        println("Unlock")
+        locked = false
+    }
+
+    fun lock() {
+        println("Lock")
+        locked = true
+    }
+
+    fun alarm() {
+        println("Alarm")
+    }
+
+    fun returnCoin() {
+        println("Return coin")
+    }
+    override fun toString(): String {
+        return "Turnstile(locked=$locked)"
+    }
+}
+```
+### Enums for States and Events
+We declare 2 enums, one for the possible states and one for the possible events.
+
+```kotlin
+enum class TurnstileStates {
+    LOCKED,
+    UNLOCKED
+}
+
+enum class TurnstileEvents {
+    COIN,
+    PASS
+}
+
+```
+
+### Packaged definition and state machine
+```kotlin
+class TurnstileFSM(turnstile: Turnstile) {
+    companion object {
+        private val definition = stateMachine(
+                TurnstileStates::class, 
+                TurnstileEvents::class, 
+                Turnstile::class
+        ) {
+            initial {
+            if (locked)
+                TurnstileStates.LOCKED
+            else
+                TurnstileStates.UNLOCKED
+            }
+            default {
+                action { _, _, _ ->
+                    alarm()
+                }
+            }
+            state(TurnstileStates.LOCKED) {
+                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                    unlock()
+                }
+            }
+            state(TurnstileStates.UNLOCKED) {
+                on(TurnstileEvents.COIN) {
+                    returnCoin()
+                }
+                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                    lock()
+                }
+            }
+        }.build()
+    }
+
+    private val fsm = definition.create(turnstile)
+
+    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
+    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
+
+    fun allowedEvents() = fsm.allowed().map { it.name }.toSet()    
+}
+```
+
+The set of possible events can provided. This is useful when you have to determine which buttons to enable or something more complex.
+
+In this case we didn't specify the internal transition when state is `LOCKED` and the `PASS` event is received. Since this should be an alarm we made it a default event which means that `PASS` will not be reported as allowed when the state is `LOCKED` 
+
+### Using the FSM
+
+This state machine will determine the state based on the `initial` expression.
+
+```kotlin
+val turnstile = Turnstile()
+val fsm = TurnstileFSM(turnstile)
+
+fsm.coin()
+fsm.pass()
+```
+
+This model means the FSM can be instantiated as needed if the context has values that represent the state. The idea is that the context will properly maintain it's internal state.
+
+The FSM can derive the formal state from the value(s) of properties of the context.
 
 ## Dependency 
 

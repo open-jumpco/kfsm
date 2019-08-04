@@ -194,4 +194,38 @@ class TurnstileFsmTests {
         println("--coin3")
         fsm.coin()
     }
+    @Test
+    fun `Alternative Turnstile Test`() {
+        
+        val turnstile = Turnstile()
+        val fsm = TurnstileAlternate(turnstile)
+
+        assertTrue { turnstile.locked }
+        assertTrue { fsm.currentState == LOCKED }
+
+        fsm.coin()
+
+        assertTrue { !turnstile.locked }
+        assertTrue { fsm.currentState == UNLOCKED }
+
+        fsm.pass()
+
+        assertTrue { turnstile.locked }
+        assertTrue { fsm.currentState == LOCKED }
+
+        fsm.pass()
+
+        assertTrue { turnstile.locked }
+        assertTrue { fsm.currentState == LOCKED }
+
+        fsm.coin()
+
+        assertTrue { !turnstile.locked }
+        assertTrue { fsm.currentState == UNLOCKED }
+
+        fsm.coin()
+
+        assertTrue { !turnstile.locked }
+        assertTrue { fsm.currentState == UNLOCKED }
+    }
 }

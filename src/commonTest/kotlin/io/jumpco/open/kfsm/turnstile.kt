@@ -101,4 +101,57 @@ class TurnstileFSM(turnstile: Turnstile) {
 
     fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
     fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
+    fun allowedEvents() = fsm.allowed().map { it.name }.toSet()
+}
+
+
+class TurnstileAlternate(private val turnstile: Turnstile, initialState: TurnstileStates? = null) {
+    var currentState: TurnstileStates
+        private set
+
+    init {
+        currentState = initialState ?: if (turnstile.locked)
+            TurnstileStates.LOCKED
+        else
+            TurnstileStates.UNLOCKED
+    }
+
+    private fun defaultEntry(startState: TurnstileStates, targetState: TurnstileStates, event: TurnstileEvents) {
+        println("entering:$startState -> $targetState for $this")
+    }
+
+    private fun defaultExit(startState: TurnstileStates, targetState: TurnstileStates, event: TurnstileEvents) {
+        println("exiting:$startState -> $targetState for $this")
+    }
+
+    private fun defaultAction(state: TurnstileStates, event: TurnstileEvents) {
+        println("Default action for state($state) -> on($event) for $this")
+        turnstile.alarm()
+    }
+
+    fun coin() {
+        when (currentState) {
+            TurnstileStates.LOCKED -> run {
+                defaultExit(TurnstileStates.LOCKED, TurnstileStates.UNLOCKED, TurnstileEvents.COIN)
+                turnstile.unlock()
+                defaultEntry(TurnstileStates.LOCKED, TurnstileStates.UNLOCKED, TurnstileEvents.COIN)
+                currentState = TurnstileStates.UNLOCKED
+            }
+            TurnstileStates.UNLOCKED -> run {
+                turnstile.returnCoin()
+            }
+        }
+    }
+
+    fun pass() {
+        when (currentState) {
+            TurnstileStates.UNLOCKED -> run {
+                defaultExit(TurnstileStates.UNLOCKED, TurnstileStates.LOCKED, TurnstileEvents.PASS)
+                turnstile.lock()
+                defaultEntry(TurnstileStates.UNLOCKED, TurnstileStates.LOCKED, TurnstileEvents.PASS)
+                currentState = TurnstileStates.LOCKED
+            }
+            else -> defaultAction(currentState, TurnstileEvents.PASS)
+        }
+    }
 }
