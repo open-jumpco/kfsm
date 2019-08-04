@@ -2,25 +2,32 @@
 
 This is a small implementation of an FSM in Kotlin.
 
+## Getting Started
+
 ![turnstile-fsm](src/doc/asciidoc/turnstile_fsm.png)
 
-The model supports events when triggered may cause a simpleTransition from one state to another while performing an optional action as well as entry and exit actions.
+The state machine implementation supports events triggering transitions from one state to another while performing an optional action as well as entry and exit actions. 
+
+## Features
+* Event driven state machine.
+* External and internal transitions 
+* State entty and exit actions.
+* Default state actions.
+* Default entry and exit actions.
+
+## Todo
+[] Multiple state maps
+[] Push / pop transitions
 
 ## Resources
 * [Documentation](https://open.jumpco.io/projects/kfsm/index.html)
 * [API Docs](https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html)
 * [Sample Project](https://github.com/open-jumpco/kfsm-samples)
 
-## Getting Started
+## Dependency 
 
-### Repository
-```groovy
-repositories {
-    maven {
-        url 'https://oss.sonatype.org/content/groups/public' 
-    }
-}
-```
+KFSM is a multiplatform project and relies on kotlin stdlib only.
+Add the relevant dependency to your build file.
 
 ### Kotlin/JVM Projects
 ```groovy
@@ -52,15 +59,7 @@ dependencies {
     implementation 'io.jumpco.open:kfsm-macosX64:0.7.1'    
 }
 ```
-### Building locally
 
-```cmd
-git clone https://github.com/open-jumpco/kfsm.git
-./gradlew publishToMavenLocal -Pprofile=default
-```
-The property `defaultProfile` is configured to `jvm,js,wasm,default`
-
-The `profile=default` will detect and add the current native platform.
 
 ## Questions:
 * Should entry / exit actions receive state or event as arguments?
