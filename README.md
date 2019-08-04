@@ -16,8 +16,8 @@ The state machine implementation supports events triggering transitions from one
 * Default entry and exit actions.
 
 ## Todo
-[] Multiple state maps
-[] Push / pop transitions
+[ ] Multiple state maps
+[ ] Push / pop transitions
 
 ## Resources
 * [Documentation](https://open.jumpco.io/projects/kfsm/index.html)
