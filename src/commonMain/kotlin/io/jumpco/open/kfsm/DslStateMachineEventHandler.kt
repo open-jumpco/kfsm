@@ -45,7 +45,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * @param event A Pair with the first being the on and the second being the targetState.
      * @param action The action will be performed
      */
-    fun on(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
+    fun transition(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event.first, event.second, action)
         return this
     }
@@ -56,7 +56,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * @param guard The guard expression must be met before the transition is considered.
      * @param action The optional action that may be executed
      */
-    fun on(
+    fun transition(
         event: EventState<E, S>,
         guard: StateGuard<C>,
         action: StateAction<C>?
@@ -70,7 +70,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * @param event The event and targetState the defines the transition
      * @param action The optional action that may be executed
      */
-    fun on(event: E, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
+    fun transition(event: E, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event, action)
         return this
     }
@@ -82,7 +82,7 @@ class DslStateMachineEventHandler<S : Enum<S>, E : Enum<E>, C>(
      * @param guard The guard expression must be met before the transition is considered.
      * @param action The optional action that may be executed
      */
-    fun on(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
+    fun transition(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMachineEventHandler<S, E, C> {
         fsm.transition(currentState, event, guard, action)
         return this
     }

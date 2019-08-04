@@ -89,15 +89,15 @@ class TurnstileFsmTests {
                 }
             }
             state(LOCKED) {
-                on(COIN to UNLOCKED) {
+                transition(COIN to UNLOCKED) {
                     unlock()
                 }
             }
             state(UNLOCKED) {
-                on(COIN) {
+                transition(COIN) {
                     returnCoin()
                 }
-                on(PASS to LOCKED) {
+                transition(PASS to LOCKED) {
                     lock()
                 }
             }
@@ -119,10 +119,10 @@ class TurnstileFsmTests {
                 entry { startState, targetState, _ ->
                     println("entering:$startState -> $targetState for $this")
                 }
-                on(COIN to UNLOCKED) {
+                transition(COIN to UNLOCKED) {
                     unlock()
                 }
-                on(PASS) {
+                transition(PASS) {
                     alarm()
                 }
                 exit { startState, targetState, _ ->
@@ -133,10 +133,10 @@ class TurnstileFsmTests {
                 entry { startState, targetState, _ ->
                     println("entering:$startState -> $targetState for $this")
                 }
-                on(COIN) {
+                transition(COIN) {
                     returnCoin()
                 }
-                on(PASS to LOCKED) {
+                transition(PASS to LOCKED) {
                     lock()
                 }
                 exit { startState, targetState, _ ->

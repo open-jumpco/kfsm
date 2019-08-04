@@ -91,20 +91,20 @@ class DetailTests {
                         println("exiting:from $targetState to $startState for:$this:$msg")
                         defaultExit()
                     }
-                    on(TestEvents.EVENT1 to TestStates.STATE1) { args ->
+                    transition(TestEvents.EVENT1 to TestStates.STATE1) { args ->
                         val msg = args[0] as String
                         println("default:EVENT1 to STATE1 for $this:$msg")
                         action1()
                         state = 1
 
                     }
-                    on(TestEvents.EVENT2 to TestStates.STATE2) { args ->
+                    transition(TestEvents.EVENT2 to TestStates.STATE2) { args ->
                         val msg = args[0] as String
                         println("default:on EVENT2 to STATE2 for $this:$msg")
                         action2()
                         state = 2
                     }
-                    on(TestEvents.EVENT3 to TestStates.STATE3) { args ->
+                    transition(TestEvents.EVENT3 to TestStates.STATE3) { args ->
                         val msg = args[0] as String
                         println("default:on EVENT3 to STATE3 for $this:$msg")
                         defaultAction()
@@ -117,7 +117,7 @@ class DetailTests {
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) {
+                    transition(TestEvents.EVENT1) {
                         action1()
                     }
                     entry { _, _, _ ->
@@ -129,7 +129,7 @@ class DetailTests {
                     entry { _, _, _ ->
                         entry2()
                     }
-                    on(TestEvents.EVENT2, guard = { state == 2 }) { args ->
+                    transition(TestEvents.EVENT2, guard = { state == 2 }) { args ->
                         val msg = args[0] as String
                         println("EVENT2:guarded:from STATE2 for $this:$msg")
                         action2()
@@ -142,7 +142,7 @@ class DetailTests {
                     exit { _, _, _ ->
                         exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { state == 2 }) {
+                    transition(TestEvents.EVENT2, guard = { state == 2 }) {
                         error("should never be called")
                     }
                 }

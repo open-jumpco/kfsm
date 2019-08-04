@@ -48,7 +48,7 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
      * @param event Pair representing an on and targetState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
-    fun on(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {
+    fun transition(event: EventState<E, S>, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {
         fsm.default(event, action)
         return this
     }
@@ -58,7 +58,7 @@ class DslStateMachineDefaultEventHandler<S : Enum<S>, E : Enum<E>, C>(private va
      * @param event The event that triggers this transition
      * @param action The action will be invoked for this transition
      */
-    fun on(event: E, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {
+    fun transition(event: E, action: StateAction<C>?): DslStateMachineDefaultEventHandler<S, E, C> {
         fsm.default(event, action)
         return this
     }

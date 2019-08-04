@@ -114,26 +114,26 @@ class LockFsmTests {
             }
 
             state(LOCKED) {
-                on(LOCK to DOUBLE_LOCKED) {
+                transition(LOCK to DOUBLE_LOCKED) {
                     doubleLock()
                 }
-                on(UNLOCK to UNLOCKED) {
+                transition(UNLOCK to UNLOCKED) {
                     unlock()
                 }
             }
             state(DOUBLE_LOCKED) {
-                on(UNLOCK to LOCKED) {
+                transition(UNLOCK to LOCKED) {
                     doubleUnlock()
                 }
-                on(LOCK) {
+                transition(LOCK) {
                     error("Already double locked")
                 }
             }
             state(UNLOCKED) {
-                on(LOCK to LOCKED) {
+                transition(LOCK to LOCKED) {
                     lock()
                 }
-                on(UNLOCK) {
+                transition(UNLOCK) {
                     error("Already unlocked")
                 }
             }

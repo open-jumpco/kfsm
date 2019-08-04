@@ -123,24 +123,29 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
             }
             state(PayingTurnstileStates.LOCKED) {
                 // The coins add up to more than required
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> val value = args[0] as Int;
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
+                    guard = { args ->
+                        val value = args[0] as Int;
                         value + this.coins > this.requiredCoins
-                    }) { args -> val value = args[0] as Int
+                    }) { args ->
+                    val value = args[0] as Int
                     returnCoin(coin(value) - requiredCoins)
                     unlock()
                     reset()
                 }
                 // The coins add up to more than required
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                    guard = { args -> val value = args[0] as Int;
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
+                    guard = { args ->
+                        val value = args[0] as Int;
                         value + this.coins < this.requiredCoins
-                    }) { args -> val value = args[0] as Int
+                    }) { args ->
+                    val value = args[0] as Int
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
                 }
                 // The coin brings amount to exact amount
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args -> val value = args[0] as Int
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
+                    val value = args[0] as Int
                     coin(value)
                     unlock()
                     reset()
@@ -148,8 +153,9 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
             }
             state(PayingTurnstileStates.COINS) {
                 // The coins add up to more than required.
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> val value = args[0] as Int
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
+                    guard = { args ->
+                        val value = args[0] as Int
                         value + this.coins > this.requiredCoins
                     }) { args -> val value = args[0] as Int
                     returnCoin(coin(value) - requiredCoins)
@@ -157,25 +163,29 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                     reset()
                 }
                 // The coins isn't enough to make total match required
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                    guard = { args -> val value = args[0] as Int;
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
+                    guard = { args ->
+                        val value = args[0] as Int;
                         value + this.coins < this.requiredCoins
-                    }) { args -> val value = args[0] as Int
+                    }) { args ->
+                    val value = args[0] as Int
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
                 }
                 // The coin is exact amount required
-                on(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args -> val value = args[0] as Int
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
+                    val value = args[0] as Int
                     coin(value)
                     unlock()
                     reset()
                 }
             }
             state(PayingTurnstileStates.UNLOCKED) {
-                on(PayingTurnstileEvents.COIN) { args -> val value = args[0] as Int
+                transition(PayingTurnstileEvents.COIN) { args ->
+                    val value = args[0] as Int
                     returnCoin(coin(value))
                 }
-                on(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
+                transition(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
                     lock()
                 }
             }
@@ -186,4 +196,5 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
 
     fun coin(value: Int) = fsm.sendEvent(PayingTurnstileEvents.COIN, value)
     fun pass() = fsm.sendEvent(PayingTurnstileEvents.PASS)
+    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
 }

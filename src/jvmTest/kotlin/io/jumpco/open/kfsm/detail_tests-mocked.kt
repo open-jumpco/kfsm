@@ -89,16 +89,16 @@ class DetailMockedTests {
                         println("exiting:from $targetState to $startState for:$this")
                         defaultExit()
                     }
-                    on(TestEvents.EVENT1 to TestStates.STATE1) {
+                    transition(TestEvents.EVENT1 to TestStates.STATE1) {
                         println("default:EVENT1 to STATE1 for $this")
                         action1()
 
                     }
-                    on(TestEvents.EVENT2 to TestStates.STATE2) {
+                    transition(TestEvents.EVENT2 to TestStates.STATE2) {
                         println("default:on EVENT2 to STATE2 for $this")
                         action2()
                     }
-                    on(TestEvents.EVENT3 to TestStates.STATE3) {
+                    transition(TestEvents.EVENT3 to TestStates.STATE3) {
                         println("default:on EVENT3 to STATE3 for $this")
                         defaultAction()
                     }
@@ -108,7 +108,7 @@ class DetailMockedTests {
                     }
                 }
                 state(TestStates.STATE1) {
-                    on(TestEvents.EVENT1) {
+                    transition(TestEvents.EVENT1) {
                         action1()
                     }
                     entry { _, _, _ ->
@@ -120,7 +120,7 @@ class DetailMockedTests {
                     entry { _, _, _ ->
                         entry2()
                     }
-                    on(TestEvents.EVENT2, guard = { state == 2 }) {
+                    transition(TestEvents.EVENT2, guard = { state == 2 }) {
                         println("EVENT2:guarded:from STATE2 for $this")
                         action2()
                     }
@@ -132,7 +132,7 @@ class DetailMockedTests {
                     exit { _, _, _ ->
                         exit3()
                     }
-                    on(TestEvents.EVENT2, guard = { state == 2 }) {
+                    transition(TestEvents.EVENT2, guard = { state == 2 }) {
                         error("should never be called")
                     }
                 }

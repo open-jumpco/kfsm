@@ -93,15 +93,15 @@ class TurnstileFSM(turnstile: Turnstile) {
                 }
             }
             state(TurnstileStates.LOCKED) {
-                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
                     unlock()
                 }
             }
             state(TurnstileStates.UNLOCKED) {
-                on(TurnstileEvents.COIN) {
+                transition(TurnstileEvents.COIN) {
                     returnCoin()
                 }
-                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
                     lock()
                 }
             }
@@ -145,31 +145,31 @@ Add the relevant dependency to your build file.
 ### Kotlin/JVM Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.7.1'
+    implementation 'io.jumpco.open:kfsm-jvm:0.8.0'
 }
 ```
 ### KotlinJS Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.7.1'
+    implementation 'io.jumpco.open:kfsm-js:0.8.0'
 }
 ```
 ### Kotlin/Native Projects using LinuxX64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.7.1'    
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.8.0'    
 }
 ```
 ### Kotlin/Native Projects using MinGW64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.7.1'    
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.8.0'    
 }
 ```
 ### Kotlin/Native Projects using macOS
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.7.1'    
+    implementation 'io.jumpco.open:kfsm-macosX64:0.8.0'    
 }
 ```
 

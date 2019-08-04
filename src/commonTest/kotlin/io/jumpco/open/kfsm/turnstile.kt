@@ -82,15 +82,15 @@ class TurnstileFSM(turnstile: Turnstile) {
                 }
             }
             state(TurnstileStates.LOCKED) {
-                on(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
                     unlock()
                 }
             }
             state(TurnstileStates.UNLOCKED) {
-                on(TurnstileEvents.COIN) {
+                transition(TurnstileEvents.COIN) {
                     returnCoin()
                 }
-                on(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
                     lock()
                 }
             }
@@ -101,7 +101,7 @@ class TurnstileFSM(turnstile: Turnstile) {
 
     fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
     fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
-    fun allowedEvents() = fsm.allowed().map { it.name }.toSet()
+    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
 }
 
 

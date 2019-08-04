@@ -16,7 +16,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.7.1'
+    implementation 'io.jumpco.open:kfsm-jvm:0.8.0'
 }
 ----
 
@@ -25,7 +25,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.7.1'
+    implementation 'io.jumpco.open:kfsm-js:0.8.0'
 }
 ----
 
@@ -34,7 +34,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-wasm32:0.7.1'
+    implementation 'io.jumpco.open:kfsm-wasm32:0.8.0'
 }
 ----
 
@@ -43,7 +43,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.7.1'
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.8.0'
 }
 ----
 
@@ -52,7 +52,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.7.1'
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.8.0'
 }
 ----
 
@@ -61,7 +61,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.7.1'
+    implementation 'io.jumpco.open:kfsm-macosX64:0.8.0'
 }
 ----
 
@@ -121,7 +121,7 @@ default {
     }
     exit { // global state exit action
     }
-    on { // default transitions
+    transition { // default transitions
     }
 }
 ----
@@ -174,8 +174,8 @@ exit { fromState, targetState, args ->
 }
 ----
 
-==== on(E [to S]) {}
-* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/on.html[DslStateMachineDefaultEventHandler::on]
+==== transition(E [to S]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/transition.html[DslStateMachineDefaultEventHandler::transition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
@@ -186,11 +186,11 @@ In both cases the lambda type is `C.(Array<out Any) -> Unit`
 Example:
 [source,kotlin]
 ----
-on(Event.EVENT) { args -> // default internal state action for given event
+transition(Event.EVENT) { args -> // default internal state action for given event
     someFunction()
 }
 
-on(Event.EVENT to State.STATE) { args-> // default external state action for given event
+transition(Event.EVENT to State.STATE) { args-> // default external state action for given event
     anotherFunction()
 }
 ----
@@ -231,13 +231,13 @@ state(State.STATE) {
     }
     exit { // exit action for State.STATE
     }
-    on(Event.EV2 to State.S1, guard = {flag == 1 }) { // external transition with guard expression
+    transition(Event.EV2 to State.S1, guard = {flag == 1 }) { // external transition with guard expression
     }
-    on(Event.EV2 to State.S1) { // external transition
+    transition(Event.EV2 to State.S1) { // external transition
     }
-    on(Event.EV1, guard = { flag == 2 }) { // internal transition with guard expression
+    transition(Event.EV1, guard = { flag == 2 }) { // internal transition with guard expression
     }
-    on(Event.EV1) { // internal guard expression
+    transition(Event.EV1) { // internal guard expression
     }
 }
 ----
@@ -286,8 +286,8 @@ exit { fromState, targetState, args -> // state exit action
     println("Exiting:$fromState to $targetState with ${args.toList()}")
 }
 ----
-==== on(E [to S],[guard = {}]) {}
-* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/on.html[DslStateMachineEventHandler::on]
+==== transition(E [to S],[guard = {}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/transition.html[DslStateMachineEventHandler::transition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
@@ -302,12 +302,12 @@ Their may be only one transition without a guard expression.
 Examples:
 [source,kotlin]
 ----
-on(Event.EV1, guard = { flag == 1 }) { args -> // internal transition with guard expression
+transition(Event.EV1, guard = { flag == 1 }) { args -> // internal transition with guard expression
 }
-on(Event.EV1 to State.S2, guard = { flag == 2}) { args -> // external transition with guard expression
+transition(Event.EV1 to State.S2, guard = { flag == 2}) { args -> // external transition with guard expression
 }
-on(Event.EV1) { args -> // internal transition
+transition(Event.EV1) { args -> // internal transition
 }
-on(Event.EV2 to State.S2) { args -> // external transition
+transition(Event.EV2 to State.S2) { args -> // external transition
 }
 ----
