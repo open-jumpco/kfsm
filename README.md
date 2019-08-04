@@ -2,7 +2,7 @@
 
 This is a small implementation of an FSM in Kotlin.
 
-![turnstile-fsm][src/doc/asciidoc/turnstile_fsm.png]
+![turnstile-fsm](src/doc/asciidoc/turnstile_fsm.png)
 
 The model supports events when triggered may cause a simpleTransition from one state to another while performing an optional action as well as entry and exit actions.
 
