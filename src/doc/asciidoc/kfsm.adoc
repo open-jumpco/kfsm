@@ -57,7 +57,7 @@ enum class TurnstileEvents {
 ----
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
-        private val definition = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
+        private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
             initial {
             if (locked)
                 TurnstileStates.LOCKED
@@ -226,23 +226,27 @@ enum class PayingTurnstileEvents {
     PASS
 }
 ----
+We add a stateMap named `coins`. The statemap will be entered when there are outstanding coins.
 
 ==== State machine definition packaged
 ```kotlin
 class PayingTurnstileFSM(turnstile: PayingTurnstile) {
     companion object {
-        private val definition = stateMachine(
-            PayingTurnstileStates::class,
+        val definition = stateMachine(
+            setOf(PayingTurnstileStates.LOCKED, PayingTurnstileStates.UNLOCKED),
             PayingTurnstileEvents::class,
             PayingTurnstile::class
         ) {
-            initial {
-                when {
-                    coins > 0 -> PayingTurnstileStates.COINS
-                    locked ->
-                        PayingTurnstileStates.LOCKED
-                    else ->
-                        PayingTurnstileStates.UNLOCKED
+            initialMap {
+                mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
+                    if (locked) {
+                        this.add(PayingTurnstileStates.LOCKED to "default")
+                    } else {
+                        this.add(PayingTurnstileStates.UNLOCKED to "default")
+                    }
+                    if (coins > 0) {
+                        this.add(PayingTurnstileStates.COINS to "coins")
+                    }
                 }
             }
             default {
@@ -255,9 +259,9 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                 }
                 action { state, event, args ->
                     if (args.isNotEmpty()) {
-                        println("Default action for state($state) -> event($event, ${args.toList()}) for $this")
+                        println("Default action for state($state) -> on($event, ${args.toList()}) for $this")
                     } else {
-                        println("Default action for state($state) -> event($event) for $this")
+                        println("Default action for state($state) -> on($event) for $this")
                     }
                     alarm()
                 }
@@ -269,58 +273,72 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                     }
                 }
             }
+            stateMap("coins", setOf(PayingTurnstileStates.COINS)) {
+                state(PayingTurnstileStates.COINS) {
+                    // The coins add up to more than required.
+                    popTransition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
+                        guard = { args ->
+                            val value = args[0] as Int
+                            value + this.coins > this.requiredCoins
+                        }) { args ->
+                        val value = args[0] as Int
+                        returnCoin(coin(value) - requiredCoins)
+                        unlock()
+                        reset()
+                    }
+                    // The coins isn't enough to make total match required
+                    transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
+                        guard = { args ->
+                            val value = args[0] as Int;
+                            value + this.coins < this.requiredCoins
+                        }) { args ->
+                        val value = args[0] as Int
+                        coin(value)
+                        println("Coins=$coins, Please add ${requiredCoins - coins}")
+                    }
+                    // The coin is exact amount required
+                    popTransition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
+                        val value = args[0] as Int
+                        coin(value)
+                        unlock()
+                        reset()
+                    }
+                }
+            }
             state(PayingTurnstileStates.LOCKED) {
                 // The coins add up to more than required
                 transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> val value = args[0] as Int;
+                    guard = { args ->
+                        val value = args[0] as Int;
                         value + this.coins > this.requiredCoins
-                    }) { args -> val value = args[0] as Int
+                    }) { args ->
+                    val value = args[0] as Int
                     returnCoin(coin(value) - requiredCoins)
+                    unlock()
+                    reset()
+                }
+                // The coin brings amount to exact amount
+                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
+                    val value = args[0] as Int
+                    coin(value)
                     unlock()
                     reset()
                 }
                 // The coins add up to more than required
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                    guard = { args -> val value = args[0] as Int;
+                pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
+                    guard = { args ->
+                        val value = args[0] as Int;
                         value + this.coins < this.requiredCoins
-                    }) { args -> val value = args[0] as Int
+                    }) { args ->
+                    val value = args[0] as Int
+                    println("PUSH TRANSITION")
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
-                }
-                // The coin brings amount to exact amount
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args -> val value = args[0] as Int
-                    coin(value)
-                    unlock()
-                    reset()
-                }
-            }
-            state(PayingTurnstileStates.COINS) {
-                // The coins add up to more than required.
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args -> val value = args[0] as Int
-                        value + this.coins > this.requiredCoins
-                    }) { args -> val value = args[0] as Int
-                    returnCoin(coin(value) - requiredCoins)
-                    unlock()
-                    reset()
-                }
-                // The coins isn't enough to make total match required
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                    guard = { args -> val value = args[0] as Int;
-                        value + this.coins < this.requiredCoins
-                    }) { args -> val value = args[0] as Int
-                    coin(value)
-                    println("Coins=$coins, Please add ${requiredCoins - coins}")
-                }
-                // The coin is exact amount required
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args -> val value = args[0] as Int
-                    coin(value)
-                    unlock()
-                    reset()
                 }
             }
             state(PayingTurnstileStates.UNLOCKED) {
-                transition(PayingTurnstileEvents.COIN) { args -> val value = args[0] as Int
+                transition(PayingTurnstileEvents.COIN) { args ->
+                    val value = args[0] as Int
                     returnCoin(coin(value))
                 }
                 transition(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
@@ -330,10 +348,20 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
         }.build()
     }
 
-    private val fsm = definition.create(turnstile)
+    val fsm = definition.create(turnstile)
 
-    fun coin(value: Int) = fsm.sendEvent(PayingTurnstileEvents.COIN, value)
-    fun pass() = fsm.sendEvent(PayingTurnstileEvents.PASS)
+    fun coin(value: Int) {
+        println("sendEvent:COIN:$value")
+        fsm.sendEvent(PayingTurnstileEvents.COIN, value)
+    }
+
+    fun pass() {
+        println("sendEvent:PASS")
+        fsm.sendEvent(PayingTurnstileEvents.PASS)
+    }
+
+    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
+
 }
 ```
 
@@ -346,9 +374,14 @@ println("--coin1")
 fsm.coin(10)
 assertTrue(turnstile.locked)
 assertTrue(turnstile.coins == 10)
+assertTrue(
+    fsm.fsm.currentStateMap.name != null && "coins" == fsm.fsm.currentStateMap.name,
+    "Expected coins map"
+)
 println("--coin2")
 fsm.coin(60)
 assertTrue(turnstile.coins == 0)
+assertTrue(fsm.fsm.currentStateMap.name == null, "Expected default map")
 assertTrue(!turnstile.locked)
 println("--pass1")
 fsm.pass()
@@ -369,35 +402,40 @@ assertTrue(!turnstile.locked)
 ==== Output
 ```
 --coin1
+sendEvent:COIN:10
 entering:LOCKED ([10]) for Turnstile(locked=true,coins=0)
-Value=10, Total=10
+PUSH TRANSITION
+Coin received=10, Total=10
 Coins=10, Please add 40
-entering:COINS ([10]) for Turnstile(locked=true,coins=10)
 --coin2
-entering:COINS ([60]) for Turnstile(locked=true,coins=10)
-Value=60, Total=70
+sendEvent:COIN:60
+Coin received=60, Total=70
 Return Coin:20
 Unlock
 Reset coins=0
 entering:UNLOCKED ([60]) for Turnstile(locked=false,coins=0)
 --pass1
+sendEvent:PASS
 exiting:UNLOCKED for Turnstile(locked=false,coins=0)
 Lock
 entering:LOCKED for Turnstile(locked=true,coins=0)
 --pass2
-Default action for state(LOCKED) -> event(PASS) for Turnstile(locked=true,coins=0)
+sendEvent:PASS
+Default action for state(LOCKED) -> on(PASS) for Turnstile(locked=true,coins=0)
 Alarm
 --pass3
-Default action for state(LOCKED) -> event(PASS) for Turnstile(locked=true,coins=0)
+sendEvent:PASS
+Default action for state(LOCKED) -> on(PASS) for Turnstile(locked=true,coins=0)
 Alarm
 --coin3
+sendEvent:COIN:40
 entering:LOCKED ([40]) for Turnstile(locked=true,coins=0)
-Value=40, Total=40
+PUSH TRANSITION
+Coin received=40, Total=40
 Coins=40, Please add 10
-entering:COINS ([40]) for Turnstile(locked=true,coins=40)
 --coin4
-entering:COINS ([10]) for Turnstile(locked=true,coins=40)
-Value=10, Total=50
+sendEvent:COIN:10
+Coin received=10, Total=50
 Unlock
 Reset coins=0
 entering:UNLOCKED ([10]) for Turnstile(locked=false,coins=0)

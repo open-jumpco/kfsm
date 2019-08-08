@@ -18,10 +18,13 @@ The state machine implementation supports events triggering transitions from one
 * Default state actions.
 * Default entry and exit actions.
 * Determine allowed events.
+* Multiple state maps with push / pop transitions
+* Automatic transitions
 
 ## Todo
-- [ ] Multiple state maps
-- [ ] Push / pop transitions
+- [X] Multiple state maps
+- [X] Push / pop transitions
+- [X] Automatic transitions
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
@@ -77,7 +80,7 @@ enum class TurnstileEvents {
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
         private val definition = stateMachine(
-                TurnstileStates::class, 
+                TurnstileStates.values().toSet(), 
                 TurnstileEvents::class, 
                 Turnstile::class
         ) {
@@ -145,31 +148,31 @@ Add the relevant dependency to your build file.
 ### Kotlin/JVM Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.8.0'
+    implementation 'io.jumpco.open:kfsm-jvm:0.9.0'
 }
 ```
 ### KotlinJS Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.8.0'
+    implementation 'io.jumpco.open:kfsm-js:0.9.0'
 }
 ```
 ### Kotlin/Native Projects using LinuxX64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.8.0'    
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.0'    
 }
 ```
 ### Kotlin/Native Projects using MinGW64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.8.0'    
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.0'    
 }
 ```
 ### Kotlin/Native Projects using macOS
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.8.0'    
+    implementation 'io.jumpco.open:kfsm-macosX64:0.9.0'    
 }
 ```
 
@@ -178,7 +181,5 @@ dependencies {
 * Should entry / exit actions receive state or event as arguments?
 * Should default actions receive state or event as arguments?
 * Is there a more elegant way to define States and Events using sealed classes?
-* Would support for multiple named state maps be useful? 
-* Push / Pop into named map with pop providing optional new state?
 * Are any features missing from the implementation?
 

@@ -24,10 +24,15 @@ class PayingTurnstileFsmTests {
         fsm.coin(10)
         assertTrue(turnstile.locked)
         assertTrue(turnstile.coins == 10)
+        assertTrue(
+            fsm.fsm.currentStateMap.name != null && "coins" == fsm.fsm.currentStateMap.name,
+            "Expected coins map"
+        )
         println("--coin2")
         fsm.coin(60)
         assertTrue(turnstile.coins == 0)
         assertTrue(!turnstile.locked)
+        assertTrue(fsm.fsm.currentStateMap.name == null, "Expected default map not ${fsm.fsm.currentStateMap.name}")
         println("--pass1")
         fsm.pass()
         assertTrue(turnstile.locked)

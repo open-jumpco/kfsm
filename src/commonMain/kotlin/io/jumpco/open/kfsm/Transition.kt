@@ -14,14 +14,22 @@ package io.jumpco.open.kfsm
  * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.
  */
-open class Transition<S : Enum<S>, E : Enum<E>, C>(
-    internal val targetState: S? = null,
+open class Transition<S, E : Enum<E>, C>(
+    val targetState: S? = null,
+    val targetMap: String? = null,
+    val automatic: Boolean = false,
+    val type: TransitionType = TransitionType.NORMAL,
     private val action: StateAction<C>? = null
 ) {
+    init {
+        if (type == TransitionType.PUSH) {
+            require(targetState != null) { "targetState is required for push transition" }
+        }
+    }
     /**
      * Executed exit, optional and entry actions specific in the transition.
      */
-    open fun execute(context: C, instance: StateMachineInstance<S, E, C>, args: Array<out Any>) {
+    open fun execute(context: C, instance: StateMapInstance<S, E, C>, args: Array<out Any>) {
 
         if (isExternal()) {
             instance.executeExit(context, targetState!!, args)
@@ -30,7 +38,25 @@ open class Transition<S : Enum<S>, E : Enum<E>, C>(
         if (isExternal()) {
             instance.executeEntry(context, targetState!!, args)
         }
+    }
 
+    /**
+     * Executed exit, optional and entry actions specific in the transition.
+     */
+    open fun execute(
+        context: C,
+        sourceMap: StateMapInstance<S, E, C>,
+        targetMap: StateMapInstance<S, E, C>?,
+        args: Array<out Any>
+    ) {
+
+        if (isExternal()) {
+            sourceMap.executeExit(context, targetState!!, args)
+        }
+        action?.invoke(context, args)
+        if (targetMap != null && isExternal()) {
+            targetMap.executeEntry(context, targetState!!, args)
+        }
     }
 
     /**

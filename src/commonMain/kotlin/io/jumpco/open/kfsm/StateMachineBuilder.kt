@@ -15,17 +15,57 @@ package io.jumpco.open.kfsm
  * @param E is en enum representing all the events the FSM may receive
  * @param C is the class of the Context where the action will be applied.
  */
-class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
+class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
     private var completed = false
     private var deriveInitialState: StateQuery<C, S>? = null
-    private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
-    private val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
-    private val entryActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
-    private val exitActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
-    private val defaultActions: MutableMap<S, DefaultStateAction<C, S, E>> = mutableMapOf()
-    private var globalDefault: DefaultStateAction<C, S, E>? = null
-    private var defaultEntryAction: DefaultChangeAction<C, S>? = null
-    private var defaultExitAction: DefaultChangeAction<C, S>? = null
+    private var deriveInitialStateMap: StateMapQuery<C, S>? = null
+    internal val defaultStateMap = StateMapBuilder<S, E, C>(validMapStates, null, this)
+    internal val namedStateMaps: MutableMap<String, StateMapBuilder<S, E, C>> = mutableMapOf()
+    /**
+     * This function is used to provide a method for determining the initial state of the FSM using the provided content.
+     * @param init Is a function that receives a context and returns the state that represents the context
+     */
+    fun initial(init: StateQuery<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
+        deriveInitialState = init
+    }
+
+    fun initialMap(init: StateMapQuery<C, S>) {
+        require(!completed) { "Statemachine has been completed" }
+        deriveInitialStateMap = init
+    }
+
+    fun stateMap(
+        name: String,
+        validStates: Set<S>,
+        handler: DslStateMapHandler<S, E, C>.() -> Unit
+    ): DslStateMapHandler<S, E, C> {
+        require(name != "default") { "Map cannot be named 'default'" }
+        val stateMapBuilder = StateMapBuilder<S, E, C>(validStates, name, this)
+        namedStateMaps[name] = stateMapBuilder
+        return DslStateMapHandler(stateMapBuilder).apply(handler)
+    }
+
+    /**
+     * This function enables completed for the state machine definition prevent further changes to the state
+     * machine behaviour.
+     */
+    fun complete(): StateMachineDefinition<S, E, C> {
+        completed = true
+        if (namedStateMaps.isNotEmpty()) {
+            require(this.deriveInitialStateMap != null) { "initialMap must be defined when using named state maps" }
+            require(this.deriveInitialState == null) { "deriveInitialState cannot be used with named state maps" }
+        }
+        return StateMachineDefinition(
+            this.deriveInitialState,
+            this.deriveInitialStateMap,
+            this.defaultStateMap.toMap(),
+            this.namedStateMaps.map { Pair(it.key, it.value.toMap()) }.toMap()
+        )
+    }
+
+    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit): DslStateMachineHandler<S, E, C> =
+        DslStateMachineHandler(this).apply(handler)
 
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
@@ -36,18 +76,9 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
-        require(!completed) { "Statemachine has been completed" }
-        val key = Pair(startState, event)
-        val transitionRule = transitionRules[key]
-        if (transitionRule == null) {
-            val rule = TransitionRules<S, E, C>()
-            rule.addGuarded(GuardedTransition(startState, event, targetState, guard, action))
-            transitionRules[key] = rule
-        } else {
-            transitionRule.addGuarded(GuardedTransition(startState, event, targetState, guard, action))
-        }
-    }
+
+    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) =
+        defaultStateMap.transition(startState, event, targetState, guard, action)
 
     /**
      * This function defines a transition that doesn't change the state also know as an internal transition.
@@ -57,18 +88,9 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) {
-        require(!completed) { "Statemachine has been completed" }
-        val key = Pair(startState, event)
-        val transitionRule = transitionRules[key]
-        if (transitionRule == null) {
-            val rule = TransitionRules<S, E, C>()
-            rule.addGuarded(GuardedTransition(startState, event, null, guard, action))
-            transitionRules[key] = rule
-        } else {
-            transitionRule.addGuarded(GuardedTransition(startState, event, null, guard, action))
-        }
-    }
+
+    fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) =
+        defaultStateMap.transition(startState, event, guard, action)
 
 
     /**
@@ -79,18 +101,8 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
      * @param targetState FSM will transition to targetState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, targetState: S, action: StateAction<C>?) {
-        require(!completed) { "Statemachine has been completed" }
-        val key = Pair(startState, event)
-        val transitionRule = transitionRules[key]
-        if (transitionRule == null) {
-            transitionRules[key] =
-                TransitionRules(transition = SimpleTransition(startState, event, targetState, action))
-        } else {
-            require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
-            transitionRule.transition = SimpleTransition(startState, event, targetState, action)
-        }
-    }
+    fun transition(startState: S, event: E, targetState: S, action: StateAction<C>?) =
+        defaultStateMap.transition(startState, event, targetState, action)
 
     /**
      * This function defines a transition that doesn't change the state of the state machine when the currentState is startState and the on is received and after the action was performed. No entry or exit actions performed.
@@ -98,25 +110,8 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
-    fun transition(startState: S, event: E, action: StateAction<C>?) {
-        require(!completed) { "Statemachine has been completed" }
-        val key = Pair(startState, event)
-        val transitionRule = transitionRules[key]
-        if (transitionRule == null) {
-            transitionRules[key] = TransitionRules(
-                transition = SimpleTransition(
-                    startState,
-                    event,
-                    null,
-                    action
-                )
-            )
-        } else {
-            require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
-            transitionRule.transition = SimpleTransition(startState, event, null, action)
-        }
-
-    }
+    fun transition(startState: S, event: E, action: StateAction<C>?) =
+        defaultStateMap.transition(startState, event, action)
 
 
     /**
@@ -124,116 +119,62 @@ class StateMachineBuilder<S : Enum<S>, E : Enum<E>, C> {
      * This will be an internal transition and will not cause a change in state or invoke entry or exit functions.
      * @param action This action will be performed
      */
-    fun defaultAction(action: DefaultStateAction<C, S, E>) {
-        require(!completed) { "Statemachine has been completed" }
-        globalDefault = action
-    }
-
-    /**
-     * This method is the entry point to creating the DSL
-     * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
-     */
-    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit): DslStateMachineHandler<S, E, C> =
-        DslStateMachineHandler(this).apply(handler)
+    fun defaultAction(action: DefaultStateAction<C, S, E>) =
+        defaultStateMap.defaultAction(action)
 
     /**
      * This function defines an action to be invoked when no entry action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultEntry(action: DefaultChangeAction<C, S>) {
-        require(!completed) { "Statemachine has been completed" }
-        defaultEntryAction = action
-    }
+    fun defaultEntry(action: DefaultChangeAction<C, S>) =
+        defaultStateMap.defaultEntry(action)
 
     /**
      * This function defines an action to be invoked when no exit action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultExit(action: DefaultChangeAction<C, S>) {
-        require(!completed) { "Statemachine has been completed" }
-        defaultExitAction = action
-    }
+    fun defaultExit(action: DefaultChangeAction<C, S>) =
+        defaultStateMap.defaultExit(action)
+
 
     /**
      * This function defines an action to be invoked when no transitions are found matching the given state and on.
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun default(currentState: S, action: DefaultStateAction<C, S, E>) {
-        require(!completed) { "Statemachine has been completed" }
-        require(defaultActions[currentState] == null) { "Default defaultAction already defined for $currentState" }
-        defaultActions[currentState] = action
-    }
+    fun default(currentState: S, action: DefaultStateAction<C, S, E>) =
+        defaultStateMap.default(currentState, action)
 
     /**
      * This function defines an action to be invoked when no transitions match the event. The currentState will be change to second parameter of the Pair.
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: EventState<E, S>, action: StateAction<C>?) {
-        require(!completed) { "Statemachine has been completed" }
-        require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
-        defaultTransitions[event.first] = DefaultTransition(event.first, event.second, action)
-    }
+    fun default(event: EventState<E, S>, action: StateAction<C>?) =
+        defaultStateMap.default(event, action)
 
     /**
      * This function defines an action to be invoked when no transitions are found for given event.
      * @param event The event to match this transition.
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: E, action: StateAction<C>?) {
-        require(!completed) { "Statemachine has been completed" }
-        require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
-        defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, action)
-    }
+    fun default(event: E, action: StateAction<C>?) =
+        defaultStateMap.default(event, action)
+
 
     /**
      * This function defines an action to be invoked when the FSM changes to the provided state
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun entry(currentState: S, action: DefaultChangeAction<C, S>) {
-        require(!completed) { "Statemachine has been completed" }
-        require(entryActions[currentState] == null) { "Entry defaultAction already defined for $currentState" }
-        entryActions[currentState] = action
-    }
+    fun entry(currentState: S, action: DefaultChangeAction<C, S>) =
+        defaultStateMap.entry(currentState, action)
 
     /**
      * This function defines an action to be invoke when the FSM changes from the provided state
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun exit(currentState: S, action: DefaultChangeAction<C, S>) {
-        require(!completed) { "Statemachine has been completed" }
-        require(exitActions[currentState] == null) { "Exit defaultAction already defined for $currentState" }
-        exitActions[currentState] = action
-    }
-
-    /**
-     * This function is used to provide a method for determining the initial state of the FSM using the provided content.
-     * @param init Is a function that receives a context and returns the state that represents the context
-     */
-    fun initial(init: StateQuery<C, S>) {
-        require(!completed) { "Statemachine has been completed" }
-        deriveInitialState = init
-    }
-
-    /**
-     * This function enables completed for the state machine definition prevent further changes to the state
-     * machine behaviour.
-     */
-    fun complete(): StateMachineDefinition<S, E, C> {
-        completed = true
-        return StateMachineDefinition(
-            this.deriveInitialState,
-            this.transitionRules.toMap(),
-            this.defaultTransitions.toMap(),
-            this.entryActions.toMap(),
-            this.exitActions.toMap(),
-            this.defaultActions.toMap(),
-            this.globalDefault,
-            this.defaultEntryAction,
-            this.defaultExitAction
-        )
-    }
+    fun exit(currentState: S, action: DefaultChangeAction<C, S>) =
+        defaultStateMap.exit(currentState, action)
 }

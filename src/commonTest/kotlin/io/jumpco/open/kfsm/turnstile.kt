@@ -62,7 +62,7 @@ enum class TurnstileEvents {
  */
 class TurnstileFSM(turnstile: Turnstile) {
     companion object {
-        private val definition = stateMachine(TurnstileStates::class, TurnstileEvents::class, Turnstile::class) {
+        private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
             initial {
                 if (locked)
                     TurnstileStates.LOCKED

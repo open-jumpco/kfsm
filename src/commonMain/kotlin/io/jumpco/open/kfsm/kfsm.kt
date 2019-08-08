@@ -31,6 +31,11 @@ typealias StateGuard<C> = C.(Array<out Any>) -> Boolean
  */
 typealias StateQuery<C, S> = (C.() -> S)
 
+typealias StateMapItem<S> = Pair<S, String>
+
+typealias StateMapList<S> = List<StateMapItem<S>>
+
+typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
 /**
  * This represents a default action that will be invoked on a change in state as defined with entry or exit.
  * @param C The context: C will be available to the lambda
@@ -55,6 +60,11 @@ typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
  */
 typealias EventState<E, S> = Pair<E, S>
 
+enum class TransitionType {
+    NORMAL,
+    PUSH,
+    POP
+}
 
 /**
  * Defines the start of a state machine DSL declaration
@@ -63,25 +73,38 @@ typealias EventState<E, S> = Pair<E, S>
  * @param contextClass The class of the context
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
-inline fun <S : Enum<S>, E : Enum<E>, C : Any> stateMachine(
-    stateClass: KClass<S>,
+inline fun <S, E : Enum<E>, C : Any> stateMachine(
+    validStates: Set<S>,
     eventClass: KClass<E>,
     contextClass: KClass<out C>,
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
-) = StateMachineBuilder<S, E, C>().stateMachine(handler)
+) = StateMachineBuilder<S, E, C>(validStates).stateMachine(handler)
 
 
-inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit, otherwise: T.() -> Unit) : T {
-    return if(expression) {
+inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit, otherwise: T.() -> Unit): T {
+    return if (expression) {
         this.apply(block)
     } else {
         this.apply(otherwise)
     }
 }
 
-inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit) : T {
-    if(expression) {
+inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit): T {
+    if (expression) {
         this.apply(block)
     }
     return this
+}
+
+class Stack<T> {
+    private val elements: MutableList<T> = mutableListOf()
+    fun push(value: T) = elements.add(value)
+    fun pop(): T {
+        require(elements.isNotEmpty())
+        return elements.removeAt(elements.lastIndex)
+    }
+
+    fun isEmpty() = elements.isEmpty()
+    fun isNotEmpty() = elements.isNotEmpty()
+    fun peek(): T? = elements.lastOrNull()
 }

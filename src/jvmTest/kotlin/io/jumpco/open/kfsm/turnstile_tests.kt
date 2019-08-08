@@ -54,7 +54,7 @@ class TurnstileFsmTests {
 
     @Test
     fun `Uncle Bob's Turnstile plain`() {
-        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>()
+        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
         builder.initial { if (locked) LOCKED else UNLOCKED }
         builder.defaultAction { _, _, _ ->
             alarm()
@@ -81,27 +81,29 @@ class TurnstileFsmTests {
     @Test
     fun `Uncle Bob's Turnstile DSL`() {
         // given
-        val definition = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-            initial { if (locked) LOCKED else UNLOCKED }
-            default {
-                action { _, _, _ ->
-                    alarm()
-                }
-            }
-            state(LOCKED) {
-                transition(COIN to UNLOCKED) {
-                    unlock()
-                }
-            }
-            state(UNLOCKED) {
-                transition(COIN) {
-                    returnCoin()
-                }
-                transition(PASS to LOCKED) {
-                    lock()
-                }
-            }
-        }.build()
+        val definition =
+            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
+                .stateMachine {
+                    initial { if (locked) LOCKED else UNLOCKED }
+                    default {
+                        action { _, _, _ ->
+                            alarm()
+                        }
+                    }
+                    state(LOCKED) {
+                        transition(COIN to UNLOCKED) {
+                            unlock()
+                        }
+                    }
+                    state(UNLOCKED) {
+                        transition(COIN) {
+                            returnCoin()
+                        }
+                        transition(PASS to LOCKED) {
+                            lock()
+                        }
+                    }
+                }.build()
         // when
         val turnstile = mockk<Turnstile>()
 
@@ -113,37 +115,39 @@ class TurnstileFsmTests {
 
     @Test
     fun `Simple Turnstile Test`() {
-        val definition = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>().stateMachine {
-            initial { if (locked) LOCKED else UNLOCKED }
-            state(LOCKED) {
-                entry { startState, targetState, _ ->
-                    println("entering:$startState -> $targetState for $this")
-                }
-                transition(COIN to UNLOCKED) {
-                    unlock()
-                }
-                transition(PASS) {
-                    alarm()
-                }
-                exit { startState, targetState, _ ->
-                    println("exiting:$startState -> $targetState for $this")
-                }
-            }
-            state(UNLOCKED) {
-                entry { startState, targetState, _ ->
-                    println("entering:$startState -> $targetState for $this")
-                }
-                transition(COIN) {
-                    returnCoin()
-                }
-                transition(PASS to LOCKED) {
-                    lock()
-                }
-                exit { startState, targetState, _ ->
-                    println("exiting:$startState -> $targetState for $this")
-                }
-            }
-        }.build()
+        val definition =
+            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
+                .stateMachine {
+                    initial { if (locked) LOCKED else UNLOCKED }
+                    state(LOCKED) {
+                        entry { startState, targetState, _ ->
+                            println("entering:$startState -> $targetState for $this")
+                        }
+                        transition(COIN to UNLOCKED) {
+                            unlock()
+                        }
+                        transition(PASS) {
+                            alarm()
+                        }
+                        exit { startState, targetState, _ ->
+                            println("exiting:$startState -> $targetState for $this")
+                        }
+                    }
+                    state(UNLOCKED) {
+                        entry { startState, targetState, _ ->
+                            println("entering:$startState -> $targetState for $this")
+                        }
+                        transition(COIN) {
+                            returnCoin()
+                        }
+                        transition(PASS to LOCKED) {
+                            lock()
+                        }
+                        exit { startState, targetState, _ ->
+                            println("exiting:$startState -> $targetState for $this")
+                        }
+                    }
+                }.build()
 
         val turnstile = Turnstile()
         val fsm = definition.create(turnstile)
@@ -194,9 +198,10 @@ class TurnstileFsmTests {
         println("--coin3")
         fsm.coin()
     }
+
     @Test
     fun `Alternative Turnstile Test`() {
-        
+
         val turnstile = Turnstile()
         val fsm = TurnstileAlternate(turnstile)
 

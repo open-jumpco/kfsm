@@ -12,7 +12,7 @@ class StateMachineBuilder<States : Enum<States>, Events : Enum<Events>, Context>
     create(context: Context, initialState: States?) : StateMachineInstance<States,Events,Context>
 }
 
-class StateMachineDefinition<S : Enum<S>, E : Enum<E>, C> {
+class StateMachineDefinition<S, E : Enum<E>, C> {
     allowed(currentState: S, includeDefaults: Boolean): Set<E>
     eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
     create(context: C, initialState: S?) : StateMachineInstance<S,E,C>

@@ -16,7 +16,7 @@ package io.jumpco.open.kfsm
  * @param definition The defined state machine that provides all the behaviour
  * @param initialState The initial state of the instance.
  */
-class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
+class StateMachineInstance<S, E : Enum<E>, C>(
     /**
      * The transition actions are performed by manipulating the context.
      */
@@ -28,77 +28,105 @@ class StateMachineInstance<S : Enum<S>, E : Enum<E>, C>(
     /**
      * The initialState will be assigned to the currentState
      */
-    initialState: S
+    initialState: S?
 ) {
+
+    internal val namedInstances: MutableMap<String, StateMapInstance<S, E, C>> = mutableMapOf()
+
+    internal val mapStack: Stack<StateMapInstance<S, E, C>> = Stack()
+
     /**
      * This represents the current state of the state machine.
      * It will be modified during transitions
      */
-    var currentState: S = initialState
-        private set
+    internal var currentStateMap: StateMapInstance<S, E, C>
 
-    private fun execute(transition: Transition<S, E, C>, args: Array<out Any>) {
-        transition.execute(context, this, args)
-        if (transition.isExternal()) {
-            currentState = transition.targetState!!
+    init {
+        currentStateMap = definition.create(context, this, initialState)
+    }
+
+    val currentState: S
+        get() = currentStateMap.currentState
+
+
+    internal fun pushMap(
+        defaultInstance: StateMapInstance<S, E, C>,
+        initial: S,
+        name: String,
+        stateMap: StateMapDefinition<S, E, C>
+    ): StateMapInstance<S, E, C> {
+        mapStack.push(defaultInstance)
+        val pushedMap = StateMapInstance(context, initial, name, this, stateMap)
+        currentStateMap = pushedMap
+        return pushedMap
+    }
+
+    internal fun pushMap(stateMap: StateMapInstance<S, E, C>): StateMapInstance<S, E, C> {
+        mapStack.push(stateMap)
+        return stateMap
+    }
+
+    internal fun execute(transition: Transition<S, E, C>, args: Array<out Any>) {
+        if (transition.type == TransitionType.PUSH) {
+            require(transition.targetState != null) { "Target state cannot be null for pushTransition" }
+            require(transition.targetMap != null) { "Target map cannot be null for pushTransition" }
+            if (transition.targetMap != currentStateMap.name) {
+                executePush(transition, args)
+            } else {
+                currentStateMap.execute(transition, args)
+            }
+        } else if (transition.type == TransitionType.POP) {
+            val sourceMap = currentStateMap
+            val targetMap = mapStack.pop()
+            currentStateMap = targetMap
+            if (transition.targetMap == null) {
+                if (transition.targetState == null) {
+                    transition.execute(context, sourceMap, targetMap, args)
+                } else {
+                    transition.execute(context, sourceMap, null, args)
+                    targetMap.executeEntry(context, transition.targetState, args)
+                    currentStateMap.currentState = transition.targetState
+                }
+            } else {
+                if (transition.targetState != null && transition.targetMap == null) {
+                    currentStateMap.currentState = transition.targetState
+                } else {
+                    executePush(transition, args)
+                }
+            }
+        } else {
+            currentStateMap.execute(transition, args)
         }
+        currentStateMap.executeAutomatic(currentStateMap.currentState, args)
     }
 
-    internal fun executeEntry(context: C, targetState: S, args: Array<out Any>) {
-        definition.entryActions[targetState]?.invoke(context, currentState, targetState, args)
-        definition.defaultEntryAction?.invoke(context, currentState, targetState, args)
-    }
-
-    internal fun executeExit(context: C, targetState: S, args: Array<out Any>) {
-        definition.exitActions[currentState]?.invoke(context, currentState, targetState, args)
-        definition.defaultExitAction?.invoke(context, currentState, targetState, args)
-    }
-
-    private fun executeDefaultAction(event: E, args: Array<out Any>) {
-        with(
-            definition.defaultActions[currentState]
-                ?: definition.globalDefault
-                ?: error("Transition from $currentState on $event not defined")
-        ) {
-            invoke(context, currentState, event, args)
+    private fun executePush(transition: Transition<S, E, C>, args: Array<out Any>) {
+        val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
+            val stateMapInstance =
+                definition.create(transition.targetMap, context, this, transition.targetState!!)
+            namedInstances.put(transition.targetMap, stateMapInstance)
+            stateMapInstance
         }
+        mapStack.push(currentStateMap)
+        transition.execute(context, currentStateMap, targetStateMap, args)
+        currentStateMap = targetStateMap
+        currentStateMap.currentState = transition.targetState!!
     }
+
+    /**
+     * This function will provide the set of allowed events given a specific state. It isn't a guarantee that a
+     * subsequent transition will be successful since a guard may prevent a transition. Default state handlers are not considered.
+     * @param given The specific state to consider
+     * @param includeDefault When `true` will include default transitions in the list of allowed events.
+     */
+    fun allowed(includeDefault: Boolean = false): Set<E> = currentStateMap.allowed(includeDefault)
+
+    fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
+        currentStateMap.eventAllowed(event, includeDefault)
 
     /**
      * This function will process the on and advance the state machine according to the FSM definition.
      * @param event The on received,
      */
-    fun sendEvent(event: E, vararg args: Any) {
-        definition.transitionRules[Pair(currentState, event)]?.apply rule@{
-            this.findGuard(context, args)?.apply {
-                execute(this, args)
-            } ?: run {
-                this@rule.transition?.apply {
-                    execute(this, args)
-                } ?: run {
-                    executeDefaultAction(event, args)
-                }
-            }
-        } ?: run {
-            definition.defaultTransitions[event]?.apply {
-                execute(this, args)
-            } ?: run {
-                executeDefaultAction(event, args)
-            }
-        }
-    }
-
-    /**
-     * This function will provide the list of allowed events given the current state of the machine.
-     * @param includeDefaults When `true` will include default transitions in the list of allowed events.
-     * @see StateMachineDefinition.allowed
-     */
-    fun allowed(includeDefaults: Boolean = false) = definition.allowed(currentState, includeDefaults)
-
-    /**
-     * This function will provide an indication whether the given event is allow in the current state.
-     * @param event The given event that will be used in combination with current state.
-     */
-    fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
-        definition.eventAllowed(event, currentState, includeDefault)
+    fun sendEvent(event: E, vararg args: Any) = currentStateMap.sendEvent(event, *args)
 }

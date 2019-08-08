@@ -12,21 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
-class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBuilder<S, E, C>) {
-    /**
-     * Defines an expression that will determine the initial state of the state machine based on the values of the context.
-     * @param deriveInitialState A lambda expression receiving context:C and returning state S.
-     */
-    fun initial(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C> {
-        fsm.initial(deriveInitialState)
-        return this
-    }
-
-    fun initialMap(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C> {
-        fsm.initialMap(deriveInitialMap)
-        return this
-    }
-
+class DslStateMapHandler<S, E : Enum<E>, C>(private val fsm: StateMapBuilder<S, E, C>) {
     /**
      * Defines a section for a specific state.
      * @param currentState The give state
@@ -34,7 +20,7 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
      */
     fun state(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
             DslStateMapEventHandler<S, E, C> =
-        DslStateMapEventHandler(currentState, fsm.defaultStateMap).apply(handler)
+        DslStateMapEventHandler(currentState, fsm).apply(handler)
 
     /**
      * Defines a section for default behaviour for the state machine.
@@ -42,18 +28,5 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
      */
     fun default(handler: DslStateMapDefaultEventHandler<S, E, C>.() -> Unit):
             DslStateMapDefaultEventHandler<S, E, C> =
-        DslStateMapDefaultEventHandler(fsm.defaultStateMap).apply(handler)
-
-    /**
-     * Returns the completed fsm.
-     */
-    fun build() = fsm.complete()
-
-    fun stateMap(
-        name: String,
-        validStates: Set<S>,
-        handler: DslStateMapHandler<S, E, C>.() -> Unit
-    ): DslStateMapHandler<S, E, C> {
-        return fsm.stateMap(name, validStates, handler)
-    }
+        DslStateMapDefaultEventHandler(fsm).apply(handler)
 }

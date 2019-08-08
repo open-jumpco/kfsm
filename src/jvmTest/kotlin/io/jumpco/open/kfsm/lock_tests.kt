@@ -68,7 +68,7 @@ class LockFsmTests {
     @Test
     fun `test plain creation of fsm`() {
         // given
-        val builder = StateMachineBuilder<LockStates, LockEvents, Lock>()
+        val builder = StateMachineBuilder<LockStates, LockEvents, Lock>(LockStates.values().toSet())
         builder.initial {
             when (locked) {
                 0 -> UNLOCKED
@@ -108,7 +108,7 @@ class LockFsmTests {
     @Test
     fun `test dsl creation of fsm`() {
         // given
-        val definition = StateMachineBuilder<LockStates, LockEvents, Lock>().stateMachine {
+        val definition = StateMachineBuilder<LockStates, LockEvents, Lock>(LockStates.values().toSet()).stateMachine {
             initial {
                 when (locked) {
                     0 -> UNLOCKED

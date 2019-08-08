@@ -14,7 +14,7 @@ package io.jumpco.open.kfsm
  * @param guardedTransitions The list of guarded transitions
  * @param transition The transition to use if there are no guarded transitions or no guarded transitions match.
  */
-class TransitionRules<S : Enum<S>, E : Enum<E>, C>(
+class TransitionRules<S, E : Enum<E>, C>(
     private val guardedTransitions: MutableList<GuardedTransition<S, E, C>> = mutableListOf(),
     internal var transition: SimpleTransition<S, E, C>? = null
 ) {

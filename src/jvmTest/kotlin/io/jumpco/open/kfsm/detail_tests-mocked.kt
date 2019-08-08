@@ -71,7 +71,8 @@ class DetailMockedTests {
 
     class TestDetailFSM(context: TestContext) {
         companion object {
-            private fun define() = StateMachineBuilder<TestStates, TestEvents, TestContext>().stateMachine {
+            private fun define() = StateMachineBuilder<TestStates, TestEvents, TestContext>(TestStates.values().toSet())
+                .stateMachine {
                 initial {
                     when (state) {
                         1 -> TestStates.STATE1

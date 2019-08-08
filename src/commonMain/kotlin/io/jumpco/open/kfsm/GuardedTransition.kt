@@ -17,13 +17,16 @@ package io.jumpco.open.kfsm
  * @param guard Expression lambda returning a Boolean
  * @param action An optional lambda that will be invoked.
  */
-class GuardedTransition<S : Enum<S>, E : Enum<E>, C>(
+open class GuardedTransition<S, E : Enum<E>, C>(
     startState: S,
-    event: E,
+    event: E?,
     targetState: S?,
+    targetMap: String?,
+    automatic: Boolean,
+    type: TransitionType,
     private val guard: StateGuard<C>,
     action: StateAction<C>?
-) : SimpleTransition<S, E, C>(startState, event, targetState, action) {
+) : SimpleTransition<S, E, C>(startState, event, targetState, targetMap, automatic, type, action) {
     /**
      * This function will invoke the guard expression using the provided context to determine if transition can be considered.
      * @param context The provided context
