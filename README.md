@@ -14,7 +14,7 @@ The state machine implementation supports events triggering transitions from one
 ## Features
 * Event driven state machine.
 * External and internal transitions 
-* State entty and exit actions.
+* State entry and exit actions.
 * Default state actions.
 * Default entry and exit actions.
 * Determine allowed events.
