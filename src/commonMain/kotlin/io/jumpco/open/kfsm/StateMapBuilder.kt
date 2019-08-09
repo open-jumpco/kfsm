@@ -10,8 +10,17 @@
 package io.jumpco.open.kfsm
 
 class StateMapBuilder<S, E : Enum<E>, C>(
+    /**
+     * The set of states the state map supports
+     */
     val validStates: Set<S>,
+    /**
+     * The name of the statemap.
+     */
     val name: String? = null,
+    /**
+     * The parent state machine builder
+     */
     val parentBuilder: StateMachineBuilder<S, E, C>
 ) {
     private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
@@ -145,6 +154,14 @@ class StateMapBuilder<S, E : Enum<E>, C>(
 
     }
 
+    /**
+     * Creates a pop transition that applies to the startState on a given event. This will result in a new push transition
+     * @param startState The pop transition will apply to the specific state.
+     * @param event The event that will trigger the transition
+     * @param targetState The state after the transition
+     * @param targetMap The map after the transition
+     * @param action The optional action that will be invoked.
+     */
     fun popTransition(startState: S, event: E, targetState: S?, targetMap: String?, action: StateAction<C>?) {
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -165,6 +182,15 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates a pop transition that applies to the startState on a given event. This will result in a new push transition if the guard expression is true
+     * @param startState The pop transition will apply to the specific state.
+     * @param event The event that will trigger the transition
+     * @param targetState The state after the transition
+     * @param targetMap The map after the transition
+     * @param guard The expression must evaludate to true before the transition will be trigger.
+     * @param action The optional action that will be invoked.
+     */
     fun popTransition(
         startState: S,
         event: E,
@@ -195,6 +221,14 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates a push transition for a startState and triggered by event. The transition will change to targetMap and targetState.
+     * @param startState The transition will apply to the specific state.
+     * @param event The event that will trigger the transition
+     * @param targetState The state after the transition
+     * @param targetMap The map after the transition
+     * @param action The optional action will be invoked
+     */
     fun pushTransition(startState: S, event: E, targetMap: String, targetState: S, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         require(parentBuilder.namedStateMaps.containsKey(targetMap)) { "$targetMap map not found in ${parentBuilder.namedStateMaps.keys}" }
@@ -209,6 +243,15 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates a push transition for a startState and triggered by event and guard expression being `true`. The transition will change to targetMap and targetState.
+     * @param startState The transition will apply to the specific state.
+     * @param event The event that will trigger the transition
+     * @param targetState The state after the transition
+     * @param targetMap The map after the transition
+     * @param guard The expression must be true to trigger the transition
+     * @param action The optional action will be invoked
+     */
     fun pushTransition(
         startState: S,
         event: E,
@@ -232,6 +275,12 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates an automatic transition when currentState is the startState. The transition will change to targetState.
+     * @param startState The transition will apply to the specific state.
+     * @param targetState The state after the transition
+     * @param action The optional action will be invoked
+     */
     fun automatic(startState: S, targetState: S, action: StateAction<C>?) {
         require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
@@ -246,20 +295,12 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
-    fun automatic(startState: S, targetMap: String, targetState: S, action: StateAction<C>?) {
-        require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
-        require(validStates.contains(startState)) { "$startState must be one of $validStates" }
-        val transitionRule = automaticTransitions[startState]
-        val transition =
-            SimpleTransition<S, E, C>(startState, null, targetState, targetMap, true, TransitionType.NORMAL, action)
-        if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(), transition)
-        } else {
-            require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
-            transitionRule.transition = transition
-        }
-    }
-
+    /**
+     * @param startState The transition will apply to the specific state.
+     * @param targetState The state after the transition
+     * @param guard The expression must be true to trigger the transition
+     * @param action The optional action will be invoked
+     */
     fun automatic(startState: S, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
@@ -273,28 +314,13 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
-    fun automatic(startState: S, targetMap: String, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
-        require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
-        require(validStates.contains(startState)) { "$startState must be one of $validStates" }
-        val transitionRule = automaticTransitions[startState]
-        val transition =
-            GuardedTransition<S, E, C>(
-                startState,
-                null,
-                targetState,
-                targetMap,
-                true,
-                TransitionType.NORMAL,
-                guard,
-                action
-            )
-        if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(transition))
-        } else {
-            transitionRule.addGuarded(transition)
-        }
-    }
 
+    /**
+     * Creates a pop transition that will pop the last statemap and then change to the targetState.
+     * @param startState The transition will apply to the specific state.
+     * @param targetState The state after the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPop(startState: S, targetState: S, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -308,6 +334,11 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates a pop transition that will return to orginal state that was pushed after executing the action.
+     * @param startState The transition will apply to the specific state.
+     * @param action The optional action will be invoked
+     */
     fun automaticPop(startState: S, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -321,6 +352,13 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates a pop transition that will apply when currentState is startState. The transition will change to targetMap/targetState
+     * @param startState The transition will apply to the specific state.
+     * @param targetState The state after the transition
+     * @param targetMap The map after the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPop(startState: S, targetMap: String, targetState: S, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -334,6 +372,13 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates a pop transition that will apply when currentState is startState and guard is true. The transition will change to targetMap/targetState
+     * @param startState The transition will apply to the specific state.
+     * @param targetState The state after the transition
+     * @param guard The expression must be true to trigger the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPop(startState: S, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -346,6 +391,12 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates an automatic pop transition with will apply when currentState is startState and the guard expression is true.
+     * @param startState The transition will apply to the specific state.
+     * @param guard The expression must be true to trigger the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPop(startState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -358,6 +409,14 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Create an automatic pop transition when currentState is startState and when guard is true. The transition will target targetMap and targetState
+     * @param startState The transition will apply to the specific state.
+     * @param targetState The state after the transition
+     * @param targetMap The map after the transition
+     * @param guard The expression must be true to trigger the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPop(startState: S, targetMap: String, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -379,6 +438,13 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates an automatic push transition when current state is startState for a targetMap and targetState.
+     * @param startState The transition will apply to the specific state.
+     * @param targetMap The map after the transition
+     * @param targetState The state after the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPush(startState: S, targetMap: String, targetState: S, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -392,6 +458,14 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
+    /**
+     * Creates an automatic push transition for startState. When the currentState is startState and guard is true the targetMap and targetState will become current after executing the optional action
+     * @param startState The transition will apply to the specific state.
+     * @param targetMap The map after the transition
+     * @param targetState The state after the transition
+     * @param guard The expression must be true to trigger the transition
+     * @param action The optional action will be invoked
+     */
     fun automaticPush(startState: S, targetMap: String, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
@@ -492,6 +566,9 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         exitActions[currentState] = action
     }
 
+    /**
+     * Creates a `StateMapDefinition` from the data in this builder
+     */
     fun toMap(): StateMapDefinition<S, E, C> = StateMapDefinition(
         this.name,
         this.validStates,

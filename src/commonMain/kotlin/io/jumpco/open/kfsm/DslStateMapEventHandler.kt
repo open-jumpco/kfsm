@@ -87,6 +87,13 @@ class DslStateMapEventHandler<S, E : Enum<E>, C>(
         return this
     }
 
+    /**
+     * Defines a push transition on event for a targetMap and targetState.
+     * @param event The event the will trigger the transition.
+     * @param targetMap The named stateMap that will be targeted.
+     * @param targetState The new state within the targetMap
+     * @param action The optional action that may be executed.
+     */
     fun pushTransition(
         event: E,
         targetMap: String,
@@ -96,7 +103,13 @@ class DslStateMapEventHandler<S, E : Enum<E>, C>(
         fsm.pushTransition(currentState, event, targetMap, targetState, action)
         return this
     }
-
+    /**
+     * Defines a push transition on event for a targetMap and targetState when the guard evaluates to `true`
+     * @param event The event the will trigger the transition.
+     * @param targetMap The named stateMap that will be targeted.
+     * @param targetState The new state within the targetMap
+     * @param action The optional action that may be executed.
+     */
     fun pushTransition(
         event: E,
         targetMap: String,
@@ -157,16 +170,8 @@ class DslStateMapEventHandler<S, E : Enum<E>, C>(
         fsm.automatic(currentState, targetState, action)
     }
 
-    fun automatic(targetMap: String, targetState: S, action: StateAction<C>?) {
-        fsm.automatic(currentState, targetMap, targetState, action)
-    }
-
     fun automatic(targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
         fsm.automatic(currentState, targetState, guard, action)
-    }
-
-    fun automatic(targetMap: String, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
-        fsm.automatic(currentState, targetMap, targetState, guard, action)
     }
 
     fun automaticPop(targetState: S, action: StateAction<C>?) {

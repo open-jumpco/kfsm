@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @suppress
  * The base for all transitions.
  * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.

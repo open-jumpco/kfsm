@@ -9,7 +9,13 @@
 
 package io.jumpco.open.kfsm
 
+/**
+ * Contains the definition of a state map. A state machine has at least one top-level state map.
+ */
 class StateMapDefinition<S, E : Enum<E>, C>(
+    /**
+     * The name of the statemap. The top-level state map name is `null`
+     */
     val name: String?,
     /**
      * A set of the valid states for this map.
@@ -36,7 +42,9 @@ class StateMapDefinition<S, E : Enum<E>, C>(
      * This is a map of default actions for event on specific startState.
      */
     val defaultActions: Map<S, DefaultStateAction<C, S, E>>,
-
+    /**
+     * This a map of TransitionRules by state for automatic transitions.
+     */
     val automaticTransitions: Map<S, TransitionRules<S, E, C>>,
     /**
      * This is the action that will be invoked of no other has been matched
@@ -76,8 +84,8 @@ class StateMapDefinition<S, E : Enum<E>, C>(
      */
     fun eventAllowed(event: E, given: S, includeDefault: Boolean): Boolean =
         (includeDefault &&
-                hasDefaultStateHandler(given)) ||
-                allowed(given, includeDefault).contains(event)
+            hasDefaultStateHandler(given)) ||
+            allowed(given, includeDefault).contains(event)
 
 
     /**

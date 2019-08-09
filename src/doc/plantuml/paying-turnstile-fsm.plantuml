@@ -1,14 +1,23 @@
 @startuml
 
-[*] --> LOCKED
-LOCKED -down-> UNLOCKED : COIN(value) guard={ value + coins == requiredCoins } { coin(value); unlock() }
-LOCKED --> UNLOCKED : COIN(value) guard={ value + coins > requiredCoins } { coin(value); returnCoin(); unlock(); }
-LOCKED --> COINS : COIN(value) guard={ value + coins < requiredCoins } { coin(value); }
-COINS --> UNLOCKED : COIN(value) guard={ value + coins == requiredCoins } { coin(value); unlock() }
-COINS ---> COINS : COIN(value) guard={ value + coins < requiredCoins } { coin(value); }
-COINS --> UNLOCKED : COIN(value) guard={ value + coins > requiredCoins } { coin(value); returnCoin(); unlock(); }
-UNLOCKED ---> LOCKED : PASS { lock() }
-LOCKED ---> LOCKED : PASS { alarm() }
-UNLOCKED ---> UNLOCKED : COIN { coin(value); returnCoin() }
+[*] -right-> LOCKED
+
+state LOCKED {
+    LOCKED --> LOCKED : <<default>> PASS\n{ alarm() }
+    LOCKED --> COINS : COIN(value)\n{ coin(value); }
+}
+
+state UNLOCKED {
+    UNLOCKED --> LOCKED : PASS\n{ lock() }
+    UNLOCKED --up--> COINS : COIN(value)\n{ coin(value); }
+}
+
+state coins {
+    state COINS {
+        COINS --> COINS : COIN(value)\n{ coin(value); }
+        COINS --down--> UNLOCKED : <<automatic,pop>>\nguard:{ value + coins == requiredCoins }\n{ unlock() }
+        COINS --down--> UNLOCKED : <<automatic,pop>>\nguard:{ value + coins > requiredCoins }\n{ returnCoin(); unlock(); }
+    }
+}
 
 @enduml

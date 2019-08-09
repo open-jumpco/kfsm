@@ -21,6 +21,7 @@ Consumer ----> StateMachineInstance : sendEvent(event:E)
     Context ---->  StateMachineInstance
     deactivate Context
     StateMachineInstance ----> StateMachineInstance : entry {}
+    StateMachineInstance ----> StateMachineInstance : executeAutomatic
     deactivate StateMachineInstance
     return
 

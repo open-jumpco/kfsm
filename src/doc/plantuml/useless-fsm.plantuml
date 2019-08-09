@@ -1,0 +1,7 @@
+@startuml
+
+[*] --left-> CLOSED
+CLOSED ---> OPENED : SWITCH\n{ openLid() }
+OPENED ---> CLOSED : <<automatic>>\n{ flipSwitch() }
+
+@enduml

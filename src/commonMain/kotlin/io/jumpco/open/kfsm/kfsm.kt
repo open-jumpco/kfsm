@@ -31,11 +31,21 @@ typealias StateGuard<C> = C.(Array<out Any>) -> Boolean
  */
 typealias StateQuery<C, S> = (C.() -> S)
 
+/**
+ * Alias for a pair of S, String
+ */
 typealias StateMapItem<S> = Pair<S, String>
 
+/**
+ * Alias for a list of pairs of S,String
+ */
 typealias StateMapList<S> = List<StateMapItem<S>>
 
+/**
+ * Alias for a lambda that will have the context as this and return a `StateMapList`
+ */
 typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
+
 /**
  * This represents a default action that will be invoked on a change in state as defined with entry or exit.
  * @param C The context: C will be available to the lambda
@@ -60,15 +70,27 @@ typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
  */
 typealias EventState<E, S> = Pair<E, S>
 
+/**
+ * Represents the different kinds of transitions.
+ */
 enum class TransitionType {
+    /**
+     * Transitions are triggered and may change to a new state or remain at the same state while performing an action.
+     */
     NORMAL,
+    /**
+     * A push transition will place the current state map on a stack and make the named statemap the current map and change to the given state,
+     */
     PUSH,
+    /**
+     * A pop transition will pop the stack and make the transition current. If the pop transition provided a new targetMap or targetState that will result in push or normal transition behaviour.
+     */
     POP
 }
 
 /**
  * Defines the start of a state machine DSL declaration
- * @param stateClass The class of the possible states
+ * @param validStates A set of the possible states supported by the top-level state map
  * @param eventClass The class of the possible events
  * @param contextClass The class of the context
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
@@ -80,7 +102,9 @@ inline fun <S, E : Enum<E>, C : Any> stateMachine(
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
 ) = StateMachineBuilder<S, E, C>(validStates).stateMachine(handler)
 
-
+/**
+ * An extension function that evaluates the expression and invokes the provided `block` if true or the `otherwise` block is false.
+ */
 inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit, otherwise: T.() -> Unit): T {
     return if (expression) {
         this.apply(block)
@@ -89,6 +113,9 @@ inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit, otherwise: T.
     }
 }
 
+/**
+ * An extension function that evaluates the expression and invokes the provided `block` if true.
+ */
 inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit): T {
     if (expression) {
         this.apply(block)
@@ -96,15 +123,40 @@ inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit): T {
     return this
 }
 
+/**
+ * This class implements a simple generic stack.
+ */
 class Stack<T> {
     private val elements: MutableList<T> = mutableListOf()
+    /**
+     * Push an element onto the stack.
+     * @param value The element will be pushed
+     */
     fun push(value: T) = elements.add(value)
+
+    /**
+     * Returns and removed the element on the top of the stack.
+     * @return The element on the top of the stack
+     * @throws Will throw IllegalStateException is the stack is empty
+     */
     fun pop(): T {
-        require(elements.isNotEmpty())
+        check(elements.isNotEmpty()) { "stack is empty" }
         return elements.removeAt(elements.lastIndex)
     }
 
+    /**
+     * @return true if the stack is empty
+     */
     fun isEmpty() = elements.isEmpty()
+
+    /**
+     *
+     * @return true if the stack is not empty
+     */
     fun isNotEmpty() = elements.isNotEmpty()
+
+    /**
+     * @return the element at the top of the stack without removing or `null` is the stack is empty.
+     */
     fun peek(): T? = elements.lastOrNull()
 }

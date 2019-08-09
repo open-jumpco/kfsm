@@ -2,6 +2,7 @@
 
 === Repository
 
+Use this repository for SNAPSHOT builds. Releases are on Maven Central
 [source,groovy]
 ----
 repositories {
@@ -16,7 +17,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.9.0'
+    implementation 'io.jumpco.open:kfsm-jvm:0.9.1'
 }
 ----
 
@@ -25,7 +26,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.9.0'
+    implementation 'io.jumpco.open:kfsm-js:0.9.1'
 }
 ----
 
@@ -34,7 +35,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-wasm32:0.9.0'
+    implementation 'io.jumpco.open:kfsm-wasm32:0.9.1'
 }
 ----
 
@@ -43,7 +44,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.0'
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.1'
 }
 ----
 
@@ -52,7 +53,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.0'
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.1'
 }
 ----
 
@@ -61,7 +62,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.9.0'
+    implementation 'io.jumpco.open:kfsm-macosX64:0.9.1'
 }
 ----
 
@@ -73,6 +74,9 @@ The statemachine supports:
 * Guard expressions
 * Entry and exit actions per state and globally
 * Default actions per state and globally
+* Named statemaps
+* Push and pop transitions
+* Automatic transitions
 
 All configuration calls are eventually applied to link:javadoc/kfsm/io.jumpco.open.kfsm/-state-machine-builder/index.html[StateMachineBuilder]
 
@@ -181,7 +185,6 @@ exit { fromState, targetState, args ->
     println("Exiting:$fromState to $targetState with ${args.toList()}")
 }
 ----
-
 ==== transition(E [to S]) {}
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/transition.html[DslStateMachineDefaultEventHandler::transition]
 * Mandatory: _Optional_
@@ -222,7 +225,7 @@ initial {
 }
 ----
 
-=== `state(S) {}`
+=== `state(currentState: S) {}`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/state.html[DslStateMachineHandler::state]
 * Mandatory: _Mandatory_
 * Cardinality: _Multiple_
@@ -308,7 +311,45 @@ exit { fromState, targetState, args -> // state exit action
     println("Exiting:$fromState to $targetState with ${args.toList()}")
 }
 ----
-==== transition(E [to S],[guard = {}]) {}
+==== automatic(targetState: S [, guard:{}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/automatic.html[DslStateMachineDefaultEventHandler::automatic]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 2 variations of automatic transitions: Those with and without guards.
+An automatic transition is exercises after the state machine has completed processing a transition.
+All automatic transitions attached to a given state will be invoked if their guards are met.
+
+==== automaticPop(targetState: S [, guard:{}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/automatic-pop.html[DslStateMachineDefaultEventHandler::automaticPop]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 6 variations of automatic transitions: Those with and without guards, those with and without targetMaps which will lead to a new push transition.
+
+==== automaticPush(targetMap: String, targetState: S [, guard:{}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/automatic-push.html[DslStateMachineDefaultEventHandler::automaticPush]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 2 variations of automatic transitions: Those with and without guards
+
+
+==== popTransition(event: E [to targetState: S]|[,targetMap: String, targetState: S], [guard:{}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/pop-transition.html[DslStateMachineEventHandler::popTransition]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 6 variations of popTransitions to provide for with and without guards, with and without a new state and with and without a targetMap that will result in a new push transition.
+
+==== pushTransition(event: E, targetMap: String, targetState: S [, guard:{}]) {}
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/push-transition.html[DslStateMachineEventHandler::pushTransition]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 2 variations of automatic transitions: Those with and without guards
+
+==== transition(event: E [to targetState: S],[guard: {}]) {}
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-event-handler/transition.html[DslStateMachineEventHandler::transition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_

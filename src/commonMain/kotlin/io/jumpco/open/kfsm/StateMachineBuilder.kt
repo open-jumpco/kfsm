@@ -37,13 +37,14 @@ class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
 
     fun stateMap(
         name: String,
-        validStates: Set<S>,
-        handler: DslStateMapHandler<S, E, C>.() -> Unit
-    ): DslStateMapHandler<S, E, C> {
+        validStates: Set<S>
+    ): StateMapBuilder<S, E, C> {
+        require(name.trim().length > 0) { "statemap name must not be empty" }
         require(name != "default") { "Map cannot be named 'default'" }
+        require(validStates.isNotEmpty()) { "Provide at least one entty in validStates" }
         val stateMapBuilder = StateMapBuilder<S, E, C>(validStates, name, this)
         namedStateMaps[name] = stateMapBuilder
-        return DslStateMapHandler(stateMapBuilder).apply(handler)
+        return stateMapBuilder
     }
 
     /**

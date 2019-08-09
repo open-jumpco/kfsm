@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @suppress
  * Represents a DefaultTransition
  * @param event The event identifies the transition
  * @param targetState when optional represents an internal transition

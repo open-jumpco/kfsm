@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @suppress
  * Represents a guarded transition. The transition will be considered if the guard expression is true
  * @param startState The given state
  * @param event The given event

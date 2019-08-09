@@ -22,6 +22,25 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
         return this
     }
 
+    /**
+     * Provides for a list of pairs with state and map name that will be pushed and the last entry will be popped and become the current map.
+     * This is required when using state machine with named maps.
+     *
+```
+initialMap {
+    mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
+        if (locked) {
+            this.add(PayingTurnstileStates.LOCKED to "default")
+        } else {
+            this.add(PayingTurnstileStates.UNLOCKED to "default")
+        }
+        if (coins > 0) {
+            this.add(PayingTurnstileStates.COINS to "coins")
+        }
+    }
+}
+```
+     */
     fun initialMap(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C> {
         fsm.initialMap(deriveInitialMap)
         return this
@@ -33,7 +52,7 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
      * @param handler A lambda with definitions for the given state
      */
     fun state(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
-            DslStateMapEventHandler<S, E, C> =
+        DslStateMapEventHandler<S, E, C> =
         DslStateMapEventHandler(currentState, fsm.defaultStateMap).apply(handler)
 
     /**
@@ -41,7 +60,7 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
      * @param handler A lambda with definition for the default behaviour of the state machine.
      */
     fun default(handler: DslStateMapDefaultEventHandler<S, E, C>.() -> Unit):
-            DslStateMapDefaultEventHandler<S, E, C> =
+        DslStateMapDefaultEventHandler<S, E, C> =
         DslStateMapDefaultEventHandler(fsm.defaultStateMap).apply(handler)
 
     /**
@@ -49,11 +68,23 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
      */
     fun build() = fsm.complete()
 
+    /**
+     * creates a named statemap
+     */
     fun stateMap(
+        /**
+         * The name of the state map. <ust be unique and not empty
+         */
         name: String,
+        /**
+         * A set of valid states for the state map
+         */
         validStates: Set<S>,
+        /**
+         * The lambda to configure the statemap
+         */
         handler: DslStateMapHandler<S, E, C>.() -> Unit
     ): DslStateMapHandler<S, E, C> {
-        return fsm.stateMap(name, validStates, handler)
+        return DslStateMapHandler(fsm.stateMap(name.trim(), validStates)).apply(handler)
     }
 }

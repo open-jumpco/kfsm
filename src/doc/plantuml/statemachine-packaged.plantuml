@@ -19,15 +19,20 @@ class StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile> {
     sendEvent(event: TurnstileEvents)
 }
 
-class StateMachine<TurnstileStates, TurnstileEvents, Turnstile> {
+class StateMachineDefinition<TurnstileStates, TurnstileEvents, Turnstile> {
     transition(startState: S, event: E, targetState: S, action: C.(Any[]) -> Unit)
+    automatic(startState: S, targetState: S[, guard: C.()->Boolean], action: C.(Any[]) -> Unit)
+    automaticPop(startState: S[,  targetState: S][, targetMap: String][, guard: C.()->Boolean], action: C.(Any[]) -> Unit)
+    automaticPush(startState: S,  targetState: S, targetMap: String[, guard: C.()->Boolean], action: C.(Any[]) -> Unit)
+    pushTransition(startState: S, event: E, targetMap: String, targetState: S[, guard: C.()->Boolean], action: C.(Any[]) -> Unit)
+    popTransition(startState: S, event: E[, targetMap: String][, targetState: S][, guard: C.()->Boolean], action: C.(Any[]) -> Unit)
     create(context: Turnstile, initialState: TurnstileStates?) : StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>
     stateMachine(): StateMachine<TurnstileStates, TurnstileEvents, Turnstile>
 }
 
 
 TurnstileFSM *--> StateMachineInstance: stateMachine
-StateMachineInstance *--> StateMachine : fsm
+StateMachineInstance *--> StateMachineDefinition : definition
 StateMachineInstance *-up-> Turnstile : context
 TurnstileFSM ...left...> Turnstile
 TurnstileFSM ....> StateMachine : <<instantiate>>

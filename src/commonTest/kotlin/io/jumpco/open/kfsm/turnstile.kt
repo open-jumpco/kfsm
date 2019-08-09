@@ -104,7 +104,9 @@ class TurnstileFSM(turnstile: Turnstile) {
     fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
 }
 
-
+/**
+ * @suppress
+ */
 class TurnstileAlternate(private val turnstile: Turnstile, initialState: TurnstileStates? = null) {
     var currentState: TurnstileStates
         private set

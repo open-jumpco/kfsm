@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @suppress
  * Represents a collection of rule with 1 transition and a list of guarded transitions.
  * @param guardedTransitions The list of guarded transitions
  * @param transition The transition to use if there are no guarded transitions or no guarded transitions match.

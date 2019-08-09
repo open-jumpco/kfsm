@@ -9,6 +9,9 @@
 
 package io.jumpco.open.kfsm
 
+/**
+ * @suppress
+ */
 class StateMapInstance<S, E : Enum<E>, C>(
     val context: C,
     val newState: S,
@@ -96,19 +99,22 @@ class StateMapInstance<S, E : Enum<E>, C>(
     fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
         definition.eventAllowed(event, currentState, includeDefault)
 
-    fun executeAutomatic(state: S, args: Array<out Any>): Boolean {
+    internal fun executeAutomatic(currentTransition: Transition<S, E, C>, state: S, args: Array<out Any>): Boolean {
         definition.automaticTransitions[state]?.apply rule@{
             val defaultTransition = this.transition
             findGuard(context, args)?.apply {
-                parentFsm.execute(this, args)
+                if (currentTransition !== this) {
+                    parentFsm.execute(this, args)
+                    return true
+                }
             } ?: run {
                 if (defaultTransition != null) {
-                    parentFsm.execute(defaultTransition, args)
-                } else {
-                    return false
+                    if (currentTransition !== defaultTransition) {
+                        parentFsm.execute(defaultTransition, args)
+                        return true
+                    }
                 }
             }
-            return true
         }
         return false
     }

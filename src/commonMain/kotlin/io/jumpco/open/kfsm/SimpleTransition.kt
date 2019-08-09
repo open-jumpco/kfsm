@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @suppress
  * Represents a transition from a given state and event.
  * @param startState The given state
  * @param event The given event

@@ -88,16 +88,15 @@ class StateMachineInstance<S, E : Enum<E>, C>(
                     currentStateMap.currentState = transition.targetState
                 }
             } else {
-                if (transition.targetState != null && transition.targetMap == null) {
+                executePush(transition, args)
+                if (transition.targetState != null) {
                     currentStateMap.currentState = transition.targetState
-                } else {
-                    executePush(transition, args)
                 }
             }
         } else {
             currentStateMap.execute(transition, args)
         }
-        currentStateMap.executeAutomatic(currentStateMap.currentState, args)
+        currentStateMap.executeAutomatic(transition, currentStateMap.currentState, args)
     }
 
     private fun executePush(transition: Transition<S, E, C>, args: Array<out Any>) {

@@ -148,31 +148,31 @@ Add the relevant dependency to your build file.
 ### Kotlin/JVM Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.9.0'
+    implementation 'io.jumpco.open:kfsm-jvm:0.9.1'
 }
 ```
 ### KotlinJS Projects
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.9.0'
+    implementation 'io.jumpco.open:kfsm-js:0.9.1'
 }
 ```
 ### Kotlin/Native Projects using LinuxX64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.0'    
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.1'    
 }
 ```
 ### Kotlin/Native Projects using MinGW64
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.0'    
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.1'    
 }
 ```
 ### Kotlin/Native Projects using macOS
 ```groovy
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.9.0'    
+    implementation 'io.jumpco.open:kfsm-macosX64:0.9.1'    
 }
 ```
 

@@ -151,8 +151,10 @@ transition(EVENT1) { args ->
     // use value
 }
 ----
+
 If we update the turnstile to include the value of the coin in the coin event we could implement the following:
-Various guard expression determine the specific transitions.
+A named state where decisions regarding coins are made.
+We push to `coins` with COINS state and then the automatic states will be triggered if the guards are met.
 
 image::paying_turnstile_fsm.png[Paying Turnstile]
 
@@ -226,7 +228,9 @@ enum class PayingTurnstileEvents {
     PASS
 }
 ----
-We add a stateMap named `coins`. The statemap will be entered when there are outstanding coins.
+We add a stateMap named `coins` with the state `COINS`.
+The statemap  will be entered when there are coins.
+The automatic transitions will be triggered based on the guard expressions.
 
 ==== State machine definition packaged
 ```kotlin
@@ -267,7 +271,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                 }
                 exit { startState, _, args ->
                     if (args.isNotEmpty()) {
-                        println("entering:$startState (${args.toList()}) for $this")
+                        println("exiting:$startState (${args.toList()}) for $this")
                     } else {
                         println("exiting:$startState for $this")
                     }
@@ -275,50 +279,30 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
             }
             stateMap("coins", setOf(PayingTurnstileStates.COINS)) {
                 state(PayingTurnstileStates.COINS) {
-                    // The coins add up to more than required.
-                    popTransition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                        guard = { args ->
-                            val value = args[0] as Int
-                            value + this.coins > this.requiredCoins
-                        }) { args ->
-                        val value = args[0] as Int
-                        returnCoin(coin(value) - requiredCoins)
+                    automaticPop(PayingTurnstileStates.UNLOCKED, guard = { coins > requiredCoins }) {
+                        println("automaticPop:returnCoin")
+                        returnCoin(coins - requiredCoins)
                         unlock()
                         reset()
                     }
-                    // The coins isn't enough to make total match required
-                    transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.COINS,
-                        guard = { args ->
-                            val value = args[0] as Int;
-                            value + this.coins < this.requiredCoins
-                        }) { args ->
-                        val value = args[0] as Int
-                        coin(value)
-                        println("Coins=$coins, Please add ${requiredCoins - coins}")
-                    }
-                    // The coin is exact amount required
-                    popTransition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
-                        val value = args[0] as Int
-                        coin(value)
+                    automaticPop(PayingTurnstileStates.UNLOCKED, guard = { coins == requiredCoins }) {
+                        println("automaticPop")
                         unlock()
                         reset()
+                    }
+                    transition(PayingTurnstileEvents.COIN) { args ->
+                        val value = args[0] as Int
+                        coin(value)
+                        println("Coins=$coins")
+                        if (coins < requiredCoins) {
+                            println("Please add ${requiredCoins - coins}")
+                        }
                     }
                 }
             }
             state(PayingTurnstileStates.LOCKED) {
-                // The coins add up to more than required
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED,
-                    guard = { args ->
-                        val value = args[0] as Int;
-                        value + this.coins > this.requiredCoins
-                    }) { args ->
-                    val value = args[0] as Int
-                    returnCoin(coin(value) - requiredCoins)
-                    unlock()
-                    reset()
-                }
                 // The coin brings amount to exact amount
-                transition(PayingTurnstileEvents.COIN to PayingTurnstileStates.UNLOCKED) { args ->
+                pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { args ->
                     val value = args[0] as Int
                     coin(value)
                     unlock()
