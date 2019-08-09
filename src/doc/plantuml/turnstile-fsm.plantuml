@@ -1,9 +1,9 @@
 @startuml
 
 [*] --> LOCKED
-LOCKED ---> UNLOCKED : COIN { unlock() }
-UNLOCKED ---> LOCKED : PASS { lock() }
-LOCKED ---> LOCKED : PASS { alarm() }
-UNLOCKED ---> UNLOCKED : COIN { returnCoin() }
+LOCKED ---> UNLOCKED : COIN\n{ unlock() }
+UNLOCKED ---> LOCKED : PASS\n{ lock() }
+LOCKED ---> LOCKED : PASS\n{ alarm() }
+UNLOCKED ---> UNLOCKED : COIN\n{ returnCoin() }
 
 @enduml

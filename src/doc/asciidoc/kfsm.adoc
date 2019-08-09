@@ -136,7 +136,9 @@ https://github.com/open-jumpco/kfsm-samples[Samples]
 
 image::statemachine_model.png[StateMachineModel]
 
-=== Events with arguments
+=== Advanced Features
+We can add arguments to events and use named state maps with push / pop and automatic transitions.
+
 Arguments are sent as follows:
 [source,kotlin]
 ----
