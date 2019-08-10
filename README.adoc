@@ -157,11 +157,11 @@ class TurnstileFSM(turnstile: Turnstile) {
 }
 ----
 
-With this We are saying:
+With this definition we are saying:
 When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the lambda which is treated
 as a member of the context `{ unlock() }`
 
-When the state is `LOCKED` and on `event(PASS)` we are perform the action `alarm()` without changing the end state.
+When the state is `LOCKED` and on event `PASS` we perform the action `alarm()` without changing the end state.
 
 ==== Usage
 Then we instantiate the FSM and provide a context to operate on:
