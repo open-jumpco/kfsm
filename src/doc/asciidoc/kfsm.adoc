@@ -94,6 +94,7 @@ class TurnstileFSM(turnstile: Turnstile) {
                 entry { startState, targetState, _ ->
                     println("entering:$startState -> $targetState for $this")
                 }
+                // default transition will invoke alarm
                 action { state, event, _ ->
                     println("Default action for state($state) -> event($event) for $this")
                     alarm()
@@ -102,15 +103,20 @@ class TurnstileFSM(turnstile: Turnstile) {
                     println("exiting:$startState -> $targetState for $this")
                 }
             }
+            // when current state is LOCKED
             state(TurnstileStates.LOCKED) {
+                // external transition on COIN to UNLOCKED state
                 transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
                     unlock()
                 }
             }
+            // when current state is UNLOCKED
             state(TurnstileStates.UNLOCKED) {
+                // internal transition on COIN
                 transition(TurnstileEvents.COIN) {
                     returnCoin()
                 }
+                // external transition on PASS to LOCKED state
                 transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
                     lock()
                 }
@@ -125,11 +131,6 @@ class TurnstileFSM(turnstile: Turnstile) {
 }
 ----
 
-With this We are saying:
-When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the lambda which is treated
-as a member of the context `{ unlock() }`
-
-When the state is `LOCKED` and on `event(PASS)` we are perform the action `alarm()` without changing the end state.
 
 ==== Usage
 Then we instantiate the FSM and provide a context to operate on:

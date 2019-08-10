@@ -25,6 +25,7 @@ The state machine implementation supports events triggering transitions from one
 * [x] Multiple state maps
 * [x] Push / pop transitions
 * [x] Automatic transitions
+* [ ] Externalisation of state 
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
@@ -126,6 +127,7 @@ class TurnstileFSM(turnstile: Turnstile) {
                 entry { startState, targetState, _ ->
                     println("entering:$startState -> $targetState for $this")
                 }
+                // default transition will invoke alarm
                 action { state, event, _ ->
                     println("Default action for state($state) -> event($event) for $this")
                     alarm()
@@ -134,15 +136,20 @@ class TurnstileFSM(turnstile: Turnstile) {
                     println("exiting:$startState -> $targetState for $this")
                 }
             }
+            // when current state is LOCKED
             state(TurnstileStates.LOCKED) {
+                // external transition on COIN to UNLOCKED state
                 transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
                     unlock()
                 }
             }
+            // when current state is UNLOCKED
             state(TurnstileStates.UNLOCKED) {
+                // internal transition on COIN
                 transition(TurnstileEvents.COIN) {
                     returnCoin()
                 }
+                // external transition on PASS to LOCKED state
                 transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
                     lock()
                 }
@@ -259,4 +266,5 @@ dependencies {
 * Should default actions receive state or event as arguments?
 * Is there a more elegant way to define States and Events using sealed classes?
 * Are any features missing from the implementation?
-
+* Do we need default automatic transitions?
+* Do we need default push / pop transitions?
