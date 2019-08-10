@@ -7,6 +7,32 @@ Then we use the DSL to declare a definition of a statemachine matching the diagr
 ==== State Diagram
 image::turnstile_fsm.png[LockStateDiagram]
 
+==== State Table
+
+|===
+|Start State |Event |End State |Action
+
+|LOCKED
+|PASS
+|LOCKED
+|alarm
+
+|LOCKED
+|COIN
+|UNLOCKED
+|unlock
+
+|UNLOCKED
+|PASS
+|LOCKED
+|lock
+
+|UNLOCKED
+|COIN
+|UNLOCKED
+|returnCoin
+|===
+
 ==== Context class
 [source,kotlin]
 ----
@@ -132,7 +158,7 @@ fsm.coin()
 // Expect returnCoin() and end state is UNLOCKED
 ----
 
-https://github.com/open-jumpco/kfsm-samples[Samples]
+link:https://github.com/open-jumpco/kfsm-samples[Samples]
 
 image::statemachine_model.png[StateMachineModel]
 
@@ -159,6 +185,52 @@ A named state where decisions regarding coins are made.
 We push to `coins` with COINS state and then the automatic states will be triggered if the guards are met.
 
 image::paying_turnstile_fsm.png[Paying Turnstile]
+
+==== State Table
+
+|===
+|Start State |Event |Guard| End State | Action
+
+|LOCKED
+|PASS
+|
+|LOCKED
+|alarm
+
+|LOCKED
+|COIN
+|
+|COINS
+|coin(value)
+
+|UNLOCKED
+|PASS
+|
+|LOCKED
+|lock
+
+|COINS
+|COIN
+|
+|COINS
+|coin(value)
+
+|COINS
+|
+|coins == requiredCoins
+| UNLOCKED
+| unlock
+
+|COINS
+|
+|coins > requiredCoins
+| UNLOCKED
+| returnCoin(coins-requiredCoins), unlock
+
+|===
+
+When event is empty it is an automatic transition.
+We will further place COINS state in a named state map to illustrate how these can be composes to isolate or group behaviour.
 
 ==== Context class
 

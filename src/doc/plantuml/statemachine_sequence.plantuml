@@ -8,7 +8,7 @@ Consumer ----> StateMachineInstance : sendEvent(event:E)
 
     activate StateMachineInstance
     note right of StateMachineInstance
-        StateMachineInstance determines the Transition
+        StateMachineInstance determines the TransitionRules
         or default exit / entry / action(s) needed
     end note
     activate StateMachineInstance
