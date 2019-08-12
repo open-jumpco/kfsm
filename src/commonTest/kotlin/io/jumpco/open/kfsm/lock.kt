@@ -43,7 +43,6 @@ class Lock(initial: Int = 1) {
     override fun toString(): String {
         return "Lock(locked=$locked)"
     }
-
 }
 
 enum class LockStates {

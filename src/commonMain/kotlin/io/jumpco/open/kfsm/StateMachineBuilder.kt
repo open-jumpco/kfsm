@@ -93,7 +93,6 @@ class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
     fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) =
         defaultStateMap.transition(startState, event, guard, action)
 
-
     /**
      * This function defines a transition that will be triggered when the currentState is the same as the startState and on is received. The FSM currentState will change to the targetState after the action was executed.
      * Entry and Exit actions will also be performed.
@@ -113,7 +112,6 @@ class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
      */
     fun transition(startState: S, event: E, action: StateAction<C>?) =
         defaultStateMap.transition(startState, event, action)
-
 
     /**
      * This function defines an action to be invoked when no action is found matching the current state and event.
@@ -136,7 +134,6 @@ class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
      */
     fun defaultExit(action: DefaultChangeAction<C, S>) =
         defaultStateMap.defaultExit(action)
-
 
     /**
      * This function defines an action to be invoked when no transitions are found matching the given state and on.
@@ -161,7 +158,6 @@ class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
      */
     fun default(event: E, action: StateAction<C>?) =
         defaultStateMap.default(event, action)
-
 
     /**
      * This function defines an action to be invoked when the FSM changes to the provided state

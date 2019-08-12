@@ -38,7 +38,6 @@ class Turnstile(locked: Boolean = true) {
     override fun toString(): String {
         return "Turnstile(locked=$locked)"
     }
-
 }
 
 /**

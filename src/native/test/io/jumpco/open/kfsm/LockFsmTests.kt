@@ -99,7 +99,6 @@ class LockFsmTests {
         verifyLockFSM(fsm, lock)
     }
 
-
     @Test
     fun testDslCreationOfFsm() {
         // given

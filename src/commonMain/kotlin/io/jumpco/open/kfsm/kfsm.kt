@@ -62,7 +62,6 @@ typealias DefaultChangeAction<C, S> = C.(S, S, Array<out Any>) -> Unit
  */
 typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
 
-
 /**
  * This represents an event and targetState pair that can be written as `event to state`
  * @param E The event: E will be the first element of the pair

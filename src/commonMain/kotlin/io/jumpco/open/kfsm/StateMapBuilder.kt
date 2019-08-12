@@ -96,7 +96,6 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         }
     }
 
-
     /**
      * This function defines a transition that will be triggered when the currentState is the same as the startState and on is received. The FSM currentState will change to the targetState after the action was executed.
      * Entry and Exit actions will also be performed.
@@ -151,7 +150,6 @@ class StateMapBuilder<S, E : Enum<E>, C>(
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
         }
-
     }
 
     /**
@@ -313,7 +311,6 @@ class StateMapBuilder<S, E : Enum<E>, C>(
             transitionRule.addGuarded(transition)
         }
     }
-
 
     /**
      * Creates a pop transition that will pop the last statemap and then change to the targetState.
@@ -582,5 +579,4 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         this.defaultEntryAction,
         this.defaultExitAction
     )
-
 }

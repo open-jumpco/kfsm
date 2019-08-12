@@ -11,7 +11,6 @@ package io.jumpco.open.kfsm
 import io.jumpco.open.kfsm.LockEvents.LOCK
 import io.jumpco.open.kfsm.LockEvents.UNLOCK
 import io.jumpco.open.kfsm.LockStates.*
-import io.mockk.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -23,18 +22,14 @@ import kotlin.test.fail
 class LockFsmTests {
 
     private fun verifyLockFSM(fsm: StateMachineInstance<LockStates, LockEvents, Lock>, lock: Lock) {
-        // when
-        every { lock.locked } returns 1
-        every { lock.unlock() } just Runs
-        every { lock.lock() } just Runs
-        every { lock.doubleLock() } just Runs
         // then
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.sendEvent(UNLOCK)
         // then
-        verify { lock.unlock() }
         assertTrue { fsm.currentState == UNLOCKED }
+        assertTrue { lock.locked == 0 }
         try {
             // when
             fsm.sendEvent(UNLOCK)
@@ -47,13 +42,13 @@ class LockFsmTests {
         // when
         fsm.sendEvent(LOCK)
         // then
-        verify { lock.lock() }
         assertTrue { fsm.currentState == LOCKED }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.sendEvent(LOCK)
-        verify { lock.doubleLock() }
         // then
         assertTrue { fsm.currentState == DOUBLE_LOCKED }
+        assertTrue { lock.locked == 2 }
         try {
             // when
             fsm.sendEvent(LOCK)
@@ -63,10 +58,11 @@ class LockFsmTests {
             // then
             assertEquals("Already double locked", x.message)
         }
+        assertTrue { lock.locked == 2 }
     }
 
     @Test
-    fun `test plain creation of fsm`() {
+    fun testPlainCreationOfFsm() {
         // given
         val builder = StateMachineBuilder<LockStates, LockEvents, Lock>(LockStates.values().toSet())
         builder.initial {
@@ -97,16 +93,14 @@ class LockFsmTests {
         }
         val definition = builder.complete()
         // when
-        val lock = mockk<Lock>()
-        every { lock.locked } returns 1
+        val lock = Lock()
         val fsm = definition.create(lock)
         // then
         verifyLockFSM(fsm, lock)
     }
 
-
     @Test
-    fun `test dsl creation of fsm`() {
+    fun testDslCreationOfFsm() {
         // given
         val definition = StateMachineBuilder<LockStates, LockEvents, Lock>(LockStates.values().toSet()).stateMachine {
             initial {
@@ -144,30 +138,26 @@ class LockFsmTests {
             }
         }.build()
         // when
-        val lock = mockk<Lock>()
-        every { lock.locked } returns 1
+        val lock = Lock()
         val fsm = definition.create(lock)
         // then
         verifyLockFSM(fsm, lock)
     }
 
     @Test
-    fun `simple lock test`() {
+    fun simpleLockTest() {
         val lock = Lock(0)
         val fsm = LockFSM(lock)
         println("--lock1")
         fsm.lock()
-        assertEquals(fsm.allowedEvents(), setOf(LOCK, UNLOCK))
         println("--lock2")
         fsm.lock()
         println("--lock3")
         fsm.lock()
         println("--unlock1")
         fsm.unlock()
-        assertEquals(fsm.allowedEvents(), setOf(UNLOCK, LOCK))
         println("--unlock2")
         fsm.unlock()
-        assertEquals(fsm.allowedEvents(), setOf(LOCK))
         println("--unlock3")
         fsm.unlock()
     }

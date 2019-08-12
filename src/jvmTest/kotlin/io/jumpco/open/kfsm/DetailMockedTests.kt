@@ -12,7 +12,6 @@ package io.jumpco.open.kfsm
 import io.mockk.*
 import kotlin.test.Test
 
-
 class DetailMockedTests {
     enum class TestStates {
         STATE1,
@@ -66,7 +65,6 @@ class DetailMockedTests {
         override fun toString(): String {
             return "TestContext(state=$state)"
         }
-
     }
 
     class TestDetailFSM(context: TestContext) {
@@ -93,7 +91,6 @@ class DetailMockedTests {
                     transition(TestEvents.EVENT1 to TestStates.STATE1) {
                         println("default:EVENT1 to STATE1 for $this")
                         action1()
-
                     }
                     transition(TestEvents.EVENT2 to TestStates.STATE2) {
                         println("default:on EVENT2 to STATE2 for $this")
@@ -115,7 +112,6 @@ class DetailMockedTests {
                     entry { _, _, _ ->
                         entry1()
                     }
-
                 }
                 state(TestStates.STATE2) {
                     entry { _, _, _ ->

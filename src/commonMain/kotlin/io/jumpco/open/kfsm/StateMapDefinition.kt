@@ -87,7 +87,6 @@ class StateMapDefinition<S, E : Enum<E>, C>(
             hasDefaultStateHandler(given)) ||
             allowed(given, includeDefault).contains(event)
 
-
     /**
      * This function will provide an indicator if a default action has been defined for a given state.
      */

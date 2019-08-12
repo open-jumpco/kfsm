@@ -58,7 +58,6 @@ class PayingTurnstile(
     override fun toString(): String {
         return "Turnstile(locked=$locked,coins=$coins)"
     }
-
 }
 
 /**
@@ -158,7 +157,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
                 // The coins add up to more than required
                 pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
                     guard = { args ->
-                        val value = args[0] as Int;
+                        val value = args[0] as Int
                         value + this.coins < this.requiredCoins
                     }) { args ->
                     val value = args[0] as Int
@@ -192,5 +191,4 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
     }
 
     fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
-
 }

@@ -48,7 +48,6 @@ class StateMachineInstance<S, E : Enum<E>, C>(
     val currentState: S
         get() = currentStateMap.currentState
 
-
     internal fun pushMap(
         defaultInstance: StateMapInstance<S, E, C>,
         initial: S,

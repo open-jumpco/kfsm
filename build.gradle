@@ -1,9 +1,14 @@
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+
 plugins {
     id 'org.jetbrains.kotlin.multiplatform' version '1.3.41'
     id 'org.jetbrains.dokka' version '0.9.18'
     id 'maven-publish'
     id 'signing'
     id 'org.asciidoctor.convert' version '1.5.9.2'
+    id 'org.jlleitschuh.gradle.ktlint' version '8.2.0'
+    id 'org.jlleitschuh.gradle.ktlint-idea' version '8.2.0'
 }
 
 repositories {
@@ -48,3 +53,14 @@ dokka {
     samples = ['src/commonTest/kotlin/io/jumpco/open/kfsm/turnstile.kt']
 }
 
+ktlint {
+    debug = true
+    verbose = true
+    // outputToConsole = true
+    reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
+    ignoreFailures = true
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
+    }
+}

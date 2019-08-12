@@ -67,7 +67,6 @@ class DetailTests {
         override fun toString(): String {
             return "TestContext(state=$state)"
         }
-
     }
 
     class TestDetailFSM(context: TestContext) {
@@ -100,7 +99,6 @@ class DetailTests {
                             println("default:EVENT1 to STATE1 for $this:$msg")
                             action1()
                             state = 1
-
                         }
                         transition(TestEvents.EVENT2 to TestStates.STATE2) { args ->
                             val msg = args[0] as String
@@ -139,7 +137,6 @@ class DetailTests {
                         entry { _, _, _ ->
                             entry1()
                         }
-
                     }
                     state(TestStates.STATE2) {
                         entry { _, _, _ ->
