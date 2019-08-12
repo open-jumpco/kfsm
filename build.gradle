@@ -56,9 +56,8 @@ dokka {
 ktlint {
     debug = true
     verbose = true
-    // outputToConsole = true
     reporters = [ReporterType.PLAIN, ReporterType.CHECKSTYLE]
-    ignoreFailures = true
+    // ignoreFailures = true
     filter {
         exclude("**/generated/**")
         include("**/kotlin/**")

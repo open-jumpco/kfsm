@@ -12,7 +12,7 @@ repositories {
 }
 ----
 === Dependencies
-==== JVM Projects
+==== Kotlin/JVM Projects
 
 [source,groovy]
 ----
@@ -66,28 +66,29 @@ dependencies {
 }
 ----
 == Operation
+
 The finite state machine follows a specific set of rules. This section describes the decision making and order of execution.
 
-The state machine will receive events constrained by set of events.
-
 The state machine will define one or more state maps each representing a subset of possible states of the same type.
+
+The state machine will receive events, constrained by set of events. The events can only be an enum class.
 
 The state machine will apply actions to a context. The context represents the work that need to be performed.
 
 An event may have arguments.
 
-Transitions defines actions to apply when the state machine is in a specific state and receives a specific event.
+An event may trigger a state transition which defines actions to apply when the state machine is in a specific state.
 
-Guarded transitions has a guard expression that can be evaluated to allow execution of transition.
+Guarded transitions has a guard expression that will be evaluated to allow execution of transition.
 
-Automatic transitions are associated with states and have no events. Automatic transitions will be executed if they apply after the exit action.
+Automatic transitions are associated with states and have no events. Automatic transitions will be executed if the specific state apply after the exit action.
 
-For this implementation the events must be an `enum class` the state can be any type but we have been using `enum class` as well.
+The state can be any type but we have been using `enum class` in all samples.
 
 image::statemachine_sequence.png[FSM sequence]
 
 When sendEvent is called the state machine applies the event to the current state map.
-The current state map is usually top-level state map unless you have defined named maps and used push transitions.
+The current state map is usually top-level state map unless you have defined named maps and used a push transition.
 
 === Send Event
 The normal operation is to invoke the following actions:
@@ -97,13 +98,28 @@ The normal operation is to invoke the following actions:
 ** action
 ** if(external) entryAction
 
-The exit action is chosen from  `stateMap/state/exit` or `stateMap/state/default/exit` or `stateMap/default/exit`
-The action is chosen from `stateMap/state/transition` or `stateMap/state/default/action` or `stateMap/default/action`
-The entry action is chosen from  `stateMap/state/entry` or `stateMap/state/default/entry` or `stateMap/default/entry`
+The exit action is chosen from one of:
+
+* `stateMap/state/exit`
+* `stateMap/state/default/exit`
+* `stateMap/default/exit`
+
+The action is chosen from one of:
+
+* `stateMap/state/transition`
+* `stateMap/state/default/action`
+* `stateMap/default/action`
+
+The entry action is chosen from one of:
+
+* `stateMap/state/entry`
+* `stateMap/state/default/entry`
+* `stateMap/default/entry`
 
 The combination of current state and event determines a set of transition rules that have been applied to that combination by one or more definitions.
 If the transition rules contains guard transitions the guard expressions are evaluated until one evaluates `true`.
 The `entry` and `exit` action are only invoked for `external` transitions.
+
 External transitions have an explicit target state defined. If the target state is not defined it is an internal transition.
 
 The currentState determines the `exit` action. The target state determines the `entry` action.
