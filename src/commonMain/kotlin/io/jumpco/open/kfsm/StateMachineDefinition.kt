@@ -19,6 +19,20 @@ class StateMachineDefinition<S, E : Enum<E>, C>(
     val namedStateMaps: Map<String, StateMapDefinition<S, E, C>>
 
 ) {
+    private fun createMap(
+        mapName: String,
+        context: C,
+        parentFsm: StateMachineInstance<S, E, C>,
+        initial: S
+    ) {
+        if (mapName == "default") {
+            parentFsm.pushMap(StateMapInstance(context, initial, null, parentFsm, defaultStateMap))
+        } else {
+            val stateMap = namedStateMaps[mapName] ?: error("Invalid map $mapName")
+            parentFsm.pushMap(StateMapInstance(context, initial, mapName, parentFsm, stateMap))
+        }
+    }
+
     /**
      * This function will create a state machine instance provided with content and optional initialState.
      * @param context The context will be provided to actions
@@ -28,46 +42,27 @@ class StateMachineDefinition<S, E : Enum<E>, C>(
     internal fun create(
         context: C,
         parentFsm: StateMachineInstance<S, E, C>,
-        initialState: S? = null
+        initialState: S? = null,
+        intitialExternalState: ExternalState<S>? = null
     ): StateMapInstance<S, E, C> {
-        if (deriveInitialMap != null && initialState == null) {
-            deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
-                if (mapName == "default") {
-                    parentFsm.pushMap(
-                        StateMapInstance(
-                            context,
-                            initial,
-                            null,
-                            parentFsm,
-                            defaultStateMap
-                        )
-                    )
-                } else {
-                    val stateMap = namedStateMaps.getOrElse(mapName) { error("Invalid initial map $mapName") }
-                    parentFsm.pushMap(
-                        parentFsm.mapStack.peek() ?: error("Expected default to be pushed"),
-                        initial,
-                        mapName,
-                        stateMap
-                    )
-                }
+        if (intitialExternalState != null) {
+            intitialExternalState.forEach { (initial, mapName) ->
+                createMap(mapName, context, parentFsm, initial)
             }
-            parentFsm.currentStateMap = parentFsm.mapStack.pop()
-            return parentFsm.currentStateMap
+            return parentFsm.mapStack.pop()
+        } else if (deriveInitialMap != null) {
+            deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
+                createMap(mapName, context, parentFsm, initial)
+            }
+            return parentFsm.mapStack.pop()
         } else {
             val initial = initialState ?: deriveInitialState?.invoke(context)
             ?: error("Definition requires deriveInitialState or deriveInitialMap")
-            return StateMapInstance(
-                context,
-                initial,
-                null,
-                parentFsm,
-                defaultStateMap
-            )
+            return StateMapInstance(context, initial, null, parentFsm, defaultStateMap)
         }
     }
 
-    internal fun create(
+    internal fun createStateMap(
         name: String,
         context: C,
         parentFsm: StateMachineInstance<S, E, C>,
@@ -81,7 +76,8 @@ class StateMachineDefinition<S, E : Enum<E>, C>(
             namedStateMaps[name] ?: error("Named map $name not found")
         )
 
-    fun create(context: C): StateMachineInstance<S, E, C> = StateMachineInstance<S, E, C>(context, this, null).apply {
-        create(context, this)
-    }
+    fun create(context: C, initialExternalState: ExternalState<S>): StateMachineInstance<S, E, C> =
+        StateMachineInstance<S, E, C>(context, this, null, initialExternalState)
+
+    fun create(context: C): StateMachineInstance<S, E, C> = StateMachineInstance<S, E, C>(context, this, null)
 }

@@ -28,8 +28,12 @@ class StateMachineInstance<S, E : Enum<E>, C>(
     /**
      * The initialState will be assigned to the currentState
      */
-    initialState: S?
+    initialState: S? = null,
+    initialExternalState: ExternalState<S>? = null
 ) {
+    constructor(context: C, definition: StateMachineDefinition<S, E, C>, initialExternalState: ExternalState<S>) :
+        this(context, definition, null, initialExternalState) {
+    }
 
     internal val namedInstances: MutableMap<String, StateMapInstance<S, E, C>> = mutableMapOf()
 
@@ -42,7 +46,7 @@ class StateMachineInstance<S, E : Enum<E>, C>(
     internal var currentStateMap: StateMapInstance<S, E, C>
 
     init {
-        currentStateMap = definition.create(context, this, initialState)
+        currentStateMap = definition.create(context, this, initialState, initialExternalState)
     }
 
     val currentState: S
@@ -100,15 +104,16 @@ class StateMachineInstance<S, E : Enum<E>, C>(
 
     private fun executePush(transition: Transition<S, E, C>, args: Array<out Any>) {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
-            val stateMapInstance =
-                definition.create(transition.targetMap, context, this, transition.targetState!!)
-            namedInstances.put(transition.targetMap, stateMapInstance)
-            stateMapInstance
+            definition.createStateMap(transition.targetMap!!, context, this, transition.targetState!!).apply {
+                namedInstances.put(transition.targetMap, this)
+            }
         }
         mapStack.push(currentStateMap)
         transition.execute(context, currentStateMap, targetStateMap, args)
         currentStateMap = targetStateMap
-        currentStateMap.currentState = transition.targetState!!
+        if (transition.targetState != null) {
+            currentStateMap.currentState = transition.targetState
+        }
     }
 
     /**
@@ -127,4 +132,18 @@ class StateMachineInstance<S, E : Enum<E>, C>(
      * @param event The on received,
      */
     fun sendEvent(event: E, vararg args: Any) = currentStateMap.sendEvent(event, *args)
+
+    /**
+     * This function will provide the external state that can be use when creating the instance at a later time.
+     * @return The external state a collection of state and map name pairs.
+     * @see StateMachineDefinition.create
+     */
+    fun externalState(): ExternalState<S> {
+        return mapStack.peekContent()
+            .map { Pair(it.currentState, it.name ?: "default") }
+            .toMutableList()
+            .apply {
+                add(Pair(currentStateMap.currentState, currentStateMap.name ?: "default"))
+            }.toList()
+    }
 }

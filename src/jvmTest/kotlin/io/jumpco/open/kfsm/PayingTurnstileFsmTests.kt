@@ -20,6 +20,7 @@ class PayingTurnstileFsmTests {
         val turnstile = PayingTurnstile(50)
         val fsm = PayingTurnstileFSM(turnstile)
         assertTrue(turnstile.locked)
+        println("External:${fsm.externalState()}")
         println("--coin1")
         fsm.coin(10)
         assertTrue(turnstile.locked)
@@ -29,9 +30,11 @@ class PayingTurnstileFsmTests {
             "Expected coins map"
         )
         println("--coin2")
+        println("External:${fsm.externalState()}")
         fsm.coin(60)
         assertTrue(turnstile.coins == 0)
         assertTrue(!turnstile.locked)
+        println("External:${fsm.externalState()}")
         assertTrue(fsm.fsm.currentStateMap.name == null, "Expected default map not ${fsm.fsm.currentStateMap.name}")
         println("--pass1")
         fsm.pass()
@@ -47,5 +50,58 @@ class PayingTurnstileFsmTests {
         fsm.coin(10)
         assertTrue(turnstile.coins == 0)
         assertTrue(!turnstile.locked)
+    }
+
+    @Test
+    fun `fsm component test external state`() {
+        val turnstile = PayingTurnstile(50)
+        val fsm = PayingTurnstileFSM(turnstile)
+        assertTrue(turnstile.locked)
+        println("External:${fsm.externalState()}")
+        println("--coin1")
+        fsm.coin(10)
+        assertTrue(turnstile.locked)
+        assertTrue(turnstile.coins == 10)
+        assertTrue(
+            fsm.fsm.currentStateMap.name != null && "coins" == fsm.fsm.currentStateMap.name,
+            "Expected coins map"
+        )
+        println("--coin2")
+        val es1 = fsm.externalState()
+        println("External:$es1")
+        val es2 = PayingTurnstileFSM(turnstile, es1).apply {
+            this.coin(60)
+            assertTrue(turnstile.coins == 0)
+            assertTrue(!turnstile.locked)
+            println("External:${this.externalState()}")
+            assertTrue(
+                this.fsm.currentStateMap.name == null,
+                "Expected default map not ${this.fsm.currentStateMap.name}"
+            )
+            println("--pass1")
+        }.externalState()
+        val es3 = PayingTurnstileFSM(turnstile, es2).apply {
+            this.pass()
+            assertTrue(turnstile.locked)
+            println("--pass2")
+        }.externalState()
+        val es4 = PayingTurnstileFSM(turnstile, es3).apply {
+            this.pass()
+            println("--pass3")
+        }.externalState()
+        val es5 = PayingTurnstileFSM(turnstile, es4).apply {
+            this.pass()
+            println("--coin3")
+        }.externalState()
+        val es6 = PayingTurnstileFSM(turnstile, es5).apply {
+            this.coin(40)
+            assertTrue(turnstile.coins == 40)
+            println("--coin4")
+        }.externalState()
+        PayingTurnstileFSM(turnstile, es6).apply {
+            this.coin(10)
+            assertTrue(turnstile.coins == 0)
+            assertTrue(!turnstile.locked)
+        }
     }
 }

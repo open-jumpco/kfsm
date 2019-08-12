@@ -70,6 +70,11 @@ typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
 typealias EventState<E, S> = Pair<E, S>
 
 /**
+ * Represents the state of one or more pushed state maps and can be stored and used to initialise the state machine.
+ */
+typealias ExternalState<S> = StateMapList<S>
+
+/**
  * Represents the different kinds of transitions.
  */
 enum class TransitionType {
@@ -158,4 +163,6 @@ class Stack<T> {
      * @return the element at the top of the stack without removing or `null` is the stack is empty.
      */
     fun peek(): T? = elements.lastOrNull()
+
+    fun peekContent(): List<T> = elements.toList()
 }
