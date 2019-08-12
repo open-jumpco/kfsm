@@ -145,7 +145,7 @@ The statemachine supports:
 
 All configuration calls are eventually applied to link:javadoc/kfsm/io.jumpco.open.kfsm/-state-machine-builder/index.html[StateMachineBuilder]
 
-=== `stateMachine {}`
+=== `stateMachine`
 The top level element is `stateMachine` either by using the function
 
 * link:javadoc/kfsm/io.jumpco.open.kfsm/-state-machine-builder/state-machine.html[StateMachineBuilder::stateMachine]
@@ -181,7 +181,7 @@ val definition = stateMachine(StateEnum.values().toSet(), EventEnum::class,Conte
 }.build()
 ----
 
-=== `default {}`
+=== `default`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/default.html[DslStateMachineHandler::default]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
@@ -203,7 +203,7 @@ default {
 }
 ----
 
-==== action {}
+==== `action`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-default-event-handler/action.html[DslStateMachineDefaultEventHandler::action]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -219,7 +219,7 @@ action { currentState, event, args -> // global default action
 }
 ----
 
-==== entry {}
+==== `entry`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/entry.html[DslStateMachineDefaultEventHandler::entry]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -235,7 +235,7 @@ entry { fromState, targetState, args ->
 }
 ----
 
-==== exit {}
+==== `exit`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/exit.html[DslStateMachineDefaultEventHandler::exit]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -250,7 +250,8 @@ exit { fromState, targetState, args ->
     println("Exiting:$fromState to $targetState with ${args.toList()}")
 }
 ----
-==== transition(E [to S]) {}
+==== `transition`
+* Arguments: `(event: E [to targetState: S])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-default-event-handler/transition.html[DslStateMachineDefaultEventHandler::transition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
@@ -271,7 +272,7 @@ transition(Event.EVENT to State.STATE) { args-> // default external state action
 }
 ----
 
-=== `initial {}`
+=== `initial`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/initial.html[DslStateMachineHandler::initial]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -289,7 +290,7 @@ initial {
     }
 }
 ----
-=== `initialMap {}`
+=== `initialMap`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/initial-map.html[DslStateMachineHandler::initialMap]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -317,7 +318,8 @@ initialMap {
 }
 ----
 
-=== `state(currentState: S) {}`
+=== `state`
+* Arguments: `(currentState: S)`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-handler/state.html[DslStateMachineHandler::state]
 * Mandatory: _Mandatory_
 * Cardinality: _Multiple_
@@ -359,7 +361,7 @@ state(State.STATE) {
 }
 ----
 
-==== default {}
+==== `default`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/default.html[DslStateMachineEventHandler::default]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -374,7 +376,7 @@ default { fromState, event, args -> // default state action
 }
 ----
 
-==== entry {}
+==== `entry`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/entry.html[DslStateMachineEventHandler::entry]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -389,7 +391,7 @@ entry { fromState, targetState, args -> // state entry action
     println("Entering:$targetState from $fromState with ${args.toList()}")
 }
 ----
-==== exit {}
+==== `exit`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/exit.html[DslStateMachineEventHandler::exit]
 * Mandatory: _Optional_
 * Cardinality: _Single_
@@ -403,7 +405,8 @@ exit { fromState, targetState, args -> // state exit action
     println("Exiting:$fromState to $targetState with ${args.toList()}")
 }
 ----
-==== automatic(targetState: S [, guard:{}]) {}
+==== `automatic`
+* Arguments: `(targetState: S [, guard:{}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/automatic.html[DslStateMachineDefaultEventHandler::automatic]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
@@ -412,36 +415,108 @@ There are 2 variations of automatic transitions: Those with and without guards.
 An automatic transition is exercises after the state machine has completed processing a transition.
 All automatic transitions attached to a given state will be invoked if their guards are met.
 
-==== automaticPop(targetState: S [, guard:{}]) {}
+Example:
+[source,kotlin]
+----
+state(State.S1) {
+    automatic(State.S1, guard = { flag == 1}) { // automatic transition to new state when guard is met
+    }
+    automatic(State.S1) { // automatic transition to new state
+    }
+}
+----
+
+==== `automaticPop`
+* Arguments: `([targetMap: String,][,targetState: S] [, guard:{}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/automatic-pop.html[DslStateMachineDefaultEventHandler::automaticPop]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
 There are 6 variations of automatic transitions: Those with and without guards, those with and without targetMaps which will lead to a new push transition.
 
-==== automaticPush(targetMap: String, targetState: S [, guard:{}]) {}
+Example:
+[source,kotlin]
+----
+state(State.S1) {
+    automaticPop { // pop when S1
+    }
+    automaticPop(guard= { flag == 1 }) { // pop when S1 and guard is true
+    }
+    automaticPop(State.S2, guard = { flag == 1 }) { // automatic pop transition to new state when guard is met
+    }
+    automaticPop(State.S2) { // automatic pop transition to new state
+    }
+    automaticPop("map1", State.S2) { // automatic pop transition to push transition to new state in target map
+    }
+    automaticPop("map1", State.S2, guard={flag == 1 }) { // automatic pop transition to push transition to new state in target map
+    }
+}
+----
+
+==== `automaticPush`
+* Arguments: `(targetMap: String, targetState: S [, guard:{}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/automatic-push.html[DslStateMachineDefaultEventHandler::automaticPush]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
 There are 2 variations of automatic transitions: Those with and without guards
 
+Example:
+[source,kotlin]
+----
+state(State.S1) {
+    automaticPush("map1", State.S2) { // automatic push transition to S2 in target map "map1"
+    }
+    automaticPush("map1", State.S2, guard={flag == 1 }) { // automatic push transition to S2 in target map "map1" if guard is true
+    }
+}
+----
 
-==== popTransition(event: E [to targetState: S]|[,targetMap: String, targetState: S], [guard:{}]) {}
+==== `popTransition`
+* Arguments: `(event: E [to targetState: S]|[,targetMap: String, targetState: S], [guard:{}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/pop-transition.html[DslStateMachineEventHandler::popTransition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
 There are 6 variations of popTransitions to provide for with and without guards, with and without a new state and with and without a targetMap that will result in a new push transition.
 
-==== pushTransition(event: E, targetMap: String, targetState: S [, guard:{}]) {}
+Example:
+[source,kotlin]
+----
+state(State.S1) {
+    popTransition(Event.EV3) { // pop transition without targetState
+    }
+    popTransition(Event.EV3, guard={ flag == 1 }) { // pop transition without targetState and guard expression
+    }
+    popTransition(Event.EV3 to State.S2) { // pop transition on EV3 changing state to S2
+    }
+    popTransition(Event.EV3 to State.S2, guard={ flag == 1 }) { // pop transition on EV3 changing state to S2 with a guard expression
+    }
+    popTransition(Event.EV3, "newMap", State.S3) { // pop transition leading into new push transition to S3 in "newMap"
+    }
+    popTransition(Event.EV3, "newMap", State.S3, guard={ flag == 1 }) { // pop transition leading into new push transition to S3 in "newMap" with a guard expression
+    }
+}
+----
+==== `pushTransition`
+* Arguments: `(event: E, targetMap: String, targetState: S [, guard:{}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/push-transition.html[DslStateMachineEventHandler::pushTransition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
 There are 2 variations of automatic transitions: Those with and without guards
-
-==== transition(event: E [to targetState: S],[guard: {}]) {}
+Example:
+[source,kotlin]
+----
+state(State.S1) {
+    pushTransition(Event.EV2, "mapName", State.S2) { // push transition to S2 in new map "mapName"
+    }
+    pushTransition(Event.EV2, "mapName", State.S2, gaurd = { flag == 1}) { // push transition to S2 in new map "mapName" with guard expression
+    }
+}
+----
+==== `transition`
+* Arguments: `(event: E [to targetState: S],[guard: {}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/transition.html[DslStateMachineEventHandler::transition]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
