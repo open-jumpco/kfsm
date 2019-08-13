@@ -54,7 +54,6 @@ class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
     fun complete(): StateMachineDefinition<S, E, C> {
         completed = true
         if (namedStateMaps.isNotEmpty()) {
-            require(this.deriveInitialStateMap != null) { "initialMap must be defined when using named state maps" }
             require(this.deriveInitialState == null) { "deriveInitialState cannot be used with named state maps" }
         }
         return StateMachineDefinition(

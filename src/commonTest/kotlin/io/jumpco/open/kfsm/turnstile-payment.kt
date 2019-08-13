@@ -87,18 +87,6 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
             PayingTurnstileEvents::class,
             PayingTurnstile::class
         ) {
-            initialMap {
-                mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-                    if (locked) {
-                        this.add(PayingTurnstileStates.LOCKED to "default")
-                    } else {
-                        this.add(PayingTurnstileStates.UNLOCKED to "default")
-                    }
-                    if (coins > 0) {
-                        this.add(PayingTurnstileStates.COINS to "coins")
-                    }
-                }
-            }
             default {
                 entry { _, targetState, args ->
                     if (args.isNotEmpty()) {
@@ -178,7 +166,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
         }.build()
     }
 
-    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(turnstile)
+    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(turnstile, PayingTurnstileStates.LOCKED)
 
     fun coin(value: Int) {
         println("sendEvent:COIN:$value")

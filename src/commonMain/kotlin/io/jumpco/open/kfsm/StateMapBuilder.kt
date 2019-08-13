@@ -9,6 +9,10 @@
 
 package io.jumpco.open.kfsm
 
+/**
+ * The build will be created to assist with create the top level or named state maps.
+ * All transitions are assigned to a state map.
+ */
 class StateMapBuilder<S, E : Enum<E>, C>(
     /**
      * The set of states the state map supports

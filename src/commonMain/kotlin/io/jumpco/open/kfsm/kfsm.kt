@@ -149,20 +149,26 @@ class Stack<T> {
     }
 
     /**
+     * Indicates that the stack is empty.
      * @return true if the stack is empty
      */
     fun isEmpty() = elements.isEmpty()
 
     /**
-     *
+     * Indicates that the stack is not empty.
      * @return true if the stack is not empty
      */
     fun isNotEmpty() = elements.isNotEmpty()
 
     /**
+     * Provides access to the top of the stack.
      * @return the element at the top of the stack without removing or `null` is the stack is empty.
      */
     fun peek(): T? = elements.lastOrNull()
 
+    /**
+     * Provides access to all the entries on the stack.
+     * @return An immutable list of entries with the top of the stack at the end.
+     */
     fun peekContent(): List<T> = elements.toList()
 }

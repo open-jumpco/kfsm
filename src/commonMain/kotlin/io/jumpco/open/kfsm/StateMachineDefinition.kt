@@ -15,7 +15,13 @@ package io.jumpco.open.kfsm
 class StateMachineDefinition<S, E : Enum<E>, C>(
     private val deriveInitialState: StateQuery<C, S>?,
     private val deriveInitialMap: StateMapQuery<C, S>?,
+    /**
+     * The top level state map will be created when the state machine is created.
+     */
     val defaultStateMap: StateMapDefinition<S, E, C>,
+    /**
+     * The named state maps can be accessed via a push transition.
+     */
     val namedStateMaps: Map<String, StateMapDefinition<S, E, C>>
 
 ) {
@@ -76,12 +82,29 @@ class StateMachineDefinition<S, E : Enum<E>, C>(
             namedStateMaps[name] ?: error("Named map $name not found")
         )
 
+    /**
+     * This function will create a state machine instance and set it to the state to a previously externalised state.
+     * @param context The instance will operate on the provided context
+     * @param initialExternalState The previously externalised state
+     */
     fun create(context: C, initialExternalState: ExternalState<S>): StateMachineInstance<S, E, C> =
         StateMachineInstance<S, E, C>(context, this, null, initialExternalState)
 
+    /**
+     * This function will create a state machine instance and set it to the initial state.
+     * @param context The instance will operate on the provided context
+     * @param initial The initial state
+     *
+     */
     fun create(context: C, initial: S? = null): StateMachineInstance<S, E, C> =
         StateMachineInstance<S, E, C>(context, this, initial)
 
+    /**
+     * This function will provide a list of possible events given a specific state.
+     * The actual events may fail because of guard conditions or named state maps and the default state map behaviour being different.
+     * @param state The given state
+     * @param includeDefault consider the default state and event handlers
+     */
     fun possibleEvents(state: S, includeDefault: Boolean): Set<E> {
         val result = mutableSetOf<E>()
         result.addAll(defaultStateMap.allowed(state, includeDefault))

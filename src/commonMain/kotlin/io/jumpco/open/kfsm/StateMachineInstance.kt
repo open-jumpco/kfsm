@@ -31,6 +31,12 @@ class StateMachineInstance<S, E : Enum<E>, C>(
     initialState: S? = null,
     initialExternalState: ExternalState<S>? = null
 ) {
+    /**
+     * Create a state machine using a specific definition and a previous externalised state.
+     * @param context The instane will operate on the context
+     * @param definition The definition of the state machine instance.
+     * @param initialExternalState The previously externalised state.
+     */
     constructor(context: C, definition: StateMachineDefinition<S, E, C>, initialExternalState: ExternalState<S>) :
         this(context, definition, null, initialExternalState) {
     }
