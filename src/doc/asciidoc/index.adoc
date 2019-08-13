@@ -19,6 +19,20 @@ The <<Tutorial>> provides examples of how to compose a DSL and FSM.
 === link:javadoc/kfsm/index.html[API Docs]
 === link:https://github.com/open-jumpco/kfsm[Source]
 
+== Features
+
+This Finite state machine implementation has the following features:
+
+* Event driven state machine.
+* External and internal transitions
+* State entry and exit actions.
+* Default state actions.
+* Default entry and exit actions.
+* Determine allowed events for current or given state.
+* Multiple state maps with push / pop transitions
+* Automatic transitions
+* Externalisation of state.
+
 == Tutorial
 include::kfsm.adoc[]
 

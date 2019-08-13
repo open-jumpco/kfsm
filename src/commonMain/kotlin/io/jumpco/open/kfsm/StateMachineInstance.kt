@@ -79,32 +79,36 @@ class StateMachineInstance<S, E : Enum<E>, C>(
                 currentStateMap.execute(transition, args)
             }
         } else if (transition.type == TransitionType.POP) {
-            val sourceMap = currentStateMap
-            val targetMap = mapStack.pop()
-            currentStateMap = targetMap
-            if (transition.targetMap == null) {
-                if (transition.targetState == null) {
-                    transition.execute(context, sourceMap, targetMap, args)
-                } else {
-                    transition.execute(context, sourceMap, null, args)
-                    targetMap.executeEntry(context, transition.targetState, args)
-                    currentStateMap.currentState = transition.targetState
-                }
-            } else {
-                executePush(transition, args)
-                if (transition.targetState != null) {
-                    currentStateMap.currentState = transition.targetState
-                }
-            }
+            executePop(transition, args)
         } else {
             currentStateMap.execute(transition, args)
         }
         currentStateMap.executeAutomatic(transition, currentStateMap.currentState, args)
     }
 
+    private fun executePop(transition: Transition<S, E, C>, args: Array<out Any>) {
+        val sourceMap = currentStateMap
+        val targetMap = mapStack.pop()
+        currentStateMap = targetMap
+        if (transition.targetMap == null) {
+            if (transition.targetState == null) {
+                transition.execute(context, sourceMap, targetMap, args)
+            } else {
+                transition.execute(context, sourceMap, null, args)
+                targetMap.executeEntry(context, transition.targetState, args)
+                currentStateMap.currentState = transition.targetState
+            }
+        } else {
+            executePush(transition, args)
+            if (transition.targetState != null) {
+                currentStateMap.currentState = transition.targetState
+            }
+        }
+    }
+
     private fun executePush(transition: Transition<S, E, C>, args: Array<out Any>) {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
-            definition.createStateMap(transition.targetMap!!, context, this, transition.targetState!!).apply {
+            definition.createStateMap(transition.targetMap, context, this, transition.targetState!!).apply {
                 namedInstances.put(transition.targetMap, this)
             }
         }

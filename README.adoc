@@ -9,23 +9,24 @@ This is a small implementation of an FSM in Kotlin.
 
 == Getting Started
 
-The state machine implementation supports events triggering transitions from one state to another while performing an optional action as well as entry and exit actions. 
+The state machine implementation supports events triggering transitions from one state to another while performing an optional action as well as entry and exit actions.
 
 == Features
 * Event driven state machine.
-* External and internal transitions 
+* External and internal transitions
 * State entry and exit actions.
 * Default state actions.
 * Default entry and exit actions.
 * Determine allowed events.
 * Multiple state maps with push / pop transitions
 * Automatic transitions
+* Externalisation of state.
 
 == Todo
 * [x] Multiple state maps
 * [x] Push / pop transitions
 * [x] Automatic transitions
-* [ ] Externalisation of state 
+* [x] Externalisation of state
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)

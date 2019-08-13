@@ -79,5 +79,17 @@ class StateMachineDefinition<S, E : Enum<E>, C>(
     fun create(context: C, initialExternalState: ExternalState<S>): StateMachineInstance<S, E, C> =
         StateMachineInstance<S, E, C>(context, this, null, initialExternalState)
 
-    fun create(context: C): StateMachineInstance<S, E, C> = StateMachineInstance<S, E, C>(context, this, null)
+    fun create(context: C, initial: S? = null): StateMachineInstance<S, E, C> =
+        StateMachineInstance<S, E, C>(context, this, initial)
+
+    fun possibleEvents(state: S, includeDefault: Boolean): Set<E> {
+        val result = mutableSetOf<E>()
+        result.addAll(defaultStateMap.allowed(state, includeDefault))
+        namedStateMaps.values.forEach {
+            if (it.validStates.contains(state)) {
+                result.addAll(it.allowed(state, includeDefault))
+            }
+        }
+        return result.toSet()
+    }
 }

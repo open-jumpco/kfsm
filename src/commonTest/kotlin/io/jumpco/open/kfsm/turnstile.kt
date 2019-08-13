@@ -59,45 +59,50 @@ enum class TurnstileEvents {
 /**
  * @suppress
  */
-class TurnstileFSM(turnstile: Turnstile) {
+class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
     companion object {
-        private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
-            initial {
-                if (locked)
-                    TurnstileStates.LOCKED
-                else
-                    TurnstileStates.UNLOCKED
-            }
-            default {
-                entry { startState, targetState, _ ->
-                    println("entering:$startState -> $targetState for $this")
+        private val definition =
+            stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
+                initial {
+                    if (locked)
+                        TurnstileStates.LOCKED
+                    else
+                        TurnstileStates.UNLOCKED
                 }
-                action { state, event, _ ->
-                    println("Default action for state($state) -> on($event) for $this")
-                    alarm()
+                default {
+                    entry { startState, targetState, _ ->
+                        println("entering:$startState -> $targetState for $this")
+                    }
+                    action { state, event, _ ->
+                        println("Default action for state($state) -> on($event) for $this")
+                        alarm()
+                    }
+                    exit { startState, targetState, _ ->
+                        println("exiting:$startState -> $targetState for $this")
+                    }
                 }
-                exit { startState, targetState, _ ->
-                    println("exiting:$startState -> $targetState for $this")
+                state(TurnstileStates.LOCKED) {
+                    transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                        unlock()
+                    }
                 }
-            }
-            state(TurnstileStates.LOCKED) {
-                transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
-                    unlock()
+                state(TurnstileStates.UNLOCKED) {
+                    transition(TurnstileEvents.COIN) {
+                        returnCoin()
+                    }
+                    transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                        lock()
+                    }
                 }
-            }
-            state(TurnstileStates.UNLOCKED) {
-                transition(TurnstileEvents.COIN) {
-                    returnCoin()
-                }
-                transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
-                    lock()
-                }
-            }
-        }.build()
+            }.build()
+
+        fun possibleEvents(state: TurnstileStates, includeDefault: Boolean = false) =
+            definition.possibleEvents(state, includeDefault)
     }
 
-    private val fsm = definition.create(turnstile)
+    private val fsm = definition.create(turnstile, savedState)
 
+    fun externalState() = fsm.currentState
     fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
     fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
     fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
@@ -118,11 +123,11 @@ class TurnstileAlternate(private val turnstile: Turnstile, initialState: Turnsti
     }
 
     private fun defaultEntry(startState: TurnstileStates, targetState: TurnstileStates, event: TurnstileEvents) {
-        println("entering:$startState -> $targetState for $this")
+        println("entering:$startState -> $targetState on($event) for $this")
     }
 
     private fun defaultExit(startState: TurnstileStates, targetState: TurnstileStates, event: TurnstileEvents) {
-        println("exiting:$startState -> $targetState for $this")
+        println("exiting:$startState -> $targetState on($event) for $this")
     }
 
     private fun defaultAction(state: TurnstileStates, event: TurnstileEvents) {

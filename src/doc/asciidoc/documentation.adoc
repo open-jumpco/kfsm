@@ -67,7 +67,8 @@ dependencies {
 ----
 == Operation
 
-The finite state machine follows a specific set of rules. This section describes the decision making and order of execution.
+The finite state machine follows a specific set of rules.
+This section describes the decision making and order of execution.
 
 The state machine will define one or more state maps each representing a subset of possible states of the same type.
 
@@ -79,9 +80,10 @@ An event may have arguments.
 
 An event may trigger a state transition which defines actions to apply when the state machine is in a specific state.
 
-Guarded transitions has a guard expression that will be evaluated to allow execution of transition.
+Transitions may have a guard expression that has to evaluate to `true` to allow execution of transition.
 
-Automatic transitions are associated with states and have no events. Automatic transitions will be executed if the specific state apply after the exit action.
+Automatic transitions are associated with states and have no events.
+Automatic transitions will be executed if the specific state applies after the exit action.
 
 The state can be any type but we have been using `enum class` in all samples.
 
@@ -130,6 +132,12 @@ A named map represents a set of states that is grouped together. Named maps can 
 A push transition requires a map name and a target state along with the normal event and optional guard and action.
 The current state map will be pushed on a stack and a statemap instance will be created using the named definition.
 Events will be processed according to the transition rules of the named map.
+
+=== Life-cycle
+The philosophy behind the design is that the finite state machine can be used when needed by creating an instance and providing it with the context.
+The state machine can derive the current state from the context or it can be provided with a previously externalised state.
+Then events can be sent to the FSM which may trigger actions.
+The FSM can also be used to determine which events are allowed for a given state.
 
 == DSL
 The DSL provides a way of configuring the statemachine.
