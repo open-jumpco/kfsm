@@ -60,6 +60,13 @@ enum class TurnstileEvents {
  * @suppress
  */
 class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
+    private val fsm = definition.create(turnstile, savedState)
+
+    fun externalState() = fsm.currentState
+    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
+    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
+    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
+
     companion object {
         private val definition =
             stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
@@ -99,13 +106,6 @@ class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
         fun possibleEvents(state: TurnstileStates, includeDefault: Boolean = false) =
             definition.possibleEvents(state, includeDefault)
     }
-
-    private val fsm = definition.create(turnstile, savedState)
-
-    fun externalState() = fsm.currentState
-    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
-    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
-    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
 }
 
 /**

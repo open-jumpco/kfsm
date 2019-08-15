@@ -68,7 +68,23 @@ class DetailMockedTests {
     }
 
     class TestDetailFSM(context: TestContext) {
+        private val fsm = definition.create(context)
+        fun event1() {
+            println("--event1")
+            fsm.sendEvent(TestEvents.EVENT1)
+        }
+
+        fun event2() {
+            println("--event2")
+            fsm.sendEvent(TestEvents.EVENT2)
+        }
+
+        fun event3() {
+            println("--event3")
+            fsm.sendEvent(TestEvents.EVENT3)
+        }
         companion object {
+            private val definition by lazy { define() }
             private fun define() = StateMachineBuilder<TestStates, TestEvents, TestContext>(TestStates.values().toSet())
                 .stateMachine {
                 initial {
@@ -134,24 +150,6 @@ class DetailMockedTests {
                     }
                 }
             }.build()
-
-            private val definition by lazy { define() }
-        }
-
-        private val fsm = definition.create(context)
-        fun event1() {
-            println("--event1")
-            fsm.sendEvent(TestEvents.EVENT1)
-        }
-
-        fun event2() {
-            println("--event2")
-            fsm.sendEvent(TestEvents.EVENT2)
-        }
-
-        fun event3() {
-            println("--event3")
-            fsm.sendEvent(TestEvents.EVENT3)
         }
     }
 

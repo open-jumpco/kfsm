@@ -70,6 +70,25 @@ class DetailTests {
     }
 
     class TestDetailFSM(context: TestContext) {
+        val fsm = definition.create(context)
+        fun allowedEvents() = fsm.allowed()
+        fun eventAllowed(event: TestEvents, includeDefaults: Boolean = false) =
+            fsm.eventAllowed(event, includeDefaults)
+
+        fun event1(msg: String) {
+            println("--event1")
+            fsm.sendEvent(TestEvents.EVENT1, msg)
+        }
+
+        fun event2(msg: String) {
+            println("--event2")
+            fsm.sendEvent(TestEvents.EVENT2, msg)
+        }
+
+        fun event3(msg: String) {
+            println("--event3")
+            fsm.sendEvent(TestEvents.EVENT3, msg)
+        }
         companion object {
             val definition = StateMachineBuilder<TestStates, TestEvents, TestContext>(TestStates.values().toSet())
                 .stateMachine {
@@ -165,26 +184,6 @@ class DetailTests {
                         }
                     }
                 }.build()
-        }
-
-        val fsm = definition.create(context)
-        fun allowedEvents() = fsm.allowed()
-        fun eventAllowed(event: TestEvents, includeDefaults: Boolean = false) =
-            fsm.eventAllowed(event, includeDefaults)
-
-        fun event1(msg: String) {
-            println("--event1")
-            fsm.sendEvent(TestEvents.EVENT1, msg)
-        }
-
-        fun event2(msg: String) {
-            println("--event2")
-            fsm.sendEvent(TestEvents.EVENT2, msg)
-        }
-
-        fun event3(msg: String) {
-            println("--event3")
-            fsm.sendEvent(TestEvents.EVENT3, msg)
         }
     }
 

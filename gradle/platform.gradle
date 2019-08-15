@@ -60,17 +60,18 @@ kotlin {
         }
     }
     if (useTarget['js']) {
-        if(project.ext.has('nodeInstall')) {
+        if (project.ext.has('nodeInstall')) {
             // tasks.findByPath(':compileKotlinsJs')?.dependsOn('kotlinNodeJsSetup')
             tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
         }
         js {
-            browser {
-            }
-            nodejs {
-            }
-            mavenPublication {
-                artifactId = "${project.name}-js"
+            compilations.main {
+                kotlinOptions {
+                    metaInfo = true
+                    sourceMap = true
+                    verbose = true
+                    moduleKind = "umd"
+                }
             }
         }
     }

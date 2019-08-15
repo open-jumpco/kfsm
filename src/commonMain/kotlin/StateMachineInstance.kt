@@ -31,16 +31,6 @@ class StateMachineInstance<S, E : Enum<E>, C>(
     initialState: S? = null,
     initialExternalState: ExternalState<S>? = null
 ) {
-    /**
-     * Create a state machine using a specific definition and a previous externalised state.
-     * @param context The instane will operate on the context
-     * @param definition The definition of the state machine instance.
-     * @param initialExternalState The previously externalised state.
-     */
-    constructor(context: C, definition: StateMachineDefinition<S, E, C>, initialExternalState: ExternalState<S>) :
-        this(context, definition, null, initialExternalState) {
-    }
-
     internal val namedInstances: MutableMap<String, StateMapInstance<S, E, C>> = mutableMapOf()
 
     internal val mapStack: Stack<StateMapInstance<S, E, C>> = Stack()
@@ -51,12 +41,22 @@ class StateMachineInstance<S, E : Enum<E>, C>(
      */
     internal var currentStateMap: StateMapInstance<S, E, C>
 
+    val currentState: S
+        get() = currentStateMap.currentState
+
+    /**
+     * Create a state machine using a specific definition and a previous externalised state.
+     * @param context The instane will operate on the context
+     * @param definition The definition of the state machine instance.
+     * @param initialExternalState The previously externalised state.
+     */
+    constructor(context: C, definition: StateMachineDefinition<S, E, C>, initialExternalState: ExternalState<S>) :
+        this(context, definition, null, initialExternalState) {
+    }
+
     init {
         currentStateMap = definition.create(context, this, initialState, initialExternalState)
     }
-
-    val currentState: S
-        get() = currentStateMap.currentState
 
     internal fun pushMap(
         defaultInstance: StateMapInstance<S, E, C>,

@@ -81,6 +81,21 @@ enum class PayingTurnstileEvents {
  * @suppress
  */
 class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState<PayingTurnstileStates>? = null) {
+    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(turnstile, PayingTurnstileStates.LOCKED)
+
+    fun coin(value: Int) {
+        println("sendEvent:COIN:$value")
+        fsm.sendEvent(PayingTurnstileEvents.COIN, value)
+    }
+
+    fun pass() {
+        println("sendEvent:PASS")
+        fsm.sendEvent(PayingTurnstileEvents.PASS)
+    }
+
+    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
+    fun externalState() = fsm.externalState()
+
     companion object {
         val definition = stateMachine(
             setOf(PayingTurnstileStates.LOCKED, PayingTurnstileStates.UNLOCKED),
@@ -165,19 +180,4 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
             }
         }.build()
     }
-
-    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(turnstile, PayingTurnstileStates.LOCKED)
-
-    fun coin(value: Int) {
-        println("sendEvent:COIN:$value")
-        fsm.sendEvent(PayingTurnstileEvents.COIN, value)
-    }
-
-    fun pass() {
-        println("sendEvent:PASS")
-        fsm.sendEvent(PayingTurnstileEvents.PASS)
-    }
-
-    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
-    fun externalState() = fsm.externalState()
 }
