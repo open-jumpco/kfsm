@@ -82,6 +82,11 @@ enum class TurnstileEvents {
 [source,kotlin]
 ----
 class TurnstileFSM(turnstile: Turnstile) {
+    private val fsm = definition.create(turnstile)
+
+    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
+    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
+
     companion object {
         private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
             initial {
@@ -123,11 +128,6 @@ class TurnstileFSM(turnstile: Turnstile) {
             }
         }.build()
     }
-
-    private val fsm = definition.create(turnstile)
-
-    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
-    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
 }
 ----
 
@@ -310,6 +310,20 @@ The automatic transitions will be triggered based on the guard expressions.
 ==== State machine definition packaged
 ```kotlin
 class PayingTurnstileFSM(turnstile: PayingTurnstile) {
+    val fsm = definition.create(turnstile)
+
+    fun coin(value: Int) {
+        println("sendEvent:COIN:$value")
+        fsm.sendEvent(PayingTurnstileEvents.COIN, value)
+    }
+
+    fun pass() {
+        println("sendEvent:PASS")
+        fsm.sendEvent(PayingTurnstileEvents.PASS)
+    }
+
+    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
+
     companion object {
         val definition = stateMachine(
             setOf(PayingTurnstileStates.LOCKED, PayingTurnstileStates.UNLOCKED),
@@ -406,21 +420,6 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
             }
         }.build()
     }
-
-    val fsm = definition.create(turnstile)
-
-    fun coin(value: Int) {
-        println("sendEvent:COIN:$value")
-        fsm.sendEvent(PayingTurnstileEvents.COIN, value)
-    }
-
-    fun pass() {
-        println("sendEvent:PASS")
-        fsm.sendEvent(PayingTurnstileEvents.PASS)
-    }
-
-    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
-
 }
 ```
 

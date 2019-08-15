@@ -116,6 +116,10 @@ enum class TurnstileEvents {
 [source,kotlin]
 ----
 class TurnstileFSM(turnstile: Turnstile) {
+    private val fsm = definition.create(turnstile)
+
+    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
+    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
     companion object {
         private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
             initial {
@@ -157,11 +161,6 @@ class TurnstileFSM(turnstile: Turnstile) {
             }
         }.build()
     }
-
-    private val fsm = definition.create(turnstile)
-
-    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
-    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
 }
 ----
 
@@ -221,7 +220,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.9.2'
+    implementation 'io.jumpco.open:kfsm-jvm:0.9.3'
 }
 ----
 
@@ -230,7 +229,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.9.2'
+    implementation 'io.jumpco.open:kfsm-js:0.9.3'
 }
 ----
 
@@ -239,7 +238,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.2'
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.3'
 }
 ----
 
@@ -248,7 +247,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.2'
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.3'
 }
 ----
 
@@ -257,7 +256,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.9.2'
+    implementation 'io.jumpco.open:kfsm-macosX64:0.9.3'
 }
 ----
 
