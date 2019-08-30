@@ -46,8 +46,8 @@ if (profile.contains('wasm')) {
 }
 
 def configureNative(srcSetMain, srcSetTest) {
-    srcSetMain.kotlin.srcDirs = ['src/native/main']
-    srcSetTest.kotlin.srcDirs = ['src/native/test']
+    srcSetMain.kotlin.srcDirs = ['src/nativeMain/kotlin']
+    srcSetTest.kotlin.srcDirs = ['src/nativeTest/kotlin']
 }
 
 kotlin {
@@ -64,7 +64,7 @@ kotlin {
             // tasks.findByPath(':compileKotlinsJs')?.dependsOn('kotlinNodeJsSetup')
             tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
         }
-        js {
+        js('js') {
             compilations.main {
                 kotlinOptions {
                     metaInfo = true
@@ -138,6 +138,7 @@ kotlin {
                 dependencies {
                     implementation kotlin('test-js')
                 }
+                kotlin.srcDirs = ['src/jsTest/kotlin']
             }
         }
         if (useTarget['mingw']) {

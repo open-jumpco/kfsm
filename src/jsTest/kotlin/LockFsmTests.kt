@@ -97,6 +97,7 @@ class LockFsmTests {
         val fsm = definition.create(lock)
         // then
         verifyLockFSM(fsm, lock)
+        assertEquals("123","321")
     }
 
     @Test

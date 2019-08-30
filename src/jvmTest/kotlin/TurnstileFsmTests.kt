@@ -53,7 +53,7 @@ class TurnstileFsmTests {
     }
 
     @Test
-    fun `Uncle Bob's Turnstile plain`() {
+    fun `Turnstile plain`() {
         val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
         builder.initial { if (locked) LOCKED else UNLOCKED }
         builder.defaultAction { _, _, _ ->
@@ -79,7 +79,7 @@ class TurnstileFsmTests {
     }
 
     @Test
-    fun `Uncle Bob's Turnstile DSL`() {
+    fun `Turnstile DSL`() {
         // given
         val definition =
             StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
