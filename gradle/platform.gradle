@@ -65,6 +65,8 @@ kotlin {
             tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
         }
         js('js') {
+            nodejs()
+            browser()
             compilations.main {
                 kotlinOptions {
                     metaInfo = true
