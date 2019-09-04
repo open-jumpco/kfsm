@@ -68,7 +68,7 @@ asciidoctor {
         }
     }
     attributes toc: 'left',
-            'source-highlighter': 'prism',
+            'source-highlighter': 'rouge',
             idprefix: '',
             idseparator: '-',
             docinfo1: ''

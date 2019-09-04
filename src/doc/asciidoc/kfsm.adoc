@@ -88,7 +88,10 @@ class TurnstileFSM(turnstile: Turnstile) {
     fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
 
     companion object {
-        private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
+        private val definition = stateMachine(
+        TurnstileStates.values().toSet(),
+        TurnstileEvents::class,
+        Turnstile::class) {
             initial {
             if (locked)
                 TurnstileStates.LOCKED
