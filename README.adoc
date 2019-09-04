@@ -39,7 +39,7 @@ Then we use the DSL to declare a definition of a statemachine matching the diagr
 
 ==== State Diagram
 
-image::src/doc/asciidoc/turnstile_fsm.png[Turnstile state diagram]
+image::src/docs/asciidoc/turnstile-fsm.png[Turnstile state diagram]
 
 ==== State Table
 
@@ -121,7 +121,11 @@ class TurnstileFSM(turnstile: Turnstile) {
     fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
     fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
     companion object {
-        private val definition = stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
+        private val definition = stateMachine(
+            TurnstileStates.values().toSet(),
+            TurnstileEvents::class,
+            Turnstile::class
+        ) {
             initial {
             if (locked)
                 TurnstileStates.LOCKED

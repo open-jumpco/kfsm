@@ -87,7 +87,7 @@ Automatic transitions will be executed if the specific state applies after the e
 
 The state can be any type but we have been using `enum class` in all samples.
 
-image::statemachine_sequence.png[FSM sequence]
+image::statemachine-sequence.png[FSM sequence]
 
 When sendEvent is called the state machine applies the event to the current state map.
 The current state map is usually top-level state map unless you have defined named maps and used a push transition.
@@ -162,7 +162,9 @@ The top level element is `stateMachine` either by using the function
 [source,kotlin]
 ----
 // using builder function
-val definition = StateMachineBuilder<StateEnum,EventEnum,ContextType>(StateEnum.values().toSet()).stateMachine {
+val definition = StateMachineBuilder<StateEnum, EventEnum, ContextType>(
+    StateEnum.values().toSet()
+).stateMachine {
     default { // global defaults
     }
     initial { // initial state expression
@@ -175,7 +177,11 @@ val definition = StateMachineBuilder<StateEnum,EventEnum,ContextType>(StateEnum.
     }
 }.build()
 // using global function
-val definition = stateMachine(StateEnum.values().toSet(), EventEnum::class,ContextType::class) {
+val definition = stateMachine(
+    StateEnum.values().toSet(),
+    EventEnum::class,
+    ContextType::class
+) {
     default { // global defaults
     }
     initial { // initial state expression
@@ -239,7 +245,7 @@ Example:
 [source,kotlin]
 ----
 entry { fromState, targetState, args ->
-    println("Entering:$targetState from $fromState with ${args.toList()}")
+    entryAction()
 }
 ----
 
@@ -255,7 +261,7 @@ Example:
 [source,kotlin]
 ----
 exit { fromState, targetState, args ->
-    println("Exiting:$fromState to $targetState with ${args.toList()}")
+    exitAction()
 }
 ----
 ==== `transition`
