@@ -99,12 +99,12 @@ enum class TransitionType {
  * @param contextClass The class of the context
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
-inline fun <S, E : Enum<E>, C : Any> stateMachine(
+inline fun <S, E, C : Any> stateMachine(
     validStates: Set<S>,
-    eventClass: KClass<E>,
+    validEvents: Set<E>,
     contextClass: KClass<out C>,
     handler: DslStateMachineHandler<S, E, C>.() -> Unit
-) = StateMachineBuilder<S, E, C>(validStates).stateMachine(handler)
+) = StateMachineBuilder<S, E, C>(validStates, validEvents).stateMachine(handler)
 
 /**
  * An extension function that evaluates the expression and invokes the provided `block` if true or the `otherwise` block is false.

@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
-class DslStateMapHandler<S, E : Enum<E>, C>(private val fsm: StateMapBuilder<S, E, C>) {
+class DslStateMapHandler<S, E, C>(private val fsm: StateMapBuilder<S, E, C>) {
     /**
      * Defines a section for a specific state.
      * @param currentState The give state

@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * @suppress
  */
-class StateMapInstance<S, E : Enum<E>, C>(
+class StateMapInstance<S, E, C>(
     val context: C,
     val newState: S,
     val name: String?,

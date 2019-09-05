@@ -54,9 +54,14 @@ dokka {
 }
 
 asciidoctor {
+    logDocuments = true
+    inputs.files(fileTree('src/docs/asciidoc/*'))
+    requires ['asciidoctor-prism-extension']
+
     sources {
         include 'index.adoc'
     }
+
     resources {
         from(sourceDir) {
             include '**/*.png'
@@ -66,10 +71,10 @@ asciidoctor {
         }
     }
     attributes toc: 'left',
-            'source-highlighter': 'rouge',
-            idprefix: '',
-            idseparator: '-',
-            docinfo1: ''
+        'source-highlighter': 'prism',
+        idprefix: '',
+        idseparator: '-',
+        docinfo1: ''
 }
 
 task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {

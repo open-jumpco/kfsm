@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This class represents an immutable definition of a state machine.
  */
-class StateMachineDefinition<S, E : Enum<E>, C>(
+class StateMachineDefinition<S, E, C>(
     private val deriveInitialState: StateQuery<C, S>?,
     private val deriveInitialMap: StateMapQuery<C, S>?,
     /**

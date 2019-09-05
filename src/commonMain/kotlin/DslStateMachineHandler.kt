@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
-class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBuilder<S, E, C>) {
+class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E, C>) {
     /**
      * Defines an expression that will determine the initial state of the state machine based on the values of the context.
      * @param deriveInitialState A lambda expression receiving context:C and returning state S.
@@ -26,20 +26,20 @@ class DslStateMachineHandler<S, E : Enum<E>, C>(private val fsm: StateMachineBui
      * Provides for a list of pairs with state and map name that will be pushed and the last entry will be popped and become the current map.
      * This is required when using state machine with named maps.
      *
-```
-initialMap {
+    ```
+    initialMap {
     mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-        if (locked) {
-            this.add(PayingTurnstileStates.LOCKED to "default")
-        } else {
-            this.add(PayingTurnstileStates.UNLOCKED to "default")
-        }
-        if (coins > 0) {
-            this.add(PayingTurnstileStates.COINS to "coins")
-        }
+    if (locked) {
+    this.add(PayingTurnstileStates.LOCKED to "default")
+    } else {
+    this.add(PayingTurnstileStates.UNLOCKED to "default")
     }
-}
-```
+    if (coins > 0) {
+    this.add(PayingTurnstileStates.COINS to "coins")
+    }
+    }
+    }
+    ```
      */
     fun initialMap(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C> {
         fsm.initialMap(deriveInitialMap)

@@ -1,0 +1,20 @@
+@startuml
+
+[*] --> RCVPCKT : CTRL { byte == SOH }
+RCVPCKT --> RCVDATA : CTRL { byte == STX } / addField
+RCVDATA --> RCVDATA : BYTE / addByte(byte)
+RCVDATA --> RCVPCKT : CTRL { guard == ETX } / endField
+RCVDATA --> RCVESC : ESC
+RCVDATA --> [*] : CTRL / sendNACK
+RCVESC --> RCVDATA: ESC \n addByte(byte)
+RCVESC --> RCVDATA: CTRL \n addByte(byte)
+RCVPCKT --> RCVCHK : BYTE / addChecksum(byte)
+RCVCHK --> RCVCHK : BYTE / addChecksum(byte)
+RCVCHK --> CHKSUM : CTRL {guard == EOT } / checksum
+RCVCHK --> RCVCHKESC : ESC
+RCVCHKESC --> RCVCHK : ESC / addChecksum(byte)
+RCVCHKESC --> RCVCHK : CTRL / addChecksum(byte)
+RCVCHK --> [*] : CTRL / sendNACK
+CHKSUM --> [*] : <<auto>> { checksumValid }\n sendACK
+CHKSUM --> [*] : <<auto>> { !checksumValid }\n sendNACK
+@enduml

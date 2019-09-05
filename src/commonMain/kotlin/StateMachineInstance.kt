@@ -16,7 +16,7 @@ package io.jumpco.open.kfsm
  * @param definition The defined state machine that provides all the behaviour
  * @param initialState The initial state of the instance.
  */
-class StateMachineInstance<S, E : Enum<E>, C>(
+class StateMachineInstance<S, E, C>(
     /**
      * The transition actions are performed by manipulating the context.
      */

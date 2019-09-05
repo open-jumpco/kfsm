@@ -7,7 +7,7 @@ enum States {
 enum Events {
 }
 
-class StateMachineBuilder<States : Enum<States>, Events : Enum<Events>, Context> {
+class StateMachineBuilder<States, Events, Context> {
     transition(startState: S, event: E[, targetState: S][, guard: C.() -> Boolean], action: C.(Any[]) -> Unit)
     automatic(startState: S, targetState: S[, guard: C.() -> Boolean], action: C.(Any[]) -> Unit)
     automaticPop(startState: S[, targetState: S][, targetMap: String][, guard: C.() -> Boolean], action: C.(Any[]) -> Unit)
@@ -15,13 +15,13 @@ class StateMachineBuilder<States : Enum<States>, Events : Enum<Events>, Context>
     create(context: Context, initialState: States?) : StateMachineInstance<States,Events,Context>
 }
 
-class StateMachineDefinition<S, E : Enum<E>, C> {
+class StateMachineDefinition<S, E, C> {
     allowed(currentState: S, includeDefaults: Boolean): Set<E>
     eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
     create(context: C, initialState: S?) : StateMachineInstance<S,E,C>
 }
 
-class StateMachineInstance<States: Enum<States>, Events: Enum<Events>, Context> {
+class StateMachineInstance<States, Events, Context> {
     StateMachineInstance(context: Context, fsm: StateMachine<States,Events,Context>, initialState: S?)
     Context: context
     var currentState: S

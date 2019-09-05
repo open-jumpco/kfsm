@@ -18,7 +18,7 @@ package io.jumpco.open.kfsm
  * @param guard Expression lambda returning a Boolean
  * @param action An optional lambda that will be invoked.
  */
-open class GuardedTransition<S, E : Enum<E>, C>(
+open class GuardedTransition<S, E, C>(
     startState: S,
     event: E?,
     targetState: S?,

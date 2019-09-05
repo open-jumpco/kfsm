@@ -7,7 +7,7 @@ enum S {
 enum E {
 }
 
-class StateMachineBuilder<S, E : Enum<E>, C> {
+class StateMachineBuilder<S, E, C> {
     initial(action: C.(Any[]) -> S)
     initialMap(action: C.(Any[]) -> List<StateMapItem<S>>)
     transition(startState: S, event: E, targetState: S[, guard: C.()->Boolean], action: C.(Any[]) -> Unit)
@@ -26,13 +26,13 @@ class StateMachineBuilder<S, E : Enum<E>, C> {
     stateMachine()
 }
 
-class StateMachineDefinition<S, E : Enum<E>, C> {
+class StateMachineDefinition<S, E, C> {
     allowed(currentState: S, includeDefaults: Boolean): Set<E>
     eventAllowed(event: E, currentState: S, includeDefault: Boolean): Boolean
     create(context: C, initialState: S?) : StateMachineInstance<S,E,C>
 }
 
-class StateMachineInstance<S: Enum<S>, E: Enum<E>, C> {
+class StateMachineInstance<S, E, C> {
     StateMachineInstance(context: Context, fsm: StateMachine<States,Events,Context>, initialState: S?)
     currentState: S
     sendEvent(event: E, Any[])

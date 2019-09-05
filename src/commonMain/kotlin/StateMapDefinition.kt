@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * Contains the definition of a state map. A state machine has at least one top-level state map.
  */
-class StateMapDefinition<S, E : Enum<E>, C>(
+class StateMapDefinition<S, E, C>(
     /**
      * The name of the statemap. The top-level state map name is `null`
      */

@@ -13,7 +13,7 @@ package io.jumpco.open.kfsm
  * The build will be created to assist with create the top level or named state maps.
  * All transitions are assigned to a state map.
  */
-class StateMapBuilder<S, E : Enum<E>, C>(
+class StateMapBuilder<S, E, C>(
     /**
      * The set of states the state map supports
      */
@@ -47,6 +47,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The optional action will be executed when the transition occurs.
      */
     fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -78,6 +79,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The optional action will be executed when the transition occurs.
      */
     fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -109,6 +111,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The actions will be invoked
      */
     fun transition(startState: S, event: E, targetState: S, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -136,6 +139,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action actions will be invoked
      */
     fun transition(startState: S, event: E, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -165,6 +169,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The optional action that will be invoked.
      */
     fun popTransition(startState: S, event: E, targetState: S?, targetMap: String?, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         val transition = SimpleTransition(
@@ -201,6 +206,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         guard: StateGuard<C>,
         action: StateAction<C>?
     ) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
@@ -232,6 +238,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The optional action will be invoked
      */
     fun pushTransition(startState: S, event: E, targetMap: String, targetState: S, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         require(parentBuilder.namedStateMaps.containsKey(targetMap)) { "$targetMap map not found in ${parentBuilder.namedStateMaps.keys}" }
         val key = Pair(startState, event)
@@ -262,6 +269,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
         guard: StateGuard<C>,
         action: StateAction<C>?
     ) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         require(parentBuilder.namedStateMaps.containsKey(targetMap)) { "$targetMap map not found in ${parentBuilder.namedStateMaps.keys}" }
         val key = Pair(startState, event)
@@ -530,6 +538,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The option action will be executed when this default transition occurs.
      */
     fun default(event: EventState<E, S>, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event.first)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
         defaultTransitions[event.first] =
             DefaultTransition(event.first, event.second, null, false, TransitionType.NORMAL, action)
@@ -541,6 +550,7 @@ class StateMapBuilder<S, E : Enum<E>, C>(
      * @param action The option action will be executed when this default transition occurs.
      */
     fun default(event: E, action: StateAction<C>?) {
+        require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
         defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, null, false, TransitionType.NORMAL, action)
     }

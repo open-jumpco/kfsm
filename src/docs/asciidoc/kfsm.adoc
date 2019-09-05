@@ -313,7 +313,8 @@ The statemap  will be entered when there are coins.
 The automatic transitions will be triggered based on the guard expressions.
 
 ==== State machine definition packaged
-```kotlin
+[source,kotlin]
+----
 class PayingTurnstileFSM(turnstile: PayingTurnstile) {
     val fsm = definition.create(turnstile)
 
@@ -426,10 +427,11 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile) {
         }.build()
     }
 }
-```
+----
 
 ==== Test
-```kotlin
+[source,kotlin]
+----
 val turnstile = PayingTurnstile(50)
 val fsm = PayingTurnstileFSM(turnstile)
 assertTrue(turnstile.locked)
@@ -460,7 +462,7 @@ println("--coin4")
 fsm.coin(10)
 assertTrue(turnstile.coins == 0)
 assertTrue(!turnstile.locked)
-```
+----
 
 ==== Output
 ```
@@ -503,3 +505,22 @@ Unlock
 Reset coins=0
 entering:UNLOCKED ([10]) for Turnstile(locked=false,coins=0)
 ```
+
+=== Packet Reader Example
+
+image::packet-reader-fsm.png[]
+
+In real terms the above example combines multiple transitions into one for brevity.
+It is better when all control characters are one type of event with guard expressions.
+All events have a parameter which is the byte received and the event type is either BYTE, CTRL or ESC where:
+
+* ESC is 0x1B
+* CTRL is for SOH,STX,ETX,EOT
+* BYTE all other characters
+
+image::packet-reader-fsm-guard.png[]
+
+[source,kotlin]
+----
+include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=packer-reader]
+----

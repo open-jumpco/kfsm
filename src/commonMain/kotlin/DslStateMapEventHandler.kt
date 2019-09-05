@@ -12,7 +12,7 @@ package io.jumpco.open.kfsm
 /**
  * This class is used in dsl to handle the state declarations.
  */
-class DslStateMapEventHandler<S, E : Enum<E>, C>(
+class DslStateMapEventHandler<S, E, C>(
     private val currentState: S,
     private val fsm: StateMapBuilder<S, E, C>
 ) {

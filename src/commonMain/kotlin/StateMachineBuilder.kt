@@ -15,7 +15,7 @@ package io.jumpco.open.kfsm
  * @param E is en enum representing all the events the FSM may receive
  * @param C is the class of the Context where the action will be applied.
  */
-class StateMachineBuilder<S, E : Enum<E>, C>(validMapStates: Set<S>) {
+class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
     private var completed = false
     private var deriveInitialState: StateQuery<C, S>? = null
     private var deriveInitialStateMap: StateMapQuery<C, S>? = null

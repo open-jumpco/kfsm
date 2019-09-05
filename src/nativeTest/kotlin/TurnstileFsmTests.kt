@@ -50,7 +50,10 @@ class TurnstileFsmTests {
 
     @Test
     fun turnstilePlain() {
-        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
+        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+            TurnstileStates.values().toSet(),
+            TurnstileEvents.values().toSet()
+        )
         builder.initial { if (locked) LOCKED else UNLOCKED }
         builder.transition(LOCKED, COIN, UNLOCKED) {
             unlock()
@@ -77,7 +80,10 @@ class TurnstileFsmTests {
     fun turnstileDSL() {
         // given
         val definition =
-            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet()).stateMachine {
+            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+                TurnstileStates.values().toSet(),
+                TurnstileEvents.values().toSet()
+            ).stateMachine {
                 initial { if (locked) LOCKED else UNLOCKED }
                 state(LOCKED) {
                     transition(COIN to UNLOCKED) {
@@ -107,8 +113,10 @@ class TurnstileFsmTests {
     @Test
     fun simpleTurnstileTest() {
         val definition =
-            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(TurnstileStates.values().toSet())
-                .stateMachine {
+            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+                TurnstileStates.values().toSet(),
+                TurnstileEvents.values().toSet()
+            ).stateMachine {
                     initial { if (locked) LOCKED else UNLOCKED }
                     state(LOCKED) {
                         entry { startState, targetState, _ ->

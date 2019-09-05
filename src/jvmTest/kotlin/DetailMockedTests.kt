@@ -9,7 +9,11 @@
 
 package io.jumpco.open.kfsm
 
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
 import kotlin.test.Test
 
 class DetailMockedTests {
@@ -83,10 +87,13 @@ class DetailMockedTests {
             println("--event3")
             fsm.sendEvent(TestEvents.EVENT3)
         }
+
         companion object {
             private val definition by lazy { define() }
-            private fun define() = StateMachineBuilder<TestStates, TestEvents, TestContext>(TestStates.values().toSet())
-                .stateMachine {
+            private fun define() = StateMachineBuilder<TestStates, TestEvents, TestContext>(
+                TestStates.values().toSet(),
+                TestEvents.values().toSet()
+            ).stateMachine {
                 initial {
                     when (state) {
                         1 -> TestStates.STATE1

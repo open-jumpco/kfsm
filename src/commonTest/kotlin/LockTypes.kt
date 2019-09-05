@@ -64,7 +64,11 @@ class LockFSM(context: Lock) {
     fun lock() = fsm.sendEvent(LockEvents.LOCK)
 
     companion object {
-        private val definition = stateMachine(LockStates.values().toSet(), LockEvents::class, Lock::class) {
+        private val definition = stateMachine(
+            LockStates.values().toSet(),
+            LockEvents.values().toSet(),
+            Lock::class
+        ) {
             initial {
                 when (locked) {
                     0 -> LockStates.UNLOCKED

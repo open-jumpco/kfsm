@@ -15,7 +15,7 @@ package io.jumpco.open.kfsm
  * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.
  */
-open class Transition<S, E : Enum<E>, C>(
+open class Transition<S, E, C>(
     val targetState: S? = null,
     val targetMap: String? = null,
     val automatic: Boolean = false,

@@ -69,7 +69,11 @@ class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
 
     companion object {
         private val definition =
-            stateMachine(TurnstileStates.values().toSet(), TurnstileEvents::class, Turnstile::class) {
+            stateMachine(
+                TurnstileStates.values().toSet(),
+                TurnstileEvents.values().toSet(),
+                Turnstile::class
+            ) {
                 initial {
                     if (locked)
                         TurnstileStates.LOCKED

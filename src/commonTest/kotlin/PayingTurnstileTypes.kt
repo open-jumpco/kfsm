@@ -81,7 +81,10 @@ enum class PayingTurnstileEvents {
  * @suppress
  */
 class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState<PayingTurnstileStates>? = null) {
-    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(turnstile, PayingTurnstileStates.LOCKED)
+    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(
+        turnstile,
+        PayingTurnstileStates.LOCKED
+    )
 
     fun coin(value: Int) {
         println("sendEvent:COIN:$value")
@@ -99,7 +102,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
     companion object {
         val definition = stateMachine(
             setOf(PayingTurnstileStates.LOCKED, PayingTurnstileStates.UNLOCKED),
-            PayingTurnstileEvents::class,
+            PayingTurnstileEvents.values().toSet(),
             PayingTurnstile::class
         ) {
             default {
