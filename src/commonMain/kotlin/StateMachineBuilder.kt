@@ -25,12 +25,12 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
      */
-    fun initial(init: StateQuery<C, S>) {
+    fun initialState(init: StateQuery<C, S>) {
         require(!completed) { "Statemachine has been completed" }
         deriveInitialState = init
     }
 
-    fun initialMap(init: StateMapQuery<C, S>) {
+    fun initialStates(init: StateMapQuery<C, S>) {
         require(!completed) { "Statemachine has been completed" }
         deriveInitialStateMap = init
     }

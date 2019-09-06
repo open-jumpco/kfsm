@@ -18,7 +18,7 @@ class DslStateMapHandler<S, E, C>(private val fsm: StateMapBuilder<S, E, C>) {
      * @param currentState The give state
      * @param handler A lambda with definitions for the given state
      */
-    fun state(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
+    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
             DslStateMapEventHandler<S, E, C> =
         DslStateMapEventHandler(currentState, fsm).apply(handler)
 

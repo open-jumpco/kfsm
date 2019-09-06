@@ -94,7 +94,7 @@ class DetailMockedTests {
                 TestStates.values().toSet(),
                 TestEvents.values().toSet()
             ).stateMachine {
-                initial {
+                initialState {
                     when (state) {
                         1 -> TestStates.STATE1
                         2 -> TestStates.STATE2
@@ -103,23 +103,23 @@ class DetailMockedTests {
                     }
                 }
                 default {
-                    entry { startState, targetState, _ ->
+                    onEntry { startState, targetState, _ ->
                         println("entering:to $targetState from $startState for:$this")
                         defaultEntry()
                     }
-                    exit { startState, targetState, _ ->
+                    onExit { startState, targetState, _ ->
                         println("exiting:from $targetState to $startState for:$this")
                         defaultExit()
                     }
-                    transition(TestEvents.EVENT1 to TestStates.STATE1) {
+                    onEvent(TestEvents.EVENT1 to TestStates.STATE1) {
                         println("default:EVENT1 to STATE1 for $this")
                         action1()
                     }
-                    transition(TestEvents.EVENT2 to TestStates.STATE2) {
+                    onEvent(TestEvents.EVENT2 to TestStates.STATE2) {
                         println("default:on EVENT2 to STATE2 for $this")
                         action2()
                     }
-                    transition(TestEvents.EVENT3 to TestStates.STATE3) {
+                    onEvent(TestEvents.EVENT3 to TestStates.STATE3) {
                         println("default:on EVENT3 to STATE3 for $this")
                         defaultAction()
                     }
@@ -128,31 +128,31 @@ class DetailMockedTests {
                         defaultAction()
                     }
                 }
-                state(TestStates.STATE1) {
-                    transition(TestEvents.EVENT1) {
+                whenState(TestStates.STATE1) {
+                    onEvent(TestEvents.EVENT1) {
                         action1()
                     }
-                    entry { _, _, _ ->
+                    onEntry { _, _, _ ->
                         entry1()
                     }
                 }
-                state(TestStates.STATE2) {
-                    entry { _, _, _ ->
+                whenState(TestStates.STATE2) {
+                    onEntry { _, _, _ ->
                         entry2()
                     }
-                    transition(TestEvents.EVENT2, guard = { state == 2 }) {
+                    onEvent(TestEvents.EVENT2, guard = { state == 2 }) {
                         println("EVENT2:guarded:from STATE2 for $this")
                         action2()
                     }
-                    exit { _, _, _ ->
+                    onExit { _, _, _ ->
                         exit2()
                     }
                 }
-                state(TestStates.STATE3) {
-                    exit { _, _, _ ->
+                whenState(TestStates.STATE3) {
+                    onExit { _, _, _ ->
                         exit3()
                     }
-                    transition(TestEvents.EVENT2, guard = { state == 2 }) {
+                    onEvent(TestEvents.EVENT2, guard = { state == 2 }) {
                         error("should never be called")
                     }
                 }

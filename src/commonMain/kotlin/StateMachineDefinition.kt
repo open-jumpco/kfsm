@@ -43,7 +43,7 @@ class StateMachineDefinition<S, E, C>(
      * This function will create a state machine instance provided with content and optional initialState.
      * @param context The context will be provided to actions
      * @param initialState If this is not provided the function defined in `initial` will be invoked to derive the initialState.
-     * @see StateMachineBuilder.initial
+     * @see StateMachineBuilder.initialState
      */
     internal fun create(
         context: C,

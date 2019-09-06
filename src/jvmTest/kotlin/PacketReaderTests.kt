@@ -18,7 +18,8 @@ import org.junit.Test
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-// tag::packer-reader[]
+
+// tag::context[]
 class Block {
     val byteArrayOutputStream = ByteArrayOutputStream(32)
     fun addByte(byte: Int) {
@@ -108,10 +109,28 @@ class Packet(private val protocolHandler: ProtocolHandler) : PacketHandler,
     }
 }
 
+// end::context[]
+// tag::states-events[]
+class CharacterConstants {
+    companion object {
+        const val SOH = 0x01
+        const val STX = 0x02
+        const val ETX = 0x03
+        const val EOT = 0x04
+        const val ACK = 0x06
+        const val NAK = 0x15
+        const val ESC = 0x1b
+    }
+}
+
+/**
+ * CTRL :
+ * BYTE everything else
+ */
 enum class ReaderEvents {
-    BYTE,
-    CTRL,
-    ESC
+    BYTE,   // everything else
+    CTRL,   // SOH, EOT, STX, ETX, ACK, NAK
+    ESC     // ESC = 0x1B
 }
 
 enum class ReaderStates {
@@ -125,16 +144,8 @@ enum class ReaderStates {
     END
 }
 
-class CharacterConstants {
-    companion object {
-        const val SOH = 0x01
-        const val STX = 0x02
-        const val ETX = 0x03
-        const val EOT = 0x04
-        const val ESC = 0x1b
-    }
-}
-
+// end::states-events[]
+// tag::packaged[]
 class PacketReaderFSM(private val packetHandler: PacketHandler) {
     companion object {
 
@@ -143,71 +154,71 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
             ReaderEvents.values().toSet(),
             PacketHandler::class
         ) {
-            initial { ReaderStates.START }
+            initialState { ReaderStates.START }
             default {
-                transition(ReaderEvents.BYTE to ReaderStates.END) {
+                onEvent(ReaderEvents.BYTE to ReaderStates.END) {
                     sendNACK()
                 }
-                transition(ReaderEvents.CTRL to ReaderStates.END) {
+                onEvent(ReaderEvents.CTRL to ReaderStates.END) {
                     sendNACK()
                 }
-                transition(ReaderEvents.ESC to ReaderStates.END) {
+                onEvent(ReaderEvents.ESC to ReaderStates.END) {
                     sendNACK()
                 }
             }
-            state(ReaderStates.START) {
-                transition(
+            whenState(ReaderStates.START) {
+                onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVPCKT,
                     guard = { args -> args[0] as Int == CharacterConstants.SOH }) {}
             }
-            state(ReaderStates.RCVPCKT) {
-                transition(
+            whenState(ReaderStates.RCVPCKT) {
+                onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVDATA,
                     guard = { args -> args[0] as Int == CharacterConstants.STX }) {
                     addField()
                 }
-                transition(ReaderEvents.BYTE to ReaderStates.RCVCHK) { args ->
+                onEvent(ReaderEvents.BYTE to ReaderStates.RCVCHK) { args ->
                     require(args.size == 1)
                     val byte = args[0] as Int
                     addChecksum(byte)
                 }
             }
-            state(ReaderStates.RCVDATA) {
-                transition(ReaderEvents.BYTE) { args ->
+            whenState(ReaderStates.RCVDATA) {
+                onEvent(ReaderEvents.BYTE) { args ->
                     require(args.size == 1)
                     val byte = args[0] as Int
                     addByte(byte)
                 }
-                transition(
+                onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVPCKT,
                     guard = { args -> args[0] as Int == CharacterConstants.ETX }) {
                     endField()
                 }
-                transition(ReaderEvents.ESC to ReaderStates.RCVESC) {}
+                onEvent(ReaderEvents.ESC to ReaderStates.RCVESC) {}
             }
-            state(ReaderStates.RCVESC) {
-                transition(ReaderEvents.ESC to ReaderStates.RCVDATA) {
+            whenState(ReaderStates.RCVESC) {
+                onEvent(ReaderEvents.ESC to ReaderStates.RCVDATA) {
                     addByte(CharacterConstants.ESC)
                 }
-                transition(ReaderEvents.CTRL to ReaderStates.RCVDATA) { args ->
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA) { args ->
                     require(args.isNotEmpty())
                     addByte(args[0] as Int)
                 }
             }
-            state(ReaderStates.RCVCHK) {
-                transition(ReaderEvents.BYTE) { args ->
+            whenState(ReaderStates.RCVCHK) {
+                onEvent(ReaderEvents.BYTE) { args ->
                     require(args.size == 1)
                     val byte = args[0] as Int
                     addChecksum(byte)
                 }
-                transition(ReaderEvents.ESC to ReaderStates.RCVCHKESC) {}
-                transition(
+                onEvent(ReaderEvents.ESC to ReaderStates.RCVCHKESC) {}
+                onEvent(
                     ReaderEvents.CTRL to ReaderStates.CHKSUM,
                     guard = { args -> args[0] as Int == CharacterConstants.EOT }) {
                     checksum()
                 }
             }
-            state(ReaderStates.CHKSUM) {
+            whenState(ReaderStates.CHKSUM) {
                 automatic(ReaderStates.END, guard = { !checksumValid }) {
                     sendNACK()
                 }
@@ -215,11 +226,11 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                     sendACK()
                 }
             }
-            state(ReaderStates.RCVCHKESC) {
-                transition(ReaderEvents.ESC to ReaderStates.RCVCHK) {
+            whenState(ReaderStates.RCVCHKESC) {
+                onEvent(ReaderEvents.ESC to ReaderStates.RCVCHK) {
                     addChecksum(CharacterConstants.ESC)
                 }
-                transition(ReaderEvents.CTRL to ReaderStates.RCVCHK) { args ->
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVCHK) { args ->
                     require(args.isNotEmpty())
                     addChecksum(args[0] as Int)
                 }
@@ -234,12 +245,16 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
             CharacterConstants.SOH,
             CharacterConstants.EOT,
             CharacterConstants.ETX,
-            CharacterConstants.STX -> fsm.sendEvent(ReaderEvents.CTRL, byte)
+            CharacterConstants.STX,
+            CharacterConstants.ACK,
+            CharacterConstants.NAK -> fsm.sendEvent(ReaderEvents.CTRL, byte)
             else -> fsm.sendEvent(ReaderEvents.BYTE, byte)
         }
     }
 }
+// end::packaged[]
 
+// tag::tests[]
 class PacketReaderTests {
     @Test
     fun `test reader expect ACK`() {
@@ -378,4 +393,4 @@ class PacketReaderTests {
         assertTrue { packetReader.fields.size == 2 }
     }
 }
-// end::packer-reader[]
+// end::tests[]

@@ -77,6 +77,10 @@ asciidoctor {
         docinfo1: ''
 }
 
+//asciidoctorj {
+//    failOnWarnings true
+//}
+
 task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {
     archiveBaseName = project.name
     archiveClassifier = 'doc'

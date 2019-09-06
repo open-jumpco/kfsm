@@ -25,7 +25,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * Defines an action to perform before a change in the currentState of the FSM
      * @param action This action will be performed when entering a new state.
      */
-    fun entry(action: DefaultChangeAction<C, S>) {
+    fun onEntry(action: DefaultChangeAction<C, S>) {
         fsm.defaultEntry(action)
     }
 
@@ -33,7 +33,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * Defines an action to be performed after the currentState was changed.
      * @param action The action will be performed when leaving any state.
      */
-    fun exit(action: DefaultChangeAction<C, S>) {
+    fun onExit(action: DefaultChangeAction<C, S>) {
         fsm.defaultExit(action)
     }
 
@@ -42,7 +42,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * @param event Pair representing an on and targetState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
-    fun transition(event: EventState<E, S>, action: StateAction<C>?): DslStateMapDefaultEventHandler<S, E, C> {
+    fun onEvent(event: EventState<E, S>, action: StateAction<C>?): DslStateMapDefaultEventHandler<S, E, C> {
         fsm.default(event, action)
         return this
     }
@@ -52,7 +52,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * @param event The event that triggers this transition
      * @param action The action will be invoked for this transition
      */
-    fun transition(event: E, action: StateAction<C>?): DslStateMapDefaultEventHandler<S, E, C> {
+    fun onEvent(event: E, action: StateAction<C>?): DslStateMapDefaultEventHandler<S, E, C> {
         fsm.default(event, action)
         return this
     }

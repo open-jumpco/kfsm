@@ -54,7 +54,7 @@ class TurnstileFsmTests {
             TurnstileStates.values().toSet(),
             TurnstileEvents.values().toSet()
         )
-        builder.initial { if (locked) LOCKED else UNLOCKED }
+        builder.initialState { if (locked) LOCKED else UNLOCKED }
         builder.transition(LOCKED, COIN, UNLOCKED) {
             unlock()
         }
@@ -84,20 +84,20 @@ class TurnstileFsmTests {
                 TurnstileStates.values().toSet(),
                 TurnstileEvents.values().toSet()
             ).stateMachine {
-                initial { if (locked) LOCKED else UNLOCKED }
-                state(LOCKED) {
-                    transition(COIN to UNLOCKED) {
+                initialState { if (locked) LOCKED else UNLOCKED }
+                whenState(LOCKED) {
+                    onEvent(COIN to UNLOCKED) {
                         unlock()
                     }
-                    transition(PASS) {
+                    onEvent(PASS) {
                         alarm()
                     }
                 }
-                state(UNLOCKED) {
-                    transition(COIN) {
+                whenState(UNLOCKED) {
+                    onEvent(COIN) {
                         returnCoin()
                     }
-                    transition(PASS to LOCKED) {
+                    onEvent(PASS to LOCKED) {
                         lock()
                     }
                 }
@@ -117,32 +117,32 @@ class TurnstileFsmTests {
                 TurnstileStates.values().toSet(),
                 TurnstileEvents.values().toSet()
             ).stateMachine {
-                    initial { if (locked) LOCKED else UNLOCKED }
-                    state(LOCKED) {
-                        entry { startState, targetState, _ ->
+                    initialState { if (locked) LOCKED else UNLOCKED }
+                    whenState(LOCKED) {
+                        onEntry { startState, targetState, _ ->
                             println("entering:$startState -> $targetState for $this")
                         }
-                        transition(COIN to UNLOCKED) {
+                        onEvent(COIN to UNLOCKED) {
                             unlock()
                         }
-                        transition(PASS) {
+                        onEvent(PASS) {
                             alarm()
                         }
-                        exit { startState, targetState, _ ->
+                        onExit { startState, targetState, _ ->
                             println("exiting:$startState -> $targetState for $this")
                         }
                     }
-                    state(UNLOCKED) {
-                        entry { startState, targetState, _ ->
+                    whenState(UNLOCKED) {
+                        onEntry { startState, targetState, _ ->
                             println("entering:$startState -> $targetState for $this")
                         }
-                        transition(COIN) {
+                        onEvent(COIN) {
                             returnCoin()
                         }
-                        transition(PASS to LOCKED) {
+                        onEvent(PASS to LOCKED) {
                             lock()
                         }
-                        exit { startState, targetState, _ ->
+                        onExit { startState, targetState, _ ->
                             println("exiting:$startState -> $targetState for $this")
                         }
                     }

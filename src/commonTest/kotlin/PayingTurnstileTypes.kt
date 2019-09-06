@@ -11,6 +11,7 @@ package io.jumpco.open.kfsm
 /**
  * @suppress
  */
+// tag::context[]
 class PayingTurnstile(
     val requiredCoins: Int,
     locked: Boolean = true,
@@ -59,10 +60,11 @@ class PayingTurnstile(
         return "Turnstile(locked=$locked,coins=$coins)"
     }
 }
-
+// end::context[]
 /**
  * @suppress
  */
+// tag::states-events[]
 enum class PayingTurnstileStates {
     LOCKED,
     COINS,
@@ -76,15 +78,23 @@ enum class PayingTurnstileEvents {
     COIN,
     PASS
 }
-
+// end::states-events[]
 /**
  * @suppress
  */
-class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState<PayingTurnstileStates>? = null) {
-    val fsm = if (initialState != null) definition.create(turnstile, initialState) else definition.create(
-        turnstile,
-        PayingTurnstileStates.LOCKED
-    )
+// tag::packaged[]
+class PayingTurnstileFSM(
+    turnstile: PayingTurnstile,
+    initialState: ExternalState<PayingTurnstileStates>? = null
+) {
+    val fsm = if (initialState != null) {
+        definition.create(turnstile, initialState)
+    } else {
+        definition.create(
+            turnstile,
+            PayingTurnstileStates.LOCKED
+        )
+    }
 
     fun coin(value: Int) {
         println("sendEvent:COIN:$value")
@@ -106,7 +116,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
             PayingTurnstile::class
         ) {
             default {
-                entry { _, targetState, args ->
+                onEntry { _, targetState, args ->
                     if (args.isNotEmpty()) {
                         println("entering:$targetState (${args.toList()}) for $this")
                     } else {
@@ -121,7 +131,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
                     }
                     alarm()
                 }
-                exit { startState, _, args ->
+                onExit { startState, _, args ->
                     if (args.isNotEmpty()) {
                         println("exiting:$startState (${args.toList()}) for $this")
                     } else {
@@ -130,7 +140,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
                 }
             }
             stateMap("coins", setOf(PayingTurnstileStates.COINS)) {
-                state(PayingTurnstileStates.COINS) {
+                whenState(PayingTurnstileStates.COINS) {
                     automaticPop(PayingTurnstileStates.UNLOCKED, guard = { coins > requiredCoins }) {
                         println("automaticPop:returnCoin")
                         returnCoin(coins - requiredCoins)
@@ -142,7 +152,7 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
                         unlock()
                         reset()
                     }
-                    transition(PayingTurnstileEvents.COIN) { args ->
+                    onEvent(PayingTurnstileEvents.COIN) { args ->
                         val value = args[0] as Int
                         coin(value)
                         println("Coins=$coins")
@@ -152,16 +162,16 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
                     }
                 }
             }
-            state(PayingTurnstileStates.LOCKED) {
+            whenState(PayingTurnstileStates.LOCKED) {
                 // The coin brings amount to exact amount
-                pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { args ->
+                onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { args ->
                     val value = args[0] as Int
                     coin(value)
                     unlock()
                     reset()
                 }
                 // The coins add up to more than required
-                pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
+                onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
                     guard = { args ->
                         val value = args[0] as Int
                         value + this.coins < this.requiredCoins
@@ -172,15 +182,16 @@ class PayingTurnstileFSM(turnstile: PayingTurnstile, initialState: ExternalState
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
                 }
             }
-            state(PayingTurnstileStates.UNLOCKED) {
-                transition(PayingTurnstileEvents.COIN) { args ->
+            whenState(PayingTurnstileStates.UNLOCKED) {
+                onEvent(PayingTurnstileEvents.COIN) { args ->
                     val value = args[0] as Int
                     returnCoin(coin(value))
                 }
-                transition(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
+                onEvent(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
                     lock()
                 }
             }
         }.build()
     }
 }
+// end::packaged[]

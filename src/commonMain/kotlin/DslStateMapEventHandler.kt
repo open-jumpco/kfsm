@@ -28,7 +28,7 @@ class DslStateMapEventHandler<S, E, C>(
      * Defines an action to be performed before transition causes a change in state
      * @param action The action will be performed when entering a new state
      */
-    fun entry(action: DefaultChangeAction<C, S>) {
+    fun onEntry(action: DefaultChangeAction<C, S>) {
         fsm.entry(currentState, action)
     }
 
@@ -36,7 +36,7 @@ class DslStateMapEventHandler<S, E, C>(
      * Defines an action to be performed after a transition has changed the state
      * @param action The action will be invoke when exiting a state.
      */
-    fun exit(action: DefaultChangeAction<C, S>) {
+    fun onExit(action: DefaultChangeAction<C, S>) {
         fsm.exit(currentState, action)
     }
 
@@ -45,7 +45,7 @@ class DslStateMapEventHandler<S, E, C>(
      * @param event A Pair with the first being the on and the second being the targetState.
      * @param action The action will be performed
      */
-    fun transition(event: EventState<E, S>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
+    fun onEvent(event: EventState<E, S>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
         fsm.transition(currentState, event.first, event.second, action)
         return this
     }
@@ -56,7 +56,7 @@ class DslStateMapEventHandler<S, E, C>(
      * @param guard The guard expression must be met before the transition is considered.
      * @param action The optional action that may be executed
      */
-    fun transition(
+    fun onEvent(
         event: EventState<E, S>,
         guard: StateGuard<C>,
         action: StateAction<C>?
@@ -70,7 +70,7 @@ class DslStateMapEventHandler<S, E, C>(
      * @param event The event and targetState the defines the transition
      * @param action The optional action that may be executed
      */
-    fun transition(event: E, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
+    fun onEvent(event: E, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
         fsm.transition(currentState, event, action)
         return this
     }
@@ -82,7 +82,7 @@ class DslStateMapEventHandler<S, E, C>(
      * @param guard The guard expression must be met before the transition is considered.
      * @param action The optional action that may be executed
      */
-    fun transition(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
+    fun onEvent(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
         fsm.transition(currentState, event, guard, action)
         return this
     }
@@ -94,7 +94,7 @@ class DslStateMapEventHandler<S, E, C>(
      * @param targetState The new state within the targetMap
      * @param action The optional action that may be executed.
      */
-    fun pushTransition(
+    fun onEventPush(
         event: E,
         targetMap: String,
         targetState: S,
@@ -110,7 +110,7 @@ class DslStateMapEventHandler<S, E, C>(
      * @param targetState The new state within the targetMap
      * @param action The optional action that may be executed.
      */
-    fun pushTransition(
+    fun onEventPush(
         event: E,
         targetMap: String,
         targetState: S,
@@ -121,17 +121,17 @@ class DslStateMapEventHandler<S, E, C>(
         return this
     }
 
-    fun popTransition(event: E, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
+    fun onEventPop(event: E, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
         fsm.popTransition(currentState, event, null, null, action)
         return this
     }
 
-    fun popTransition(event: Pair<E, S>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
+    fun onEventPop(event: Pair<E, S>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
         fsm.popTransition(currentState, event.first, event.second, null, action)
         return this
     }
 
-    fun popTransition(
+    fun onEventPop(
         event: Pair<E, S>,
         guard: StateGuard<C>,
         action: StateAction<C>?
@@ -140,7 +140,7 @@ class DslStateMapEventHandler<S, E, C>(
         return this
     }
 
-    fun popTransition(
+    fun onEventPop(
         event: E,
         targetMap: String,
         targetState: S,
@@ -150,12 +150,12 @@ class DslStateMapEventHandler<S, E, C>(
         return this
     }
 
-    fun popTransition(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
+    fun onEventPop(event: E, guard: StateGuard<C>, action: StateAction<C>?): DslStateMapEventHandler<S, E, C> {
         fsm.popTransition(currentState, event, null, null, guard, action)
         return this
     }
 
-    fun popTransition(
+    fun onEventPop(
         event: E,
         targetMap: String,
         targetState: S,

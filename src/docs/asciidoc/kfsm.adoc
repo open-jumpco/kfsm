@@ -36,30 +36,7 @@ image::turnstile-fsm.png[LockStateDiagram]
 ==== Context class
 [source,kotlin]
 ----
-class Turnstile(var locked: Boolean = true) {
-    fun unlock() {
-        assert(locked) { "Cannot unlock when not locked" }
-        println("Unlock")
-        locked = false
-    }
-
-    fun lock() {
-        assert(!locked) { "Cannot lock when locked" }
-        println("Lock")
-        locked = true
-    }
-
-    fun alarm() {
-        println("Alarm")
-    }
-
-    fun returnCoin() {
-        println("Return coin")
-    }
-    override fun toString(): String {
-        return "Turnstile(locked=$locked)"
-    }
-}
+include::../../commonTest/kotlin/TurnstileTypes.kt[tag=context]
 ----
 
 ==== Enums for States and Events
@@ -67,71 +44,13 @@ We declare 2 enums, one for the possible states and one for the possible events.
 
 [source,kotlin]
 ----
-enum class TurnstileStates {
-    LOCKED,
-    UNLOCKED
-}
-
-enum class TurnstileEvents {
-    COIN,
-    PASS
-}
+include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=states-events]
 ----
 
 ==== Packaged definition and execution
 [source,kotlin]
 ----
-class TurnstileFSM(turnstile: Turnstile) {
-    private val fsm = definition.create(turnstile)
-
-    fun coin() = fsm.sendEvent(TurnstileEvents.COIN)
-    fun pass() = fsm.sendEvent(TurnstileEvents.PASS)
-
-    companion object {
-        private val definition = stateMachine(
-        TurnstileStates.values().toSet(),
-        TurnstileEvents::class,
-        Turnstile::class) {
-            initial {
-            if (locked)
-                TurnstileStates.LOCKED
-            else
-                TurnstileStates.UNLOCKED
-            }
-            default {
-                entry { startState, targetState, _ ->
-                    println("entering:$startState -> $targetState for $this")
-                }
-                // default transition will invoke alarm
-                action { state, event, _ ->
-                    println("Default action for state($state) -> event($event) for $this")
-                    alarm()
-                }
-                exit { startState, targetState, _ ->
-                    println("exiting:$startState -> $targetState for $this")
-                }
-            }
-            // when current state is LOCKED
-            state(TurnstileStates.LOCKED) {
-                // external transition on COIN to UNLOCKED state
-                transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
-                    unlock()
-                }
-            }
-            // when current state is UNLOCKED
-            state(TurnstileStates.UNLOCKED) {
-                // internal transition on COIN
-                transition(TurnstileEvents.COIN) {
-                    returnCoin()
-                }
-                // external transition on PASS to LOCKED state
-                transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
-                    lock()
-                }
-            }
-        }.build()
-    }
-}
+include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]
 ----
 
 
@@ -178,7 +97,7 @@ fsm.sendEvent(EVENT1, arg1)
 The argument is references in the action as follows:
 [source,kotlin]
 ----
-transition(EVENT1) { args ->
+onEvent(EVENT1) { args ->
     val value = args[0] as Int
     // use value
 }
@@ -242,71 +161,14 @@ The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
 [source,kotlin]
 ----
-class PayingTurnstile(
-    val requiredCoins: Int,
-    locked: Boolean = true,
-    coins: Int = 0
-) {
-    var coins: Int = coins
-        private set
-    var locked: Boolean = locked
-        private set
-
-    fun unlock() {
-        require(locked) { "Cannot unlock when not locked" }
-        require(coins >= requiredCoins) { "Not enough coins. ${requiredCoins - coins} required" }
-        println("Unlock")
-        locked = false
-    }
-
-    fun lock() {
-        require(!locked) { "Cannot lock when locked" }
-        require(coins == 0) { "Coins $coins must be returned" }
-        println("Lock")
-        locked = true
-    }
-
-    fun alarm() {
-        println("Alarm")
-    }
-
-    fun coin(value: Int): Int {
-        coins += value
-        println("Value=$value, Total=$coins")
-        return coins
-    }
-
-    fun returnCoin(returnCoins: Int) {
-        println("Return Coin:$returnCoins")
-        coins -= returnCoins
-    }
-
-    fun reset() {
-        coins = 0
-        println("Reset coins=$coins")
-    }
-
-    override fun toString(): String {
-        return "Turnstile(locked=$locked,coins=$coins)"
-    }
-
-}
+include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=context]
 ----
 
 ==== States and Events
 
 [source,kotlin]
 ----
-enum class PayingTurnstileStates {
-    LOCKED,
-    COINS,
-    UNLOCKED
-}
-
-enum class PayingTurnstileEvents {
-    COIN,
-    PASS
-}
+include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=states-events]
 ----
 We add a stateMap named `coins` with the state `COINS`.
 The statemap  will be entered when there are coins.
@@ -315,153 +177,13 @@ The automatic transitions will be triggered based on the guard expressions.
 ==== State machine definition packaged
 [source,kotlin]
 ----
-class PayingTurnstileFSM(turnstile: PayingTurnstile) {
-    val fsm = definition.create(turnstile)
-
-    fun coin(value: Int) {
-        println("sendEvent:COIN:$value")
-        fsm.sendEvent(PayingTurnstileEvents.COIN, value)
-    }
-
-    fun pass() {
-        println("sendEvent:PASS")
-        fsm.sendEvent(PayingTurnstileEvents.PASS)
-    }
-
-    fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
-
-    companion object {
-        val definition = stateMachine(
-            setOf(PayingTurnstileStates.LOCKED, PayingTurnstileStates.UNLOCKED),
-            PayingTurnstileEvents::class,
-            PayingTurnstile::class
-        ) {
-            initialMap {
-                mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-                    if (locked) {
-                        this.add(PayingTurnstileStates.LOCKED to "default")
-                    } else {
-                        this.add(PayingTurnstileStates.UNLOCKED to "default")
-                    }
-                    if (coins > 0) {
-                        this.add(PayingTurnstileStates.COINS to "coins")
-                    }
-                }
-            }
-            default {
-                entry { _, targetState, args ->
-                    if (args.isNotEmpty()) {
-                        println("entering:$targetState (${args.toList()}) for $this")
-                    } else {
-                        println("entering:$targetState for $this")
-                    }
-                }
-                action { state, event, args ->
-                    if (args.isNotEmpty()) {
-                        println("Default action for state($state) -> on($event, ${args.toList()}) for $this")
-                    } else {
-                        println("Default action for state($state) -> on($event) for $this")
-                    }
-                    alarm()
-                }
-                exit { startState, _, args ->
-                    if (args.isNotEmpty()) {
-                        println("exiting:$startState (${args.toList()}) for $this")
-                    } else {
-                        println("exiting:$startState for $this")
-                    }
-                }
-            }
-            stateMap("coins", setOf(PayingTurnstileStates.COINS)) {
-                state(PayingTurnstileStates.COINS) {
-                    automaticPop(PayingTurnstileStates.UNLOCKED, guard = { coins > requiredCoins }) {
-                        println("automaticPop:returnCoin")
-                        returnCoin(coins - requiredCoins)
-                        unlock()
-                        reset()
-                    }
-                    automaticPop(PayingTurnstileStates.UNLOCKED, guard = { coins == requiredCoins }) {
-                        println("automaticPop")
-                        unlock()
-                        reset()
-                    }
-                    transition(PayingTurnstileEvents.COIN) { args ->
-                        val value = args[0] as Int
-                        coin(value)
-                        println("Coins=$coins")
-                        if (coins < requiredCoins) {
-                            println("Please add ${requiredCoins - coins}")
-                        }
-                    }
-                }
-            }
-            state(PayingTurnstileStates.LOCKED) {
-                // The coin brings amount to exact amount
-                pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { args ->
-                    val value = args[0] as Int
-                    coin(value)
-                    unlock()
-                    reset()
-                }
-                // The coins add up to more than required
-                pushTransition(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
-                    guard = { args ->
-                        val value = args[0] as Int;
-                        value + this.coins < this.requiredCoins
-                    }) { args ->
-                    val value = args[0] as Int
-                    println("PUSH TRANSITION")
-                    coin(value)
-                    println("Coins=$coins, Please add ${requiredCoins - coins}")
-                }
-            }
-            state(PayingTurnstileStates.UNLOCKED) {
-                transition(PayingTurnstileEvents.COIN) { args ->
-                    val value = args[0] as Int
-                    returnCoin(coin(value))
-                }
-                transition(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
-                    lock()
-                }
-            }
-        }.build()
-    }
-}
+include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]
 ----
 
 ==== Test
 [source,kotlin]
 ----
-val turnstile = PayingTurnstile(50)
-val fsm = PayingTurnstileFSM(turnstile)
-assertTrue(turnstile.locked)
-println("--coin1")
-fsm.coin(10)
-assertTrue(turnstile.locked)
-assertTrue(turnstile.coins == 10)
-assertTrue(
-    fsm.fsm.currentStateMap.name != null && "coins" == fsm.fsm.currentStateMap.name,
-    "Expected coins map"
-)
-println("--coin2")
-fsm.coin(60)
-assertTrue(turnstile.coins == 0)
-assertTrue(fsm.fsm.currentStateMap.name == null, "Expected default map")
-assertTrue(!turnstile.locked)
-println("--pass1")
-fsm.pass()
-assertTrue(turnstile.locked)
-println("--pass2")
-fsm.pass()
-println("--pass3")
-fsm.pass()
-println("--coin3")
-fsm.coin(40)
-assertTrue(turnstile.coins == 40)
-println("--coin4")
-fsm.coin(10)
-assertTrue(turnstile.coins == 0)
-assertTrue(!turnstile.locked)
+include::../../jvmTest/kotlin/PayingTurnstileFsmTests.kt[tag=test]
 ----
 
 ==== Output
@@ -515,12 +237,46 @@ It is better when all control characters are one type of event with guard expres
 All events have a parameter which is the byte received and the event type is either BYTE, CTRL or ESC where:
 
 * ESC is 0x1B
-* CTRL is for SOH,STX,ETX,EOT
+* CTRL is for SOH,STX,ETX,EOT, ACK, NAK
 * BYTE all other characters
 
 image::packet-reader-fsm-guard.png[]
 
+==== Context Classes
+
+The current checksum is a trivial implementation for the demonstration where the checksum has a character that matches the first character of each field.
+
 [source,kotlin]
 ----
-include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=packer-reader]
+include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=context]
 ----
+
+==== States and Events
+
+[source,kotlin]
+----
+include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=states-events]
+----
+
+==== Packaged FSM
+
+[source,kotlin]
+----
+include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=packaged]
+----
+
+==== Tests
+
+[source,kotlin]
+----
+include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=tests]
+----
+
+=== Further thoughts
+
+The escape handling from the packet reader could be a separate statemap.
+The current implementation has a problem in that the value should be added to different buffer.
+It may be worthwhile to have a mechanism for providing a different substate context to take care of this kind of situation.
+An interface/class exposed to the substate instead of the full context.
+In this example `Block` will be exposed to the stateMap. The stateMap can then pop after adding the byte.
+In the case of an invalid character the statemap will still transition to the end state.

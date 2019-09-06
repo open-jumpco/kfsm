@@ -11,6 +11,7 @@ package io.jumpco.open.kfsm
 /**
  * @suppress
  */
+// tag::context[]
 class Turnstile(locked: Boolean = true) {
     var locked: Boolean = locked
         private set
@@ -39,10 +40,11 @@ class Turnstile(locked: Boolean = true) {
         return "Turnstile(locked=$locked)"
     }
 }
-
+// end::context[]
 /**
  * @suppress
  */
+// tag::states-events[]
 enum class TurnstileStates {
     LOCKED,
     UNLOCKED
@@ -55,10 +57,11 @@ enum class TurnstileEvents {
     COIN,
     PASS
 }
-
+// end::states-events[]
 /**
  * @suppress
  */
+// tag:packaged[]
 class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
     private val fsm = definition.create(turnstile, savedState)
 
@@ -74,34 +77,34 @@ class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
                 TurnstileEvents.values().toSet(),
                 Turnstile::class
             ) {
-                initial {
+                initialState {
                     if (locked)
                         TurnstileStates.LOCKED
                     else
                         TurnstileStates.UNLOCKED
                 }
                 default {
-                    entry { startState, targetState, _ ->
+                    onEntry { startState, targetState, _ ->
                         println("entering:$startState -> $targetState for $this")
                     }
                     action { state, event, _ ->
                         println("Default action for state($state) -> on($event) for $this")
                         alarm()
                     }
-                    exit { startState, targetState, _ ->
+                    onExit { startState, targetState, _ ->
                         println("exiting:$startState -> $targetState for $this")
                     }
                 }
-                state(TurnstileStates.LOCKED) {
-                    transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                whenState(TurnstileStates.LOCKED) {
+                    onEvent(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
                         unlock()
                     }
                 }
-                state(TurnstileStates.UNLOCKED) {
-                    transition(TurnstileEvents.COIN) {
+                whenState(TurnstileStates.UNLOCKED) {
+                    onEvent(TurnstileEvents.COIN) {
                         returnCoin()
                     }
-                    transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                    onEvent(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
                         lock()
                     }
                 }
@@ -111,7 +114,7 @@ class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
             definition.possibleEvents(state, includeDefault)
     }
 }
-
+// end::packaged[]
 /**
  * @suppress
  */

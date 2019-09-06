@@ -78,7 +78,7 @@ class LockFsmTests {
             LockStates.values().toSet(),
             LockEvents.values().toSet()
         )
-        builder.initial {
+        builder.initialState {
             when (locked) {
                 0 -> UNLOCKED
                 1 -> LOCKED
@@ -120,7 +120,7 @@ class LockFsmTests {
             LockStates.values().toSet(),
             LockEvents.values().toSet()
         ).stateMachine {
-            initial {
+            initialState {
                 when (locked) {
                     0 -> UNLOCKED
                     1 -> LOCKED
@@ -129,27 +129,27 @@ class LockFsmTests {
                 }
             }
 
-            state(LOCKED) {
-                transition(LOCK to DOUBLE_LOCKED) {
+            whenState(LOCKED) {
+                onEvent(LOCK to DOUBLE_LOCKED) {
                     doubleLock()
                 }
-                transition(UNLOCK to UNLOCKED) {
+                onEvent(UNLOCK to UNLOCKED) {
                     unlock()
                 }
             }
-            state(DOUBLE_LOCKED) {
-                transition(UNLOCK to LOCKED) {
+            whenState(DOUBLE_LOCKED) {
+                onEvent(UNLOCK to LOCKED) {
                     doubleUnlock()
                 }
-                transition(LOCK) {
+                onEvent(LOCK) {
                     error("Already double locked")
                 }
             }
-            state(UNLOCKED) {
-                transition(LOCK to LOCKED) {
+            whenState(UNLOCKED) {
+                onEvent(LOCK to LOCKED) {
                     lock()
                 }
-                transition(UNLOCK) {
+                onEvent(UNLOCK) {
                     error("Already unlocked")
                 }
             }

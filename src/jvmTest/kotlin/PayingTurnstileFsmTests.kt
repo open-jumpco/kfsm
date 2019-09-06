@@ -17,6 +17,7 @@ import kotlin.test.assertTrue
 class PayingTurnstileFsmTests {
     @Test
     fun `fsm component test`() {
+        // tag::test[]
         val turnstile = PayingTurnstile(50)
         val fsm = PayingTurnstileFSM(turnstile)
         assertTrue(turnstile.locked)
@@ -50,6 +51,7 @@ class PayingTurnstileFsmTests {
         fsm.coin(10)
         assertTrue(turnstile.coins == 0)
         assertTrue(!turnstile.locked)
+        // end::test[]
     }
 
     @Test

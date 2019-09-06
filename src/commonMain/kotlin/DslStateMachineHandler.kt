@@ -17,8 +17,8 @@ class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E,
      * Defines an expression that will determine the initial state of the state machine based on the values of the context.
      * @param deriveInitialState A lambda expression receiving context:C and returning state S.
      */
-    fun initial(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C> {
-        fsm.initial(deriveInitialState)
+    fun initialState(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C> {
+        fsm.initialState(deriveInitialState)
         return this
     }
 
@@ -27,22 +27,22 @@ class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E,
      * This is required when using state machine with named maps.
      *
     ```
-    initialMap {
-    mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-    if (locked) {
-    this.add(PayingTurnstileStates.LOCKED to "default")
-    } else {
-    this.add(PayingTurnstileStates.UNLOCKED to "default")
-    }
-    if (coins > 0) {
-    this.add(PayingTurnstileStates.COINS to "coins")
-    }
-    }
+    initialStates {
+        mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
+            if (locked) {
+                this.add(PayingTurnstileStates.LOCKED to "default")
+            } else {
+                this.add(PayingTurnstileStates.UNLOCKED to "default")
+            }
+            if (coins > 0) {
+                this.add(PayingTurnstileStates.COINS to "coins")
+            }
+        }
     }
     ```
      */
-    fun initialMap(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C> {
-        fsm.initialMap(deriveInitialMap)
+    fun initialStates(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C> {
+        fsm.initialStates(deriveInitialMap)
         return this
     }
 
@@ -51,7 +51,7 @@ class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E,
      * @param currentState The give state
      * @param handler A lambda with definitions for the given state
      */
-    fun state(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
+    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
         DslStateMapEventHandler<S, E, C> =
         DslStateMapEventHandler(currentState, fsm.defaultStateMap).apply(handler)
 

@@ -126,14 +126,14 @@ class TurnstileFSM(turnstile: Turnstile) {
             TurnstileEvents::class,
             Turnstile::class
         ) {
-            initial {
+            initialState {
             if (locked)
                 TurnstileStates.LOCKED
             else
                 TurnstileStates.UNLOCKED
             }
             default {
-                entry { startState, targetState, _ ->
+                onEntry { startState, targetState, _ ->
                     println("entering:$startState -> $targetState for $this")
                 }
                 // default transition will invoke alarm
@@ -141,25 +141,25 @@ class TurnstileFSM(turnstile: Turnstile) {
                     println("Default action for state($state) -> event($event) for $this")
                     alarm()
                 }
-                exit { startState, targetState, _ ->
+                onExit { startState, targetState, _ ->
                     println("exiting:$startState -> $targetState for $this")
                 }
             }
             // when current state is LOCKED
-            state(TurnstileStates.LOCKED) {
+            whenState(TurnstileStates.LOCKED) {
                 // external transition on COIN to UNLOCKED state
-                transition(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
+                onEvent(TurnstileEvents.COIN to TurnstileStates.UNLOCKED) {
                     unlock()
                 }
             }
             // when current state is UNLOCKED
-            state(TurnstileStates.UNLOCKED) {
+            whenState(TurnstileStates.UNLOCKED) {
                 // internal transition on COIN
-                transition(TurnstileEvents.COIN) {
+                onEvent(TurnstileEvents.COIN) {
                     returnCoin()
                 }
                 // external transition on PASS to LOCKED state
-                transition(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
+                onEvent(TurnstileEvents.PASS to TurnstileStates.LOCKED) {
                     lock()
                 }
             }
@@ -224,7 +224,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:0.9.4'
+    implementation 'io.jumpco.open:kfsm-jvm:0.9.5'
 }
 ----
 
@@ -233,7 +233,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:0.9.4'
+    implementation 'io.jumpco.open:kfsm-js:0.9.5'
 }
 ----
 
@@ -242,7 +242,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.4'
+    implementation 'io.jumpco.open:kfsm-linuxX64:0.9.5'
 }
 ----
 
@@ -251,7 +251,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.4'
+    implementation 'io.jumpco.open:kfsm-mingwX64:0.9.5'
 }
 ----
 
@@ -260,7 +260,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:0.9.4'
+    implementation 'io.jumpco.open:kfsm-macosX64:0.9.5'
 }
 ----
 

@@ -69,7 +69,7 @@ class LockFSM(context: Lock) {
             LockEvents.values().toSet(),
             Lock::class
         ) {
-            initial {
+            initialState {
                 when (locked) {
                     0 -> LockStates.UNLOCKED
                     1 -> LockStates.LOCKED
@@ -81,28 +81,28 @@ class LockFSM(context: Lock) {
                 action { state, event, _ ->
                     println("Default action for state($state) -> on($event) for $this")
                 }
-                entry { startState, targetState, _ ->
+                onEntry { startState, targetState, _ ->
                     println("entering:$startState -> $targetState for $this")
                 }
-                exit { startState, targetState, _ ->
+                onExit { startState, targetState, _ ->
                     println("exiting:$startState -> $targetState for $this")
                 }
             }
-            state(LockStates.LOCKED) {
-                transition(LockEvents.LOCK to LockStates.DOUBLE_LOCKED) {
+            whenState(LockStates.LOCKED) {
+                onEvent(LockEvents.LOCK to LockStates.DOUBLE_LOCKED) {
                     doubleLock()
                 }
-                transition(LockEvents.UNLOCK to LockStates.UNLOCKED) {
+                onEvent(LockEvents.UNLOCK to LockStates.UNLOCKED) {
                     unlock()
                 }
             }
-            state(LockStates.DOUBLE_LOCKED) {
-                transition(LockEvents.UNLOCK to LockStates.LOCKED) {
+            whenState(LockStates.DOUBLE_LOCKED) {
+                onEvent(LockEvents.UNLOCK to LockStates.LOCKED) {
                     doubleUnlock()
                 }
             }
-            state(LockStates.UNLOCKED) {
-                transition(LockEvents.LOCK to LockStates.LOCKED) {
+            whenState(LockStates.UNLOCKED) {
+                onEvent(LockEvents.LOCK to LockStates.LOCKED) {
                     lock()
                 }
             }
