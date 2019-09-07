@@ -8,7 +8,7 @@
  */
 
 apply plugin: 'org.jetbrains.dokka'
-apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'org.asciidoctor.jvm.convert'
 
 dokka {
     outputFormat = 'html'
@@ -54,9 +54,11 @@ dokka {
 }
 
 asciidoctor {
+    baseDirFollowsSourceDir()
     logDocuments = true
-    inputs.files(fileTree('src/docs/asciidoc/*'))
-    requires ['asciidoctor-prism-extension']
+    asciidoctorj {
+        fatalWarnings missingIncludes()
+    }
 
     sources {
         include 'index.adoc'
@@ -70,16 +72,16 @@ asciidoctor {
             include '**/*.css'
         }
     }
+
     attributes toc: 'left',
         'source-highlighter': 'prism',
         idprefix: '',
         idseparator: '-',
         docinfo1: ''
-}
 
-//asciidoctorj {
-//    failOnWarnings true
-//}
+    requires ['asciidoctor-prism-extension']
+
+}
 
 task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {
     archiveBaseName = project.name
