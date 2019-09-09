@@ -27,6 +27,10 @@ The state machine implementation supports events triggering transitions from one
 * [x] Push / pop transitions
 * [x] Automatic transitions
 * [x] Externalisation of state
+* [ ] Typed event parameters
+* [ ] Event returns
+* [ ] Timers / Timeouts
+* [ ] Corountines
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
