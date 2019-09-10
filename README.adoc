@@ -27,8 +27,8 @@ The state machine implementation supports events triggering transitions from one
 * [x] Push / pop transitions
 * [x] Automatic transitions
 * [x] Externalisation of state
-* [ ] Typed event parameters
-* [ ] Event returns
+* [x] Typed event parameters
+* [x] Event returns
 * [ ] Timers / Timeouts
 * [ ] Corountines
 
