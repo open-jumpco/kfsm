@@ -12,12 +12,12 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
-class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E, C>) {
+class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder<S, E, C, A, R>) {
     /**
      * Defines an expression that will determine the initial state of the state machine based on the values of the context.
      * @param deriveInitialState A lambda expression receiving context:C and returning state S.
      */
-    fun initialState(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C> {
+    fun initialState(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C, A, R> {
         fsm.initialState(deriveInitialState)
         return this
     }
@@ -41,7 +41,7 @@ class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E,
     }
     ```
      */
-    fun initialStates(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C> {
+    fun initialStates(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C, A, R> {
         fsm.initialStates(deriveInitialMap)
         return this
     }
@@ -51,16 +51,16 @@ class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E,
      * @param currentState The give state
      * @param handler A lambda with definitions for the given state
      */
-    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
-        DslStateMapEventHandler<S, E, C> =
+    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C, A, R>.() -> Unit):
+        DslStateMapEventHandler<S, E, C, A, R> =
         DslStateMapEventHandler(currentState, fsm.defaultStateMap).apply(handler)
 
     /**
      * Defines a section for default behaviour for the state machine.
      * @param handler A lambda with definition for the default behaviour of the state machine.
      */
-    fun default(handler: DslStateMapDefaultEventHandler<S, E, C>.() -> Unit):
-        DslStateMapDefaultEventHandler<S, E, C> =
+    fun default(handler: DslStateMapDefaultEventHandler<S, E, C, A, R>.() -> Unit):
+        DslStateMapDefaultEventHandler<S, E, C, A, R> =
         DslStateMapDefaultEventHandler(fsm.defaultStateMap).apply(handler)
 
     /**
@@ -83,8 +83,8 @@ class DslStateMachineHandler<S, E, C>(private val fsm: StateMachineBuilder<S, E,
         /**
          * The lambda to configure the statemap
          */
-        handler: DslStateMapHandler<S, E, C>.() -> Unit
-    ): DslStateMapHandler<S, E, C> {
+        handler: DslStateMapHandler<S, E, C, A, R>.() -> Unit
+    ): DslStateMapHandler<S, E, C, A, R> {
         return DslStateMapHandler(fsm.stateMap(name.trim(), validStates)).apply(handler)
     }
 }

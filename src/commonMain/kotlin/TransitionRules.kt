@@ -15,14 +15,14 @@ package io.jumpco.open.kfsm
  * @param guardedTransitions The list of guarded transitions
  * @param transition The transition to use if there are no guarded transitions or no guarded transitions match.
  */
-class TransitionRules<S, E, C>(
-    private val guardedTransitions: MutableList<GuardedTransition<S, E, C>> = mutableListOf(),
-    internal var transition: SimpleTransition<S, E, C>? = null
+class TransitionRules<S, E, C, A, R>(
+    private val guardedTransitions: MutableList<GuardedTransition<S, E, C, A, R>> = mutableListOf(),
+    internal var transition: SimpleTransition<S, E, C, A, R>? = null
 ) {
     /**
      * Add a guarded transition to the end of the list
      */
-    fun addGuarded(guardedTransition: GuardedTransition<S, E, C>) {
+    fun addGuarded(guardedTransition: GuardedTransition<S, E, C, A, R>) {
         guardedTransitions.add(guardedTransition)
     }
 
@@ -30,6 +30,6 @@ class TransitionRules<S, E, C>(
      * Find the first entry in the list of guarded transitions that match/
      * @param context The given context.
      */
-    fun findGuard(context: C, args: Array<out Any>): GuardedTransition<S, E, C>? =
-        guardedTransitions.firstOrNull { it.guardMet(context, args) }
+    fun findGuard(context: C, arg: A? = null): GuardedTransition<S, E, C, A, R>? =
+        guardedTransitions.firstOrNull { it.guardMet(context, arg) }
 }

@@ -25,7 +25,7 @@ import kotlin.test.assertTrue
  */
 class TurnstileFsmTests {
     private fun verifyTurnstileFSM(
-        fsm: StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
+        fsm: AnyStateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
         turnstile: Turnstile
     ) {
         every { turnstile.alarm() } just Runs
@@ -58,7 +58,7 @@ class TurnstileFsmTests {
 
     @Test
     fun `Turnstile plain`() {
-        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+        val builder = AnyStateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
             TurnstileStates.values().toSet(),
             TurnstileEvents.values().toSet()
         )
@@ -89,10 +89,11 @@ class TurnstileFsmTests {
     fun `Turnstile DSL`() {
         // given
         val definition =
-            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+            stateMachine(
                 TurnstileStates.values().toSet(),
-                TurnstileEvents.values().toSet()
-            ).stateMachine {
+                TurnstileEvents.values().toSet(),
+                Turnstile::class
+            ) {
                 initialState { if (locked) LOCKED else UNLOCKED }
                 default {
                     action { _, _, _ ->
@@ -125,10 +126,11 @@ class TurnstileFsmTests {
     @Test
     fun `Simple Turnstile Test`() {
         val definition =
-            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+            stateMachine(
                 TurnstileStates.values().toSet(),
-                TurnstileEvents.values().toSet()
-            ).stateMachine {
+                TurnstileEvents.values().toSet(),
+                Turnstile::class
+            ) {
                 initialState { if (locked) LOCKED else UNLOCKED }
                 whenState(LOCKED) {
                     onEntry { startState, targetState, _ ->

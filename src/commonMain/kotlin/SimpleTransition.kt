@@ -17,12 +17,12 @@ package io.jumpco.open.kfsm
  * @param targetState when optional represents an internal transition
  * @param action An optional lambda that will be invoked.
  */
-open class SimpleTransition<S, E, C>(
+open class SimpleTransition<S, E, C, A, R>(
     internal val startState: S,
     internal val event: E?,
     targetState: S?,
     targetMap: String?,
     automatic: Boolean,
     type: TransitionType,
-    action: StateAction<C>?
-) : Transition<S, E, C>(targetState, targetMap, automatic, type, action)
+    action: StateAction<C, A, R>?
+) : Transition<S, E, C, A, R>(targetState, targetMap, automatic, type, action)

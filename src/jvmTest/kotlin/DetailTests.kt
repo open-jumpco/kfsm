@@ -48,6 +48,7 @@ class DetailTests {
             println("action2")
         }
 
+        fun none() {}
         fun entry1() {
             println("entry1")
         }
@@ -91,10 +92,12 @@ class DetailTests {
         }
 
         companion object {
-            val definition = StateMachineBuilder<TestStates, TestEvents, TestContext>(
+            val definition = stateMachine(
                 TestStates.values().toSet(),
-                TestEvents.values().toSet()
-            ).stateMachine {
+                TestEvents.values().toSet(),
+                TestContext::class,
+                String::class
+            ) {
                 initialStates {
                     mutableListOf<StateMapItem<TestStates>>().apply {
                         when (state) {
@@ -106,54 +109,51 @@ class DetailTests {
                     }
                 }
                 default {
-                    onEntry { startState, targetState, args ->
-                        val msg = args[0] as String
+                    onEntry { startState, targetState, msg ->
                         println("entering:to $targetState from $startState for:$this:$msg")
                         defaultEntry()
                     }
-                    onExit { startState, targetState, args ->
-                        val msg = args[0] as String
+                    onExit { startState, targetState, msg ->
                         println("exiting:from $targetState to $startState for:$this:$msg")
                         defaultExit()
                     }
-                    onEvent(TestEvents.EVENT1 to TestStates.STATE1) { args ->
-                        val msg = args[0] as String
+                    onEvent(TestEvents.EVENT1 to TestStates.STATE1) { msg ->
                         println("default:EVENT1 to STATE1 for $this:$msg")
                         action1()
                         state = 1
+                        none()
                     }
-                    onEvent(TestEvents.EVENT2 to TestStates.STATE2) { args ->
-                        val msg = args[0] as String
+                    onEvent(TestEvents.EVENT2 to TestStates.STATE2) { msg ->
                         println("default:on EVENT2 to STATE2 for $this:$msg")
                         action2()
                         state = 2
+                        none()
                     }
-                    onEvent(TestEvents.EVENT3 to TestStates.STATE3) { args ->
-                        val msg = args[0] as String
+                    onEvent(TestEvents.EVENT3 to TestStates.STATE3) { msg ->
                         println("default:on EVENT3 to STATE3 for $this:$msg")
                         defaultAction()
                         state = 3
+                        none()
                     }
-                    action { currentState, event, args ->
-                        val msg = args[0] as String
+                    action { currentState, event, msg ->
                         println("default:$event from $currentState for $this:$msg")
                         defaultAction()
                     }
                 }
                 stateMap("map1", setOf(TestStates.STATE1, TestStates.STATE2)) {
                     whenState(TestStates.STATE1) {
-                        onEventPop(TestEvents.EVENT1) {
+                        onEventPop(TestEvents.EVENT1) { msg ->
                             println("pop")
                         }
                     }
                     whenState(TestStates.STATE2) {
-                        automatic(TestStates.STATE1) {
+                        automatic(TestStates.STATE1) { msg ->
                             println("automatic -> TestStates.STATE1")
                         }
                     }
                 }
                 whenState(TestStates.STATE1) {
-                    onEvent(TestEvents.EVENT1) {
+                    onEvent(TestEvents.EVENT1) { msg ->
                         action1()
                     }
                     onEntry { _, _, _ ->
@@ -164,13 +164,11 @@ class DetailTests {
                     onEntry { _, _, _ ->
                         entry2()
                     }
-                    onEvent(TestEvents.EVENT2, guard = { state == 2 }) { args ->
-                        val msg = args[0] as String
+                    onEvent(TestEvents.EVENT2, guard = { state == 2 }) { msg ->
                         println("EVENT2:guarded:from STATE2 for $this:$msg")
                         action2()
                     }
-                    onEventPush(TestEvents.EVENT1, "map1", TestStates.STATE2) { args ->
-                        val msg = args[0] as String
+                    onEventPush(TestEvents.EVENT1, "map1", TestStates.STATE2) { msg ->
                         println("EVENT1:push:from STATE2 for $this:$msg")
                         action2()
                     }

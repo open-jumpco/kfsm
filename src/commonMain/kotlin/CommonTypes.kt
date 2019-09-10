@@ -15,13 +15,17 @@ import kotlin.reflect.KClass
  * This represents an action that may be invoked during a transition.
  * @param C The context: C will be available to the lambda.
  */
-typealias StateAction<C> = C.(Array<out Any>) -> Unit
+typealias StateAction<C, A, R> = C.(A?) -> R?
+
+typealias AnyStateAction<C> = C.(Any?) -> Any?
 
 /**
  * This represents a guard expression that may be used to select a specific transition.
  * @param C The context: C will be available to the lambda
  */
-typealias StateGuard<C> = C.(Array<out Any>) -> Boolean
+typealias StateGuard<C, A> = C.(A?) -> Boolean
+
+typealias AnyStateGuard<C> = C.(Any?) -> Boolean
 
 /**
  * This represents an expression to determine the state of the context. This is useful when creating an instance of a
@@ -51,7 +55,11 @@ typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
  * @param C The context: C will be available to the lambda
  * @param S currentState: S and targetState: S will be available to the lambda.
  */
-typealias DefaultChangeAction<C, S> = C.(S, S, Array<out Any>) -> Unit
+typealias DefaultChangeAction<C, S, A, R> = C.(S, S, A?) -> R?
+
+typealias DefaultEntryExitAction<C, S, A> = C.(S, S, A?) -> Unit
+
+typealias AnyDefaultChangeAction<C, S> = C.(S, S, Any?) -> Any?
 
 /**
  * This represents a default action for a specific event. These action will not cause changes in state.
@@ -60,7 +68,9 @@ typealias DefaultChangeAction<C, S> = C.(S, S, Array<out Any>) -> Unit
  * @param S The currentState:S will be available to the lambda
  * @param E The event: E will be available to the lambda
  */
-typealias DefaultStateAction<C, S, E> = C.(S, E, Array<out Any>) -> Unit
+typealias DefaultStateAction<C, S, E, A, R> = C.(S, E, A?) -> R?
+
+typealias AnyDefaultStateAction<C, S, E> = C.(S, E, Any?) -> Any?
 
 /**
  * This represents an event and targetState pair that can be written as `event to state`
@@ -97,14 +107,48 @@ enum class TransitionType {
  * @param validStates A set of the possible states supported by the top-level state map
  * @param eventClass The class of the possible events
  * @param contextClass The class of the context
+ * @param argumentClass The class of the argument to events/actions
+ * @param returnClass The class of the return type of events/actions
+ * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ */
+inline fun <S, E, C : Any, A : Any, R : Any> stateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    argumentClass: KClass<out A>,
+    returnClass: KClass<out R>,
+    handler: DslStateMachineHandler<S, E, C, A, R>.() -> Unit
+) = StateMachineBuilder<S, E, C, A, R>(validStates, validEvents).stateMachine(handler)
+
+/**
+ * Defines the start of a state machine DSL declaration with `Any` as the return type
+ * @param validStates A set of the possible states supported by the top-level state map
+ * @param eventClass The class of the possible events
+ * @param contextClass The class of the context
+ * @param argumentClass The class of the argument to events/actions
+ * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ */
+inline fun <S, E, C : Any, A : Any> stateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    argumentClass: KClass<out A>,
+    handler: DslStateMachineHandler<S, E, C, A, Any>.() -> Unit
+) = stateMachine<S, E, C, A, Any>(validStates, validEvents, contextClass, argumentClass, Any::class, handler)
+
+/**
+ * Defines the start of a state machine DSL declaration with `Any` as the type of arguments and returns types for events/actions
+ * @param validStates A set of the possible states supported by the top-level state map
+ * @param eventClass The class of the possible events
+ * @param contextClass The class of the context
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
 inline fun <S, E, C : Any> stateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
-    handler: DslStateMachineHandler<S, E, C>.() -> Unit
-) = StateMachineBuilder<S, E, C>(validStates, validEvents).stateMachine(handler)
+    handler: DslStateMachineHandler<S, E, C, Any, Any>.() -> Unit
+) = stateMachine<S, E, C, Any, Any>(validStates, validEvents, contextClass, Any::class, Any::class, handler)
 
 /**
  * An extension function that evaluates the expression and invokes the provided `block` if true or the `otherwise` block is false.

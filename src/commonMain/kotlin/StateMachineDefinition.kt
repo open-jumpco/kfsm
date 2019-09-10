@@ -12,23 +12,23 @@ package io.jumpco.open.kfsm
 /**
  * This class represents an immutable definition of a state machine.
  */
-class StateMachineDefinition<S, E, C>(
+class StateMachineDefinition<S, E, C, A, R>(
     private val deriveInitialState: StateQuery<C, S>?,
     private val deriveInitialMap: StateMapQuery<C, S>?,
     /**
      * The top level state map will be created when the state machine is created.
      */
-    val defaultStateMap: StateMapDefinition<S, E, C>,
+    val defaultStateMap: StateMapDefinition<S, E, C, A, R>,
     /**
      * The named state maps can be accessed via a push transition.
      */
-    val namedStateMaps: Map<String, StateMapDefinition<S, E, C>>
+    val namedStateMaps: Map<String, StateMapDefinition<S, E, C, A, R>>
 
 ) {
     private fun createMap(
         mapName: String,
         context: C,
-        parentFsm: StateMachineInstance<S, E, C>,
+        parentFsm: StateMachineInstance<S, E, C, A, R>,
         initial: S
     ) {
         if (mapName == "default") {
@@ -47,10 +47,10 @@ class StateMachineDefinition<S, E, C>(
      */
     internal fun create(
         context: C,
-        parentFsm: StateMachineInstance<S, E, C>,
+        parentFsm: StateMachineInstance<S, E, C, A, R>,
         initialState: S? = null,
         intitialExternalState: ExternalState<S>? = null
-    ): StateMapInstance<S, E, C> {
+    ): StateMapInstance<S, E, C, A, R> {
         if (intitialExternalState != null) {
             intitialExternalState.forEach { (initial, mapName) ->
                 createMap(mapName, context, parentFsm, initial)
@@ -71,9 +71,9 @@ class StateMachineDefinition<S, E, C>(
     internal fun createStateMap(
         name: String,
         context: C,
-        parentFsm: StateMachineInstance<S, E, C>,
+        parentFsm: StateMachineInstance<S, E, C, A, R>,
         initialState: S
-    ): StateMapInstance<S, E, C> =
+    ): StateMapInstance<S, E, C, A, R> =
         StateMapInstance(
             context,
             initialState,
@@ -87,8 +87,8 @@ class StateMachineDefinition<S, E, C>(
      * @param context The instance will operate on the provided context
      * @param initialExternalState The previously externalised state
      */
-    fun create(context: C, initialExternalState: ExternalState<S>): StateMachineInstance<S, E, C> =
-        StateMachineInstance<S, E, C>(context, this, null, initialExternalState)
+    fun create(context: C, initialExternalState: ExternalState<S>): StateMachineInstance<S, E, C, A, R> =
+        StateMachineInstance<S, E, C, A, R>(context, this, null, initialExternalState)
 
     /**
      * This function will create a state machine instance and set it to the initial state.
@@ -96,8 +96,8 @@ class StateMachineDefinition<S, E, C>(
      * @param initial The initial state
      *
      */
-    fun create(context: C, initial: S? = null): StateMachineInstance<S, E, C> =
-        StateMachineInstance<S, E, C>(context, this, initial)
+    fun create(context: C, initial: S? = null): StateMachineInstance<S, E, C, A, R> =
+        StateMachineInstance<S, E, C, A, R>(context, this, initial)
 
     /**
      * This function will provide a list of possible events given a specific state.

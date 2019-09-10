@@ -15,30 +15,32 @@ package io.jumpco.open.kfsm
  * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.
  */
-open class Transition<S, E, C>(
+open class Transition<S, E, C, A, R>(
     val targetState: S? = null,
     val targetMap: String? = null,
     val automatic: Boolean = false,
     val type: TransitionType = TransitionType.NORMAL,
-    private val action: StateAction<C>? = null
+    private val action: StateAction<C, A, R>? = null
 ) {
     init {
         if (type == TransitionType.PUSH) {
             require(targetState != null) { "targetState is required for push transition" }
         }
     }
+
     /**
      * Executed exit, optional and entry actions specific in the transition.
      */
-    open fun execute(context: C, instance: StateMapInstance<S, E, C>, args: Array<out Any>) {
+    open fun execute(context: C, instance: StateMapInstance<S, E, C, A, R>, arg: A?): R? {
 
         if (isExternal()) {
-            instance.executeExit(context, targetState!!, args)
+            instance.executeExit(context, targetState!!, arg)
         }
-        action?.invoke(context, args)
+        val result = action?.invoke(context, arg)
         if (isExternal()) {
-            instance.executeEntry(context, targetState!!, args)
+            instance.executeEntry(context, targetState!!, arg)
         }
+        return result
     }
 
     /**
@@ -46,18 +48,19 @@ open class Transition<S, E, C>(
      */
     open fun execute(
         context: C,
-        sourceMap: StateMapInstance<S, E, C>,
-        targetMap: StateMapInstance<S, E, C>?,
-        args: Array<out Any>
-    ) {
+        sourceMap: StateMapInstance<S, E, C, A, R>,
+        targetMap: StateMapInstance<S, E, C, A, R>?,
+        arg: A?
+    ): R? {
 
         if (isExternal()) {
-            sourceMap.executeExit(context, targetState!!, args)
+            sourceMap.executeExit(context, targetState!!, arg)
         }
-        action?.invoke(context, args)
+        val result = action?.invoke(context, arg)
         if (targetMap != null && isExternal()) {
-            targetMap.executeEntry(context, targetState!!, args)
+            targetMap.executeEntry(context, targetState!!, arg)
         }
+        return result
     }
 
     /**

@@ -15,12 +15,12 @@ package io.jumpco.open.kfsm
  * @param E is en enum representing all the events the FSM may receive
  * @param C is the class of the Context where the action will be applied.
  */
-class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
+class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
     private var completed = false
     private var deriveInitialState: StateQuery<C, S>? = null
     private var deriveInitialStateMap: StateMapQuery<C, S>? = null
-    internal val defaultStateMap = StateMapBuilder<S, E, C>(validMapStates, null, this)
-    internal val namedStateMaps: MutableMap<String, StateMapBuilder<S, E, C>> = mutableMapOf()
+    internal val defaultStateMap = StateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
+    internal val namedStateMaps: MutableMap<String, StateMapBuilder<S, E, C, A, R>> = mutableMapOf()
     /**
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
@@ -38,11 +38,11 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
     fun stateMap(
         name: String,
         validStates: Set<S>
-    ): StateMapBuilder<S, E, C> {
+    ): StateMapBuilder<S, E, C, A, R> {
         require(name.trim().length > 0) { "statemap name must not be empty" }
         require(name != "default") { "Map cannot be named 'default'" }
         require(validStates.isNotEmpty()) { "Provide at least one entty in validStates" }
-        val stateMapBuilder = StateMapBuilder<S, E, C>(validStates, name, this)
+        val stateMapBuilder = StateMapBuilder<S, E, C, A, R>(validStates, name, this)
         namedStateMaps[name] = stateMapBuilder
         return stateMapBuilder
     }
@@ -51,7 +51,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * This function enables completed for the state machine definition prevent further changes to the state
      * machine behaviour.
      */
-    fun complete(): StateMachineDefinition<S, E, C> {
+    fun complete(): StateMachineDefinition<S, E, C, A, R> {
         completed = true
         if (namedStateMaps.isNotEmpty()) {
             require(this.deriveInitialState == null) { "deriveInitialState cannot be used with named state maps" }
@@ -64,7 +64,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
         )
     }
 
-    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C>.() -> Unit): DslStateMachineHandler<S, E, C> =
+    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C, A, R>.() -> Unit): DslStateMachineHandler<S, E, C, A, R> =
         DslStateMachineHandler(this).apply(handler)
 
     /**
@@ -77,7 +77,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param action The optional action will be executed when the transition occurs.
      */
 
-    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) =
+    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, targetState, guard, action)
 
     /**
@@ -89,7 +89,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param action The optional action will be executed when the transition occurs.
      */
 
-    fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) =
+    fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, guard, action)
 
     /**
@@ -100,7 +100,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param targetState FSM will transition to targetState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, targetState: S, action: StateAction<C>?) =
+    fun transition(startState: S, event: E, targetState: S, action: StateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, targetState, action)
 
     /**
@@ -109,7 +109,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
-    fun transition(startState: S, event: E, action: StateAction<C>?) =
+    fun transition(startState: S, event: E, action: StateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, action)
 
     /**
@@ -117,21 +117,21 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * This will be an internal transition and will not cause a change in state or invoke entry or exit functions.
      * @param action This action will be performed
      */
-    fun defaultAction(action: DefaultStateAction<C, S, E>) =
+    fun defaultAction(action: DefaultStateAction<C, S, E, A, R>) =
         defaultStateMap.defaultAction(action)
 
     /**
      * This function defines an action to be invoked when no entry action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultEntry(action: DefaultChangeAction<C, S>) =
+    fun defaultEntry(action: DefaultEntryExitAction<C, S, A>) =
         defaultStateMap.defaultEntry(action)
 
     /**
      * This function defines an action to be invoked when no exit action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultExit(action: DefaultChangeAction<C, S>) =
+    fun defaultExit(action: DefaultEntryExitAction<C, S, A>) =
         defaultStateMap.defaultExit(action)
 
     /**
@@ -139,7 +139,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun default(currentState: S, action: DefaultStateAction<C, S, E>) =
+    fun default(currentState: S, action: DefaultStateAction<C, S, E, A, R>) =
         defaultStateMap.default(currentState, action)
 
     /**
@@ -147,7 +147,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: EventState<E, S>, action: StateAction<C>?) =
+    fun default(event: EventState<E, S>, action: StateAction<C, A, R>?) =
         defaultStateMap.default(event, action)
 
     /**
@@ -155,7 +155,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param event The event to match this transition.
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: E, action: StateAction<C>?) =
+    fun default(event: E, action: StateAction<C, A, R>?) =
         defaultStateMap.default(event, action)
 
     /**
@@ -163,7 +163,7 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun entry(currentState: S, action: DefaultChangeAction<C, S>) =
+    fun entry(currentState: S, action: DefaultEntryExitAction<C, S, A>) =
         defaultStateMap.entry(currentState, action)
 
     /**
@@ -171,6 +171,8 @@ class StateMachineBuilder<S, E, C>(validMapStates: Set<S>, internal val validEve
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun exit(currentState: S, action: DefaultChangeAction<C, S>) =
+    fun exit(currentState: S, action: DefaultEntryExitAction<C, S, A>) =
         defaultStateMap.exit(currentState, action)
 }
+
+typealias AnyStateMachineBuilder<S, E, C> = StateMachineBuilder<S, E, C, Any, Any>

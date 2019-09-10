@@ -23,7 +23,7 @@ import kotlin.test.fail
  */
 class LockFsmTests {
 
-    private fun verifyLockFSM(fsm: StateMachineInstance<LockStates, LockEvents, Lock>, lock: Lock) {
+    private fun verifyLockFSM(fsm: AnyStateMachineInstance<LockStates, LockEvents, Lock>, lock: Lock) {
         // then
         assertTrue { fsm.currentState == LOCKED }
         assertTrue { lock.locked == 1 }
@@ -66,7 +66,7 @@ class LockFsmTests {
     @Test
     fun testPlainCreationOfFsm() {
         // given
-        val builder = StateMachineBuilder<LockStates, LockEvents, Lock>(
+        val builder = AnyStateMachineBuilder<LockStates, LockEvents, Lock>(
             LockStates.values().toSet(),
             LockEvents.values().toSet()
         )
@@ -107,10 +107,11 @@ class LockFsmTests {
     @Test
     fun testDslCreationOfFsm() {
         // given
-        val definition = StateMachineBuilder<LockStates, LockEvents, Lock>(
+        val definition = stateMachine(
             LockStates.values().toSet(),
-            LockEvents.values().toSet()
-        ).stateMachine {
+            LockEvents.values().toSet(),
+            Lock::class
+        ) {
             initialState {
                 when (locked) {
                     0 -> UNLOCKED

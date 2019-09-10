@@ -128,9 +128,9 @@ class CharacterConstants {
  * BYTE everything else
  */
 enum class ReaderEvents {
-    BYTE,   // everything else
-    CTRL,   // SOH, EOT, STX, ETX, ACK, NAK
-    ESC     // ESC = 0x1B
+    BYTE, // everything else
+    CTRL, // SOH, EOT, STX, ETX, ACK, NAK
+    ESC // ESC = 0x1B
 }
 
 enum class ReaderStates {
@@ -152,7 +152,8 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
         private val definition = stateMachine(
             ReaderStates.values().toSet(),
             ReaderEvents.values().toSet(),
-            PacketHandler::class
+            PacketHandler::class,
+            Int::class
         ) {
             initialState { ReaderStates.START }
             default {
@@ -169,29 +170,27 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
             whenState(ReaderStates.START) {
                 onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVPCKT,
-                    guard = { args -> args[0] as Int == CharacterConstants.SOH }) {}
+                    guard = { arg -> arg == CharacterConstants.SOH }) {}
             }
             whenState(ReaderStates.RCVPCKT) {
                 onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVDATA,
-                    guard = { args -> args[0] as Int == CharacterConstants.STX }) {
+                    guard = { arg -> arg == CharacterConstants.STX }) {
                     addField()
                 }
-                onEvent(ReaderEvents.BYTE to ReaderStates.RCVCHK) { args ->
-                    require(args.size == 1)
-                    val byte = args[0] as Int
-                    addChecksum(byte)
+                onEvent(ReaderEvents.BYTE to ReaderStates.RCVCHK) { arg ->
+                    require(arg != null)
+                    addChecksum(arg)
                 }
             }
             whenState(ReaderStates.RCVDATA) {
-                onEvent(ReaderEvents.BYTE) { args ->
-                    require(args.size == 1)
-                    val byte = args[0] as Int
-                    addByte(byte)
+                onEvent(ReaderEvents.BYTE) { arg ->
+                    require(arg != null)
+                    addByte(arg)
                 }
                 onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVPCKT,
-                    guard = { args -> args[0] as Int == CharacterConstants.ETX }) {
+                    guard = { arg -> arg == CharacterConstants.ETX }) {
                     endField()
                 }
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVESC) {}
@@ -200,21 +199,20 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVDATA) {
                     addByte(CharacterConstants.ESC)
                 }
-                onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA) { args ->
-                    require(args.isNotEmpty())
-                    addByte(args[0] as Int)
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA) { arg ->
+                    require(arg != null)
+                    addByte(arg)
                 }
             }
             whenState(ReaderStates.RCVCHK) {
-                onEvent(ReaderEvents.BYTE) { args ->
-                    require(args.size == 1)
-                    val byte = args[0] as Int
-                    addChecksum(byte)
+                onEvent(ReaderEvents.BYTE) { arg ->
+                    require(arg != null)
+                    addChecksum(arg)
                 }
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVCHKESC) {}
                 onEvent(
                     ReaderEvents.CTRL to ReaderStates.CHKSUM,
-                    guard = { args -> args[0] as Int == CharacterConstants.EOT }) {
+                    guard = { arg -> arg == CharacterConstants.EOT }) {
                     checksum()
                 }
             }
@@ -230,9 +228,9 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVCHK) {
                     addChecksum(CharacterConstants.ESC)
                 }
-                onEvent(ReaderEvents.CTRL to ReaderStates.RCVCHK) { args ->
-                    require(args.isNotEmpty())
-                    addChecksum(args[0] as Int)
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVCHK) { arg ->
+                    require(arg != null)
+                    addChecksum(arg)
                 }
             }
         }.build()

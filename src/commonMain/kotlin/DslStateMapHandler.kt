@@ -12,21 +12,21 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
-class DslStateMapHandler<S, E, C>(private val fsm: StateMapBuilder<S, E, C>) {
+class DslStateMapHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C, A, R>) {
     /**
      * Defines a section for a specific state.
      * @param currentState The give state
      * @param handler A lambda with definitions for the given state
      */
-    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C>.() -> Unit):
-            DslStateMapEventHandler<S, E, C> =
+    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C, A, R>.() -> Unit):
+            DslStateMapEventHandler<S, E, C, A, R> =
         DslStateMapEventHandler(currentState, fsm).apply(handler)
 
     /**
      * Defines a section for default behaviour for the state machine.
      * @param handler A lambda with definition for the default behaviour of the state machine.
      */
-    fun default(handler: DslStateMapDefaultEventHandler<S, E, C>.() -> Unit):
-            DslStateMapDefaultEventHandler<S, E, C> =
+    fun default(handler: DslStateMapDefaultEventHandler<S, E, C, A, R>.() -> Unit):
+            DslStateMapDefaultEventHandler<S, E, C, A, R> =
         DslStateMapDefaultEventHandler(fsm).apply(handler)
 }

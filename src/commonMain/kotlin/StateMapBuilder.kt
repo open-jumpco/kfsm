@@ -13,7 +13,7 @@ package io.jumpco.open.kfsm
  * The build will be created to assist with create the top level or named state maps.
  * All transitions are assigned to a state map.
  */
-class StateMapBuilder<S, E, C>(
+class StateMapBuilder<S, E, C, A, R>(
     /**
      * The set of states the state map supports
      */
@@ -25,17 +25,17 @@ class StateMapBuilder<S, E, C>(
     /**
      * The parent state machine builder
      */
-    val parentBuilder: StateMachineBuilder<S, E, C>
+    val parentBuilder: StateMachineBuilder<S, E, C, A, R>
 ) {
-    private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C>> = mutableMapOf()
-    private val defaultTransitions: MutableMap<E, DefaultTransition<E, S, C>> = mutableMapOf()
-    private val entryActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
-    private val exitActions: MutableMap<S, DefaultChangeAction<C, S>> = mutableMapOf()
-    private val defaultActions: MutableMap<S, DefaultStateAction<C, S, E>> = mutableMapOf()
-    private val automaticTransitions: MutableMap<S, TransitionRules<S, E, C>> = mutableMapOf()
-    private var globalDefault: DefaultStateAction<C, S, E>? = null
-    private var defaultEntryAction: DefaultChangeAction<C, S>? = null
-    private var defaultExitAction: DefaultChangeAction<C, S>? = null
+    private val transitionRules: MutableMap<Pair<S, E>, TransitionRules<S, E, C, A, R>> = mutableMapOf()
+    private val defaultTransitions: MutableMap<E, DefaultTransition<S, E, C, A, R>> = mutableMapOf()
+    private val entryActions: MutableMap<S, DefaultEntryExitAction<C, S, A>> = mutableMapOf()
+    private val exitActions: MutableMap<S, DefaultEntryExitAction<C, S, A>> = mutableMapOf()
+    private val defaultActions: MutableMap<S, DefaultStateAction<C, S, E, A, R>> = mutableMapOf()
+    private val automaticTransitions: MutableMap<S, TransitionRules<S, E, C, A, R>> = mutableMapOf()
+    private var globalDefault: DefaultStateAction<C, S, E, A, R>? = null
+    private var defaultEntryAction: DefaultEntryExitAction<C, S, A>? = null
+    private var defaultExitAction: DefaultEntryExitAction<C, S, A>? = null
 
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
@@ -46,12 +46,12 @@ class StateMapBuilder<S, E, C>(
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = GuardedTransition(
+        val transition = GuardedTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -62,7 +62,7 @@ class StateMapBuilder<S, E, C>(
             action
         )
         if (transitionRule == null) {
-            val rule = TransitionRules<S, E, C>()
+            val rule = TransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -78,12 +78,12 @@ class StateMapBuilder<S, E, C>(
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = GuardedTransition(
+        val transition = GuardedTransition<S, E, C, A, R>(
             startState,
             event,
             null,
@@ -94,7 +94,7 @@ class StateMapBuilder<S, E, C>(
             action
         )
         if (transitionRule == null) {
-            val rule = TransitionRules<S, E, C>()
+            val rule = TransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -110,12 +110,12 @@ class StateMapBuilder<S, E, C>(
      * @param targetState FSM will transition to targetState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, targetState: S, action: StateAction<C>?) {
+    fun transition(startState: S, event: E, targetState: S, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleTransition(
+        val transition = SimpleTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -125,7 +125,7 @@ class StateMapBuilder<S, E, C>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = TransitionRules(transition = transition)
+            transitionRules[key] = TransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -138,12 +138,12 @@ class StateMapBuilder<S, E, C>(
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
-    fun transition(startState: S, event: E, action: StateAction<C>?) {
+    fun transition(startState: S, event: E, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleTransition(
+        val transition = SimpleTransition<S, E, C, A, R>(
             startState,
             event,
             null,
@@ -153,7 +153,7 @@ class StateMapBuilder<S, E, C>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = TransitionRules(transition = transition)
+            transitionRules[key] = TransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -168,11 +168,11 @@ class StateMapBuilder<S, E, C>(
      * @param targetMap The map after the transition
      * @param action The optional action that will be invoked.
      */
-    fun popTransition(startState: S, event: E, targetState: S?, targetMap: String?, action: StateAction<C>?) {
+    fun popTransition(startState: S, event: E, targetState: S?, targetMap: String?, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleTransition(
+        val transition = SimpleTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -182,7 +182,7 @@ class StateMapBuilder<S, E, C>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = TransitionRules(transition = transition)
+            transitionRules[key] = TransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -203,14 +203,14 @@ class StateMapBuilder<S, E, C>(
         event: E,
         targetState: S?,
         targetMap: String?,
-        guard: StateGuard<C>,
-        action: StateAction<C>?
+        guard: StateGuard<C, A>,
+        action: StateAction<C, A, R>?
     ) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = GuardedTransition(
+        val transition = GuardedTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -221,7 +221,7 @@ class StateMapBuilder<S, E, C>(
             action
         )
         if (transitionRule == null) {
-            val rule = TransitionRules<S, E, C>()
+            val rule = TransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -237,15 +237,15 @@ class StateMapBuilder<S, E, C>(
      * @param targetMap The map after the transition
      * @param action The optional action will be invoked
      */
-    fun pushTransition(startState: S, event: E, targetMap: String, targetState: S, action: StateAction<C>?) {
+    fun pushTransition(startState: S, event: E, targetMap: String, targetState: S, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         require(parentBuilder.namedStateMaps.containsKey(targetMap)) { "$targetMap map not found in ${parentBuilder.namedStateMaps.keys}" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleTransition(startState, event, targetState, targetMap, false, TransitionType.PUSH, action)
+        val transition = SimpleTransition<S, E, C, A, R>(startState, event, targetState, targetMap, false, TransitionType.PUSH, action)
         if (transitionRule == null) {
-            transitionRules[key] = TransitionRules(mutableListOf(), transition)
+            transitionRules[key] = TransitionRules<S, E, C, A, R>(mutableListOf(), transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -266,8 +266,8 @@ class StateMapBuilder<S, E, C>(
         event: E,
         targetMap: String,
         targetState: S,
-        guard: StateGuard<C>,
-        action: StateAction<C>?
+        guard: StateGuard<C, A>,
+        action: StateAction<C, A, R>?
     ) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
@@ -275,9 +275,9 @@ class StateMapBuilder<S, E, C>(
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         val transition =
-            GuardedTransition(startState, event, targetState, targetMap, false, TransitionType.PUSH, guard, action)
+            GuardedTransition<S, E, C, A, R>(startState, event, targetState, targetMap, false, TransitionType.PUSH, guard, action)
         if (transitionRule == null) {
-            val rule = TransitionRules<S, E, C>()
+            val rule = TransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -291,14 +291,14 @@ class StateMapBuilder<S, E, C>(
      * @param targetState The state after the transition
      * @param action The optional action will be invoked
      */
-    fun automatic(startState: S, targetState: S, action: StateAction<C>?) {
+    fun automatic(startState: S, targetState: S, action: StateAction<C, A, R>?) {
         require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleTransition<S, E, C>(startState, null, targetState, null, true, TransitionType.NORMAL, action)
+            SimpleTransition<S, E, C, A, R>(startState, null, targetState, null, true, TransitionType.NORMAL, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(), transition)
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(), transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -311,14 +311,14 @@ class StateMapBuilder<S, E, C>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automatic(startState: S, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun automatic(startState: S, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            GuardedTransition<S, E, C>(startState, null, targetState, null, true, TransitionType.NORMAL, guard, action)
+            GuardedTransition<S, E, C, A, R>(startState, null, targetState, null, true, TransitionType.NORMAL, guard, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(transition))
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -330,13 +330,13 @@ class StateMapBuilder<S, E, C>(
      * @param targetState The state after the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetState: S, action: StateAction<C>?) {
+    fun automaticPop(startState: S, targetState: S, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleTransition<S, E, C>(startState, null, targetState, null, true, TransitionType.POP, action)
+            SimpleTransition<S, E, C, A, R>(startState, null, targetState, null, true, TransitionType.POP, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(), transition)
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(), transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -348,13 +348,13 @@ class StateMapBuilder<S, E, C>(
      * @param startState The transition will apply to the specific state.
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, action: StateAction<C>?) {
+    fun automaticPop(startState: S, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleTransition<S, E, C>(startState, null, null, null, true, TransitionType.POP, action)
+            SimpleTransition<S, E, C, A, R>(startState, null, null, null, true, TransitionType.POP, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(transition = transition)
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -368,13 +368,13 @@ class StateMapBuilder<S, E, C>(
      * @param targetMap The map after the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetMap: String, targetState: S, action: StateAction<C>?) {
+    fun automaticPop(startState: S, targetMap: String, targetState: S, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleTransition<S, E, C>(startState, null, targetState, targetMap, true, TransitionType.POP, action)
+            SimpleTransition<S, E, C, A, R>(startState, null, targetState, targetMap, true, TransitionType.POP, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(transition = transition)
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -388,13 +388,13 @@ class StateMapBuilder<S, E, C>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun automaticPop(startState: S, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            GuardedTransition<S, E, C>(startState, null, targetState, null, true, TransitionType.POP, guard, action)
+            GuardedTransition<S, E, C, A, R>(startState, null, targetState, null, true, TransitionType.POP, guard, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(transition))
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -406,13 +406,13 @@ class StateMapBuilder<S, E, C>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun automaticPop(startState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            GuardedTransition<S, E, C>(startState, null, null, null, true, TransitionType.POP, guard, action)
+            GuardedTransition<S, E, C, A, R>(startState, null, null, null, true, TransitionType.POP, guard, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(transition))
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -426,11 +426,11 @@ class StateMapBuilder<S, E, C>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetMap: String, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun automaticPop(startState: S, targetMap: String, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            GuardedTransition<S, E, C>(
+            GuardedTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -441,7 +441,7 @@ class StateMapBuilder<S, E, C>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(transition))
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -454,13 +454,13 @@ class StateMapBuilder<S, E, C>(
      * @param targetState The state after the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPush(startState: S, targetMap: String, targetState: S, action: StateAction<C>?) {
+    fun automaticPush(startState: S, targetMap: String, targetState: S, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleTransition<S, E, C>(startState, null, targetState, targetMap, true, TransitionType.PUSH, action)
+            SimpleTransition<S, E, C, A, R>(startState, null, targetState, targetMap, true, TransitionType.PUSH, action)
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(transition = transition)
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -475,11 +475,11 @@ class StateMapBuilder<S, E, C>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPush(startState: S, targetMap: String, targetState: S, guard: StateGuard<C>, action: StateAction<C>?) {
+    fun automaticPush(startState: S, targetMap: String, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            GuardedTransition<S, E, C>(
+            GuardedTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -490,7 +490,7 @@ class StateMapBuilder<S, E, C>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = TransitionRules<S, E, C>(mutableListOf(transition))
+            automaticTransitions[startState] = TransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -501,7 +501,7 @@ class StateMapBuilder<S, E, C>(
      * This will be an internal transition and will not cause a change in state or invoke entry or exit functions.
      * @param action This action will be performed
      */
-    fun defaultAction(action: DefaultStateAction<C, S, E>) {
+    fun defaultAction(action: DefaultStateAction<C, S, E, A, R>) {
         globalDefault = action
     }
 
@@ -509,7 +509,7 @@ class StateMapBuilder<S, E, C>(
      * This function defines an action to be invoked when no entry action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultEntry(action: DefaultChangeAction<C, S>) {
+    fun defaultEntry(action: DefaultEntryExitAction<C, S, A>) {
         defaultEntryAction = action
     }
 
@@ -517,7 +517,7 @@ class StateMapBuilder<S, E, C>(
      * This function defines an action to be invoked when no exit action is defined for the current state.
      * @param action This action will be invoked
      */
-    fun defaultExit(action: DefaultChangeAction<C, S>) {
+    fun defaultExit(action: DefaultEntryExitAction<C, S, A>) {
         defaultExitAction = action
     }
 
@@ -526,7 +526,7 @@ class StateMapBuilder<S, E, C>(
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun default(currentState: S, action: DefaultStateAction<C, S, E>) {
+    fun default(currentState: S, action: DefaultStateAction<C, S, E, A, R>) {
         require(validStates.contains(currentState)) { "$currentState must be one of $validStates" }
         require(defaultActions[currentState] == null) { "Default defaultAction already defined for $currentState" }
         defaultActions[currentState] = action
@@ -537,11 +537,11 @@ class StateMapBuilder<S, E, C>(
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: EventState<E, S>, action: StateAction<C>?) {
+    fun default(event: EventState<E, S>, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event.first)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
         defaultTransitions[event.first] =
-            DefaultTransition(event.first, event.second, null, false, TransitionType.NORMAL, action)
+            DefaultTransition<S, E, C, A, R>(event.first, event.second, null, false, TransitionType.NORMAL, action)
     }
 
     /**
@@ -549,10 +549,10 @@ class StateMapBuilder<S, E, C>(
      * @param event The event to match this transition.
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: E, action: StateAction<C>?) {
+    fun default(event: E, action: StateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
-        defaultTransitions[event] = DefaultTransition<E, S, C>(event, null, null, false, TransitionType.NORMAL, action)
+        defaultTransitions[event] = DefaultTransition<S, E, C, A, R>(event, null, null, false, TransitionType.NORMAL, action)
     }
 
     /**
@@ -560,7 +560,7 @@ class StateMapBuilder<S, E, C>(
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun entry(currentState: S, action: DefaultChangeAction<C, S>) {
+    fun entry(currentState: S, action: DefaultEntryExitAction<C, S, A>) {
         require(validStates.contains(currentState)) { "$currentState must be one of $validStates" }
         require(entryActions[currentState] == null) { "Entry defaultAction already defined for $currentState" }
         entryActions[currentState] = action
@@ -571,7 +571,7 @@ class StateMapBuilder<S, E, C>(
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun exit(currentState: S, action: DefaultChangeAction<C, S>) {
+    fun exit(currentState: S, action: DefaultEntryExitAction<C, S, A>) {
         require(validStates.contains(currentState)) { "$currentState must be one of $validStates" }
         require(exitActions[currentState] == null) { "Exit defaultAction already defined for $currentState" }
         exitActions[currentState] = action
@@ -580,7 +580,7 @@ class StateMapBuilder<S, E, C>(
     /**
      * Creates a `StateMapDefinition` from the data in this builder
      */
-    fun toMap(): StateMapDefinition<S, E, C> = StateMapDefinition(
+    fun toMap(): StateMapDefinition<S, E, C, A, R> = StateMapDefinition(
         this.name,
         this.validStates,
         this.transitionRules.toMap(),

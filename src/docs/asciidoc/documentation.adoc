@@ -160,10 +160,11 @@ The top level element is `stateMachine` either by using the function
 * link:javadoc/kfsm/io.jumpco.open.kfsm/-state-machine-builder/state-machine.html[StateMachineBuilder::stateMachine]
 * link:javadoc/kfsm/io.jumpco.open.kfsm/state-machine.html[stateMachine]
 
+There are 3 overloaded variations on `stateMachine` for providing `Any` as the return type and the argument to events/actions in cases where they are not used.
 [source,kotlin]
 ----
 // using builder function
-val definition = StateMachineBuilder<StateEnum, EventEnum, ContextType>(
+val definition = StateMachineBuilder<StateEnum, EventEnum, ContextType, ArgType, ReturnType>(
     StateEnum.values().toSet(),
     EventEnum.values().toSet()
 ).stateMachine {
@@ -182,7 +183,9 @@ val definition = StateMachineBuilder<StateEnum, EventEnum, ContextType>(
 val definition = stateMachine(
     StateEnum.values().toSet(),
     EventEnum.values().toSet(),
-    ContextType::class
+    ContextType::class,
+    ArgType::class,
+    ReturnType::class
 ) {
     default { // global defaults
     }
@@ -224,12 +227,12 @@ default {
 * Mandatory: _Optional_
 * Cardinality: _Single_
 
-Provide a lambda `C.(S,E, Array<out Any>)->Unit` that will be invoked when no other transitions are matched.
+Provide a lambda `C.(S, E, A?)->R?` that will be invoked when no other transitions are matched.
 
 Example:
 [source,kotlin]
 ----
-action { currentState, event, args -> // global default action
+action { currentState, event, arg -> // global default action
     contextFunction()
     anotherContextFunction()
 }
@@ -240,13 +243,13 @@ action { currentState, event, args -> // global default action
 * Mandatory: _Optional_
 * Cardinality: _Single_
 
-Provide a lambda `C.(S,S,Array<out Any>) -> Unit` that will be invoked before a change in the state of the FSM.
+Provide a lambda `C.(S,S,A?) -> Unit` that will be invoked before a change in the state of the FSM.
 Global entry actions will be called for all external transitions after state specific entry actions.
 
 Example:
 [source,kotlin]
 ----
-onEntry { fromState, targetState, args ->
+onEntry { fromState, targetState, arg ->
     entryAction()
 }
 ----
@@ -256,13 +259,13 @@ onEntry { fromState, targetState, args ->
 * Mandatory: _Optional_
 * Cardinality: _Single_
 
-Provide a lambda `C.(S,S,Array<out Any>) -> Unit` that will be invoked after a change in the state of the FSM.
+Provide a lambda `C.(S,S,A?) -> Unit` that will be invoked after a change in the state of the FSM.
 Global exit actions will be called for all external transitions after state specific entry actions.
 
 Example:
 [source,kotlin]
 ----
-onExit { fromState, targetState, args ->
+onExit { fromState, targetState, arg ->
     exitAction()
 }
 ----
@@ -274,16 +277,16 @@ onExit { fromState, targetState, args ->
 
 This defines a transition when a specific event is receive and no other transition was matched.
 There are 2 variations, the first is internal and doesn't define a target state, the second is external and defines a target state.
-In both cases the lambda type is `C.(Array<out Any) -> Unit`
+In both cases the lambda type is `C.(A?) -> R?`
 
 Example:
 [source,kotlin]
 ----
-onEvent(Event.EVENT) { args -> // default internal state action for given event
+onEvent(Event.EVENT) { arg -> // default internal state action for given event
     someFunction()
 }
 
-onEvent(Event.EVENT to State.STATE) { args-> // default external state action for given event
+onEvent(Event.EVENT to State.STATE) { arg -> // default external state action for given event
     anotherFunction()
 }
 ----
@@ -387,7 +390,7 @@ A state block may have one default action which is a lambda of type `C.(S,E,Arra
 Example:
 [source,kotlin]
 ----
-default { fromState, event, args -> // default state action
+default { fromState, event, arg -> // default state action
     someDefaultAction()
 }
 ----
@@ -397,14 +400,14 @@ default { fromState, event, args -> // default state action
 * Mandatory: _Optional_
 * Cardinality: _Single_
 
-This defines a lambda of type `C.(S,S,Array<out Any>) -> Unit` that will be invoked after the transition action for an external transition.
+This defines a lambda of type `C.(S,S,A?) -> R?` that will be invoked after the transition action for an external transition.
 
 Example:
 [source,kotlin]
 ----
 
-onEntry { fromState, targetState, args -> // state entry action
-    println("Entering:$targetState from $fromState with ${args.toList()}")
+onEntry { fromState, targetState, arg -> // state entry action
+    println("Entering:$targetState from $fromState with $arg")
 }
 ----
 ==== `onExit`
@@ -412,13 +415,13 @@ onEntry { fromState, targetState, args -> // state entry action
 * Mandatory: _Optional_
 * Cardinality: _Single_
 
-This defines a lambda of type `C.(S,S,Array<out Any>) -> Unit` that will be invoked before the transition action for an external transitions.
+This defines a lambda of type `C.(S,S,A?) -> Unit` that will be invoked before the transition action for an external transitions.
 
 Example:
 [source,kotlin]
 ----
-onExit { fromState, targetState, args -> // state exit action
-    println("Exiting:$fromState to $targetState with ${args.toList()}")
+onExit { fromState, targetState, arg -> // state exit action
+    println("Exiting:$fromState to $targetState with $arg")
 }
 ----
 ==== `automatic`
@@ -504,13 +507,13 @@ Their may be only one transition without a guard expression.
 Examples:
 [source,kotlin]
 ----
-onEvent(Event.EV1, guard = { flag == 1 }) { args -> // internal transition with guard expression
+onEvent(Event.EV1, guard = { flag == 1 }) { arg -> // internal transition with guard expression
 }
-onEvent(Event.EV1 to State.S2, guard = { flag == 2}) { args -> // external transition with guard expression
+onEvent(Event.EV1 to State.S2, guard = { flag == 2}) { arg -> // external transition with guard expression
 }
-onEvent(Event.EV1) { args -> // internal transition
+onEvent(Event.EV1) { arg -> // internal transition
 }
-onEvent(Event.EV2 to State.S2) { args -> // external transition
+onEvent(Event.EV2 to State.S2) { arg -> // external transition
 }
 ----
 ==== `onEventPush`

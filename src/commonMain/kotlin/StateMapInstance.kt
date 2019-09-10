@@ -12,12 +12,12 @@ package io.jumpco.open.kfsm
 /**
  * @suppress
  */
-class StateMapInstance<S, E, C>(
+class StateMapInstance<S, E, C, A, R>(
     val context: C,
     val newState: S,
     val name: String?,
-    val parentFsm: StateMachineInstance<S, E, C>,
-    val definition: StateMapDefinition<S, E, C>
+    val parentFsm: StateMachineInstance<S, E, C, A, R>,
+    val definition: StateMapDefinition<S, E, C, A, R>
 ) {
     init {
         require(definition.validStates.contains(newState)) { "Initial state is $newState and not in ${definition.validStates}" }
@@ -26,38 +26,39 @@ class StateMapInstance<S, E, C>(
     var currentState: S = newState
         internal set
 
-    internal fun execute(transition: Transition<S, E, C>, args: Array<out Any>) {
-        transition.execute(context, this, args)
+    internal fun execute(transition: Transition<S, E, C, A, R>, arg: A?): R? {
+        val result = transition.execute(context, this, arg)
         if (transition.isExternal()) {
             currentState = transition.targetState!!
         }
+        return result
     }
 
-    internal fun executeEntry(context: C, targetState: S, args: Array<out Any>) {
+    internal fun executeEntry(context: C, targetState: S, arg: A?) {
         val entryAction =
             definition.entryActions[targetState] ?: parentFsm.definition.defaultStateMap.entryActions[targetState]
-        entryAction?.invoke(context, currentState, targetState, args)
+        entryAction?.invoke(context, currentState, targetState, arg)
         val defaultEntry = definition.defaultEntryAction ?: parentFsm.definition.defaultStateMap.defaultEntryAction
-        defaultEntry?.invoke(context, currentState, targetState, args)
+        defaultEntry?.invoke(context, currentState, targetState, arg)
     }
 
-    internal fun executeExit(context: C, targetState: S, args: Array<out Any>) {
+    internal fun executeExit(context: C, targetState: S, arg: A?) {
         val exitAction =
             definition.exitActions[currentState] ?: parentFsm.definition.defaultStateMap.exitActions[targetState]
-        exitAction?.invoke(context, currentState, targetState, args)
+        exitAction?.invoke(context, currentState, targetState, arg)
         val defaultExitAction = definition.defaultExitAction ?: parentFsm.definition.defaultStateMap.defaultExitAction
-        defaultExitAction?.invoke(context, currentState, targetState, args)
+        defaultExitAction?.invoke(context, currentState, targetState, arg)
     }
 
-    private fun executeDefaultAction(event: E, args: Array<out Any>) {
-        with(
+    private fun executeDefaultAction(event: E, arg: A?): R? {
+        return with(
             definition.defaultActions[currentState]
                 ?: definition.globalDefault
                 ?: parentFsm.definition.defaultStateMap.defaultActions[currentState]
                 ?: parentFsm.definition.defaultStateMap.globalDefault
                 ?: error("Transition from $currentState on $event not defined")
         ) {
-            invoke(context, currentState, event, args)
+            invoke(context, currentState, event, arg)
         }
     }
 
@@ -65,24 +66,26 @@ class StateMapInstance<S, E, C>(
      * This function will process the on and advance the state machine according to the FSM definition.
      * @param event The on received,
      */
-    fun sendEvent(event: E, vararg args: Any) {
+    fun sendEvent(event: E, arg: A? = null): R? {
+        var result: R? = null
         definition.transitionRules[Pair(currentState, event)]?.apply rule@{
-            this.findGuard(context, args)?.apply {
-                parentFsm.execute(this, args)
+            this.findGuard(context, arg)?.apply {
+                result = parentFsm.execute(this, arg)
             } ?: run {
                 this@rule.transition?.apply {
-                    parentFsm.execute(this, args)
+                    result = parentFsm.execute(this, arg)
                 } ?: run {
-                    executeDefaultAction(event, args)
+                    result = executeDefaultAction(event, arg)
                 }
             }
         } ?: run {
             definition.defaultTransitions[event]?.apply {
-                parentFsm.execute(this, args)
+                result = parentFsm.execute(this, arg)
             } ?: run {
-                executeDefaultAction(event, args)
+                result = executeDefaultAction(event, arg)
             }
         }
+        return result
     }
 
     /**
@@ -99,23 +102,24 @@ class StateMapInstance<S, E, C>(
     fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
         definition.eventAllowed(event, currentState, includeDefault)
 
-    internal fun executeAutomatic(currentTransition: Transition<S, E, C>, state: S, args: Array<out Any>): Boolean {
+    internal fun executeAutomatic(currentTransition: Transition<S, E, C, A, R>, state: S, arg: A?): Boolean {
+        var result: Boolean = false
         definition.automaticTransitions[state]?.apply rule@{
             val defaultTransition = this.transition
-            findGuard(context, args)?.apply {
+            findGuard(context, arg)?.apply {
                 if (currentTransition !== this) {
-                    parentFsm.execute(this, args)
-                    return true
+                    parentFsm.execute(this, arg)
+                    result = true
                 }
             } ?: run {
                 if (defaultTransition != null) {
                     if (currentTransition !== defaultTransition) {
-                        parentFsm.execute(defaultTransition, args)
-                        return true
+                        parentFsm.execute(defaultTransition, arg)
+                        result = true
                     }
                 }
             }
         }
-        return false
+        return result
     }
 }

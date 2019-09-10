@@ -16,7 +16,7 @@ package io.jumpco.open.kfsm
  * @param definition The defined state machine that provides all the behaviour
  * @param initialState The initial state of the instance.
  */
-class StateMachineInstance<S, E, C>(
+class StateMachineInstance<S, E, C, A, R>(
     /**
      * The transition actions are performed by manipulating the context.
      */
@@ -24,22 +24,22 @@ class StateMachineInstance<S, E, C>(
     /**
      * The Immutable definition of the state machine.
      */
-    val definition: StateMachineDefinition<S, E, C>,
+    val definition: StateMachineDefinition<S, E, C, A, R>,
     /**
      * The initialState will be assigned to the currentState
      */
     initialState: S? = null,
     initialExternalState: ExternalState<S>? = null
 ) {
-    internal val namedInstances: MutableMap<String, StateMapInstance<S, E, C>> = mutableMapOf()
+    internal val namedInstances: MutableMap<String, StateMapInstance<S, E, C, A, R>> = mutableMapOf()
 
-    internal val mapStack: Stack<StateMapInstance<S, E, C>> = Stack()
+    internal val mapStack: Stack<StateMapInstance<S, E, C, A, R>> = Stack()
 
     /**
      * This represents the current state of the state machine.
      * It will be modified during transitions
      */
-    internal var currentStateMap: StateMapInstance<S, E, C>
+    internal var currentStateMap: StateMapInstance<S, E, C, A, R>
 
     val currentState: S
         get() = currentStateMap.currentState
@@ -50,7 +50,7 @@ class StateMachineInstance<S, E, C>(
      * @param definition The definition of the state machine instance.
      * @param initialExternalState The previously externalised state.
      */
-    constructor(context: C, definition: StateMachineDefinition<S, E, C>, initialExternalState: ExternalState<S>) :
+    constructor(context: C, definition: StateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
         this(context, definition, null, initialExternalState) {
     }
 
@@ -59,71 +59,75 @@ class StateMachineInstance<S, E, C>(
     }
 
     internal fun pushMap(
-        defaultInstance: StateMapInstance<S, E, C>,
+        defaultInstance: StateMapInstance<S, E, C, A, R>,
         initial: S,
         name: String,
-        stateMap: StateMapDefinition<S, E, C>
-    ): StateMapInstance<S, E, C> {
+        stateMap: StateMapDefinition<S, E, C, A, R>
+    ): StateMapInstance<S, E, C, A, R> {
         mapStack.push(defaultInstance)
         val pushedMap = StateMapInstance(context, initial, name, this, stateMap)
         currentStateMap = pushedMap
         return pushedMap
     }
 
-    internal fun pushMap(stateMap: StateMapInstance<S, E, C>): StateMapInstance<S, E, C> {
+    internal fun pushMap(stateMap: StateMapInstance<S, E, C, A, R>): StateMapInstance<S, E, C, A, R> {
         mapStack.push(stateMap)
         return stateMap
     }
 
-    internal fun execute(transition: Transition<S, E, C>, args: Array<out Any>) {
-        if (transition.type == TransitionType.PUSH) {
+    internal fun execute(transition: Transition<S, E, C, A, R>, arg: A?): R? {
+        val result = if (transition.type == TransitionType.PUSH) {
             require(transition.targetState != null) { "Target state cannot be null for pushTransition" }
             require(transition.targetMap != null) { "Target map cannot be null for pushTransition" }
             if (transition.targetMap != currentStateMap.name) {
-                executePush(transition, args)
+                executePush(transition, arg)
             } else {
-                currentStateMap.execute(transition, args)
+                currentStateMap.execute(transition, arg)
             }
         } else if (transition.type == TransitionType.POP) {
-            executePop(transition, args)
+            executePop(transition, arg)
         } else {
-            currentStateMap.execute(transition, args)
+            currentStateMap.execute(transition, arg)
         }
-        currentStateMap.executeAutomatic(transition, currentStateMap.currentState, args)
+        currentStateMap.executeAutomatic(transition, currentStateMap.currentState, arg)
+        return result
     }
 
-    private fun executePop(transition: Transition<S, E, C>, args: Array<out Any>) {
+    private fun executePop(transition: Transition<S, E, C, A, R>, arg: A?): R? {
         val sourceMap = currentStateMap
         val targetMap = mapStack.pop()
         currentStateMap = targetMap
-        if (transition.targetMap == null) {
+        return if (transition.targetMap == null) {
             if (transition.targetState == null) {
-                transition.execute(context, sourceMap, targetMap, args)
+                transition.execute(context, sourceMap, targetMap, arg)
             } else {
-                transition.execute(context, sourceMap, null, args)
-                targetMap.executeEntry(context, transition.targetState, args)
+                val interim = transition.execute(context, sourceMap, null, arg)
+                targetMap.executeEntry(context, transition.targetState, arg)
                 currentStateMap.currentState = transition.targetState
+                interim
             }
         } else {
-            executePush(transition, args)
+            val interim = executePush(transition, arg)
             if (transition.targetState != null) {
                 currentStateMap.currentState = transition.targetState
             }
+            interim
         }
     }
 
-    private fun executePush(transition: Transition<S, E, C>, args: Array<out Any>) {
+    private fun executePush(transition: Transition<S, E, C, A, R>, arg: A?): R? {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
             definition.createStateMap(transition.targetMap, context, this, transition.targetState!!).apply {
                 namedInstances.put(transition.targetMap, this)
             }
         }
         mapStack.push(currentStateMap)
-        transition.execute(context, currentStateMap, targetStateMap, args)
+        val result = transition.execute(context, currentStateMap, targetStateMap, arg)
         currentStateMap = targetStateMap
         if (transition.targetState != null) {
             currentStateMap.currentState = transition.targetState
         }
+        return result
     }
 
     /**
@@ -141,7 +145,7 @@ class StateMachineInstance<S, E, C>(
      * This function will process the on and advance the state machine according to the FSM definition.
      * @param event The on received,
      */
-    fun sendEvent(event: E, vararg args: Any) = currentStateMap.sendEvent(event, *args)
+    fun sendEvent(event: E, arg: A? = null) = currentStateMap.sendEvent(event, arg)
 
     /**
      * This function will provide the external state that can be use when creating the instance at a later time.
@@ -157,3 +161,5 @@ class StateMachineInstance<S, E, C>(
             }.toList()
     }
 }
+
+typealias AnyStateMachineInstance<S, E, C> = StateMachineInstance<S, E, C, Any, Any>

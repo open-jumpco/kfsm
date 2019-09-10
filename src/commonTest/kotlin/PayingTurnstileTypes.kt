@@ -113,27 +113,28 @@ class PayingTurnstileFSM(
         val definition = stateMachine(
             setOf(PayingTurnstileStates.LOCKED, PayingTurnstileStates.UNLOCKED),
             PayingTurnstileEvents.values().toSet(),
-            PayingTurnstile::class
+            PayingTurnstile::class,
+            Int::class
         ) {
             default {
-                onEntry { _, targetState, args ->
-                    if (args.isNotEmpty()) {
-                        println("entering:$targetState (${args.toList()}) for $this")
+                onEntry { _, targetState, arg ->
+                    if (arg != null) {
+                        println("entering:$targetState ($arg) for $this")
                     } else {
                         println("entering:$targetState for $this")
                     }
                 }
-                action { state, event, args ->
-                    if (args.isNotEmpty()) {
-                        println("Default action for state($state) -> on($event, ${args.toList()}) for $this")
+                action { state, event, arg ->
+                    if (arg != null) {
+                        println("Default action for state($state) -> on($event, $arg) for $this")
                     } else {
                         println("Default action for state($state) -> on($event) for $this")
                     }
                     alarm()
                 }
-                onExit { startState, _, args ->
-                    if (args.isNotEmpty()) {
-                        println("exiting:$startState (${args.toList()}) for $this")
+                onExit { startState, _, arg ->
+                    if (arg != null) {
+                        println("exiting:$startState ($arg) for $this")
                     } else {
                         println("exiting:$startState for $this")
                     }
@@ -152,9 +153,8 @@ class PayingTurnstileFSM(
                         unlock()
                         reset()
                     }
-                    onEvent(PayingTurnstileEvents.COIN) { args ->
-                        val value = args[0] as Int
-                        coin(value)
+                    onEvent(PayingTurnstileEvents.COIN) { value ->
+                        coin(value ?: error("argument required for COIN"))
                         println("Coins=$coins")
                         if (coins < requiredCoins) {
                             println("Please add ${requiredCoins - coins}")
@@ -164,27 +164,26 @@ class PayingTurnstileFSM(
             }
             whenState(PayingTurnstileStates.LOCKED) {
                 // The coin brings amount to exact amount
-                onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { args ->
-                    val value = args[0] as Int
-                    coin(value)
+                onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { value ->
+                    coin(value ?: error("argument required for COIN"))
                     unlock()
                     reset()
                 }
                 // The coins add up to more than required
                 onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
-                    guard = { args ->
-                        val value = args[0] as Int
+                    guard = { value ->
+                        require(value != null) { "argument required for COIN" }
                         value + this.coins < this.requiredCoins
-                    }) { args ->
-                    val value = args[0] as Int
+                    }) { value ->
+                    require(value != null) { "argument required for COIN" }
                     println("PUSH TRANSITION")
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
                 }
             }
             whenState(PayingTurnstileStates.UNLOCKED) {
-                onEvent(PayingTurnstileEvents.COIN) { args ->
-                    val value = args[0] as Int
+                onEvent(PayingTurnstileEvents.COIN) { value ->
+                    require(value != null) { "argument required for COIN" }
                     returnCoin(coin(value))
                 }
                 onEvent(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {

@@ -12,12 +12,12 @@ package io.jumpco.open.kfsm
 /**
  * This handler will be active inside the default section of the statemachine.
  */
-class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S, E, C>) {
+class DslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C, A, R>) {
     /**
      * Define a default action that will be applied when no other transitions are matched.
      * @param action Will be invoked when no transitions matches
      */
-    fun action(action: DefaultStateAction<C, S, E>) {
+    fun action(action: DefaultStateAction<C, S, E, A, R>) {
         fsm.defaultAction(action)
     }
 
@@ -25,7 +25,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * Defines an action to perform before a change in the currentState of the FSM
      * @param action This action will be performed when entering a new state.
      */
-    fun onEntry(action: DefaultChangeAction<C, S>) {
+    fun onEntry(action: DefaultEntryExitAction<C, S, A>) {
         fsm.defaultEntry(action)
     }
 
@@ -33,7 +33,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * Defines an action to be performed after the currentState was changed.
      * @param action The action will be performed when leaving any state.
      */
-    fun onExit(action: DefaultChangeAction<C, S>) {
+    fun onExit(action: DefaultEntryExitAction<C, S, A>) {
         fsm.defaultExit(action)
     }
 
@@ -42,7 +42,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * @param event Pair representing an on and targetState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
-    fun onEvent(event: EventState<E, S>, action: StateAction<C>?): DslStateMapDefaultEventHandler<S, E, C> {
+    fun onEvent(event: EventState<E, S>, action: StateAction<C, A, R>?): DslStateMapDefaultEventHandler<S, E, C, A, R> {
         fsm.default(event, action)
         return this
     }
@@ -52,7 +52,7 @@ class DslStateMapDefaultEventHandler<S, E, C>(private val fsm: StateMapBuilder<S
      * @param event The event that triggers this transition
      * @param action The action will be invoked for this transition
      */
-    fun onEvent(event: E, action: StateAction<C>?): DslStateMapDefaultEventHandler<S, E, C> {
+    fun onEvent(event: E, action: StateAction<C, A, R>?): DslStateMapDefaultEventHandler<S, E, C, A, R> {
         fsm.default(event, action)
         return this
     }

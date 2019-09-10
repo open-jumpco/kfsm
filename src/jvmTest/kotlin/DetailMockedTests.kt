@@ -90,73 +90,71 @@ class DetailMockedTests {
 
         companion object {
             private val definition by lazy { define() }
-            private fun define() = StateMachineBuilder<TestStates, TestEvents, TestContext>(
-                TestStates.values().toSet(),
-                TestEvents.values().toSet()
-            ).stateMachine {
-                initialState {
-                    when (state) {
-                        1 -> TestStates.STATE1
-                        2 -> TestStates.STATE2
-                        3 -> TestStates.STATE3
-                        else -> error("Invalid state $state")
+            private fun define() =
+                stateMachine(TestStates.values().toSet(), TestEvents.values().toSet(), TestContext::class) {
+                    initialState {
+                        when (state) {
+                            1 -> TestStates.STATE1
+                            2 -> TestStates.STATE2
+                            3 -> TestStates.STATE3
+                            else -> error("Invalid state $state")
+                        }
                     }
-                }
-                default {
-                    onEntry { startState, targetState, _ ->
-                        println("entering:to $targetState from $startState for:$this")
-                        defaultEntry()
+                    default {
+                        onEntry { startState, targetState, _ ->
+                            println("entering:to $targetState from $startState for:$this")
+                            defaultEntry()
+                        }
+                        onExit { startState, targetState, _ ->
+                            println("exiting:from $targetState to $startState for:$this")
+                            defaultExit()
+                        }
+                        onEvent(TestEvents.EVENT1 to TestStates.STATE1) {
+                            println("default:EVENT1 to STATE1 for $this")
+                            action1()
+                        }
+                        onEvent(TestEvents.EVENT2 to TestStates.STATE2) {
+                            println("default:on EVENT2 to STATE2 for $this")
+                            action2()
+                        }
+                        onEvent(TestEvents.EVENT3 to TestStates.STATE3) {
+                            println("default:on EVENT3 to STATE3 for $this")
+                            defaultAction()
+                        }
+                        action { currentState, event, _ ->
+                            println("default:$event from $currentState for $this")
+                            defaultAction()
+                        }
                     }
-                    onExit { startState, targetState, _ ->
-                        println("exiting:from $targetState to $startState for:$this")
-                        defaultExit()
+                    whenState(TestStates.STATE1) {
+                        onEvent(TestEvents.EVENT1) {
+                            action1()
+                        }
+                        onEntry { _, _, _ ->
+                            entry1()
+                        }
                     }
-                    onEvent(TestEvents.EVENT1 to TestStates.STATE1) {
-                        println("default:EVENT1 to STATE1 for $this")
-                        action1()
+                    whenState(TestStates.STATE2) {
+                        onEntry { _, _, _ ->
+                            entry2()
+                        }
+                        onEvent(TestEvents.EVENT2, guard = { state == 2 }) {
+                            println("EVENT2:guarded:from STATE2 for $this")
+                            action2()
+                        }
+                        onExit { _, _, _ ->
+                            exit2()
+                        }
                     }
-                    onEvent(TestEvents.EVENT2 to TestStates.STATE2) {
-                        println("default:on EVENT2 to STATE2 for $this")
-                        action2()
+                    whenState(TestStates.STATE3) {
+                        onExit { _, _, _ ->
+                            exit3()
+                        }
+                        onEvent(TestEvents.EVENT2, guard = { state == 2 }) {
+                            error("should never be called")
+                        }
                     }
-                    onEvent(TestEvents.EVENT3 to TestStates.STATE3) {
-                        println("default:on EVENT3 to STATE3 for $this")
-                        defaultAction()
-                    }
-                    action { currentState, event, _ ->
-                        println("default:$event from $currentState for $this")
-                        defaultAction()
-                    }
-                }
-                whenState(TestStates.STATE1) {
-                    onEvent(TestEvents.EVENT1) {
-                        action1()
-                    }
-                    onEntry { _, _, _ ->
-                        entry1()
-                    }
-                }
-                whenState(TestStates.STATE2) {
-                    onEntry { _, _, _ ->
-                        entry2()
-                    }
-                    onEvent(TestEvents.EVENT2, guard = { state == 2 }) {
-                        println("EVENT2:guarded:from STATE2 for $this")
-                        action2()
-                    }
-                    onExit { _, _, _ ->
-                        exit2()
-                    }
-                }
-                whenState(TestStates.STATE3) {
-                    onExit { _, _, _ ->
-                        exit3()
-                    }
-                    onEvent(TestEvents.EVENT2, guard = { state == 2 }) {
-                        error("should never be called")
-                    }
-                }
-            }.build()
+                }.build()
         }
     }
 

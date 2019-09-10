@@ -20,7 +20,7 @@ import kotlin.test.assertTrue
  */
 class TurnstileFsmTests {
     private fun verifyTurnstileFSM(
-        fsm: StateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
+        fsm: AnyStateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
         turnstile: Turnstile
     ) {
 
@@ -50,7 +50,7 @@ class TurnstileFsmTests {
 
     @Test
     fun turnstilePlain() {
-        val builder = StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+        val builder = AnyStateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
             TurnstileStates.values().toSet(),
             TurnstileEvents.values().toSet()
         )
@@ -80,10 +80,11 @@ class TurnstileFsmTests {
     fun turnstileDSL() {
         // given
         val definition =
-            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+            stateMachine(
                 TurnstileStates.values().toSet(),
-                TurnstileEvents.values().toSet()
-            ).stateMachine {
+                TurnstileEvents.values().toSet(),
+                Turnstile::class
+            ) {
                 initialState { if (locked) LOCKED else UNLOCKED }
                 whenState(LOCKED) {
                     onEvent(COIN to UNLOCKED) {
@@ -113,40 +114,41 @@ class TurnstileFsmTests {
     @Test
     fun simpleTurnstileTest() {
         val definition =
-            StateMachineBuilder<TurnstileStates, TurnstileEvents, Turnstile>(
+            stateMachine(
                 TurnstileStates.values().toSet(),
-                TurnstileEvents.values().toSet()
-            ).stateMachine {
-                    initialState { if (locked) LOCKED else UNLOCKED }
-                    whenState(LOCKED) {
-                        onEntry { startState, targetState, _ ->
-                            println("entering:$startState -> $targetState for $this")
-                        }
-                        onEvent(COIN to UNLOCKED) {
-                            unlock()
-                        }
-                        onEvent(PASS) {
-                            alarm()
-                        }
-                        onExit { startState, targetState, _ ->
-                            println("exiting:$startState -> $targetState for $this")
-                        }
+                TurnstileEvents.values().toSet(),
+                Turnstile::class
+            ) {
+                initialState { if (locked) LOCKED else UNLOCKED }
+                whenState(LOCKED) {
+                    onEntry { startState, targetState, _ ->
+                        println("entering:$startState -> $targetState for $this")
                     }
-                    whenState(UNLOCKED) {
-                        onEntry { startState, targetState, _ ->
-                            println("entering:$startState -> $targetState for $this")
-                        }
-                        onEvent(COIN) {
-                            returnCoin()
-                        }
-                        onEvent(PASS to LOCKED) {
-                            lock()
-                        }
-                        onExit { startState, targetState, _ ->
-                            println("exiting:$startState -> $targetState for $this")
-                        }
+                    onEvent(COIN to UNLOCKED) {
+                        unlock()
                     }
-                }.build()
+                    onEvent(PASS) {
+                        alarm()
+                    }
+                    onExit { startState, targetState, _ ->
+                        println("exiting:$startState -> $targetState for $this")
+                    }
+                }
+                whenState(UNLOCKED) {
+                    onEntry { startState, targetState, _ ->
+                        println("entering:$startState -> $targetState for $this")
+                    }
+                    onEvent(COIN) {
+                        returnCoin()
+                    }
+                    onEvent(PASS to LOCKED) {
+                        lock()
+                    }
+                    onExit { startState, targetState, _ ->
+                        println("exiting:$startState -> $targetState for $this")
+                    }
+                }
+            }.build()
 
         val turnstile = Turnstile()
         val fsm = definition.create(turnstile)
