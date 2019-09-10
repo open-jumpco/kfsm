@@ -168,29 +168,21 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                 }
             }
             whenState(ReaderStates.START) {
-                onEvent(
-                    ReaderEvents.CTRL to ReaderStates.RCVPCKT,
-                    guard = { byte -> byte == CharacterConstants.SOH }) {}
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVPCKT, guard = { byte -> byte == CharacterConstants.SOH }) {}
             }
             whenState(ReaderStates.RCVPCKT) {
-                onEvent(
-                    ReaderEvents.CTRL to ReaderStates.RCVDATA,
-                    guard = { byte -> byte == CharacterConstants.STX }) {
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA, guard = { byte -> byte == CharacterConstants.STX }) {
                     addField()
                 }
-                onEvent(ReaderEvents.BYTE to ReaderStates.RCVCHK) { byte ->
-                    require(byte != null)
+                onEvent(ReaderEvents.BYTE to ReaderStates.RCVCHK) { byte -> require(byte != null)
                     addChecksum(byte)
                 }
             }
             whenState(ReaderStates.RCVDATA) {
-                onEvent(ReaderEvents.BYTE) { byte ->
-                    require(byte != null)
+                onEvent(ReaderEvents.BYTE) { byte -> require(byte != null)
                     addByte(byte)
                 }
-                onEvent(
-                    ReaderEvents.CTRL to ReaderStates.RCVPCKT,
-                    guard = { byte -> byte == CharacterConstants.ETX }) {
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVPCKT, guard = { byte -> byte == CharacterConstants.ETX }) {
                     endField()
                 }
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVESC) {}
@@ -199,20 +191,16 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVDATA) {
                     addByte(CharacterConstants.ESC)
                 }
-                onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA) { byte ->
-                    require(byte != null)
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA) { byte -> require(byte != null)
                     addByte(byte)
                 }
             }
             whenState(ReaderStates.RCVCHK) {
-                onEvent(ReaderEvents.BYTE) { byte ->
-                    require(byte != null)
+                onEvent(ReaderEvents.BYTE) { byte -> require(byte != null)
                     addChecksum(byte)
                 }
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVCHKESC) {}
-                onEvent(
-                    ReaderEvents.CTRL to ReaderStates.CHKSUM,
-                    guard = { byte -> byte == CharacterConstants.EOT }) {
+                onEvent(ReaderEvents.CTRL to ReaderStates.CHKSUM, guard = { byte -> byte == CharacterConstants.EOT }) {
                     checksum()
                 }
             }
@@ -228,8 +216,7 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVCHK) {
                     addChecksum(CharacterConstants.ESC)
                 }
-                onEvent(ReaderEvents.CTRL to ReaderStates.RCVCHK) { byte ->
-                    require(byte != null)
+                onEvent(ReaderEvents.CTRL to ReaderStates.RCVCHK) { byte -> require(byte != null)
                     addChecksum(byte)
                 }
             }
