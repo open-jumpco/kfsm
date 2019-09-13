@@ -133,11 +133,15 @@ class StateMachineInstance<S, E, C, A, R>(
     /**
      * This function will provide the set of allowed events given a specific state. It isn't a guarantee that a
      * subsequent transition will be successful since a guard may prevent a transition. Default state handlers are not considered.
-     * @param given The specific state to consider
      * @param includeDefault When `true` will include default transitions in the list of allowed events.
      */
     fun allowed(includeDefault: Boolean = false): Set<E> = currentStateMap.allowed(includeDefault)
 
+    /**
+     * This function will return an indicator if the given event is allowed given the current state.
+     * @param event The given event.
+     * @param includeDefault Will consider defined default event handlers.
+     */
     fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
         currentStateMap.eventAllowed(event, includeDefault)
 

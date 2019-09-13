@@ -17,15 +17,11 @@ import kotlin.reflect.KClass
  */
 typealias StateAction<C, A, R> = C.(A?) -> R?
 
-typealias AnyStateAction<C> = C.(Any?) -> Any?
-
 /**
  * This represents a guard expression that may be used to select a specific transition.
  * @param C The context: C will be available to the lambda
  */
 typealias StateGuard<C, A> = C.(A?) -> Boolean
-
-typealias AnyStateGuard<C> = C.(Any?) -> Boolean
 
 /**
  * This represents an expression to determine the state of the context. This is useful when creating an instance of a
@@ -51,15 +47,12 @@ typealias StateMapList<S> = List<StateMapItem<S>>
 typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
 
 /**
- * This represents a default action that will be invoked on a change in state as defined with entry or exit.
+ * This represents a default action that will be invoked when entering or exiting a state with an external state transitions.
  * @param C The context: C will be available to the lambda
- * @param S currentState: S and targetState: S will be available to the lambda.
+ * @param S currentState: S and targetState: S will be available to the lambda as 1st and 2nd arguments.
+ * @param A argumentType: A an arg: will be available to the lambda as the 3rd argument.
  */
-typealias DefaultChangeAction<C, S, A, R> = C.(S, S, A?) -> R?
-
 typealias DefaultEntryExitAction<C, S, A> = C.(S, S, A?) -> Unit
-
-typealias AnyDefaultChangeAction<C, S> = C.(S, S, Any?) -> Any?
 
 /**
  * This represents a default action for a specific event. These action will not cause changes in state.
@@ -67,10 +60,9 @@ typealias AnyDefaultChangeAction<C, S> = C.(S, S, Any?) -> Any?
  * @param C The context: C will be available to the lambda
  * @param S The currentState:S will be available to the lambda
  * @param E The event: E will be available to the lambda
+ * @param A argumentType: A an arg: will be available to the lambda as the 3rd argument.
  */
 typealias DefaultStateAction<C, S, E, A, R> = C.(S, E, A?) -> R?
-
-typealias AnyDefaultStateAction<C, S, E> = C.(S, E, Any?) -> Any?
 
 /**
  * This represents an event and targetState pair that can be written as `event to state`

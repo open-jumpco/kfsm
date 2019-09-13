@@ -88,7 +88,7 @@ task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {
     archiveClassifier = 'doc'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    from(file('build/asciidoc/html5'))
+    from(file('build/docs/asciidoc'))
 
     from(file('build/javadoc')) {
         into('javadoc')

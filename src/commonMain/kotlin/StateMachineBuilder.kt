@@ -30,11 +30,21 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
         deriveInitialState = init
     }
 
+    /**
+     * This function is used to provide a method for determining the initial state of the FSM in cases where there may be one or more named statemaps.
+     * In this case the state may be a stack or name / value pairs representing the map name and pushed state.
+     * @param init Is a function that will use the context to provide a list which will be pushed on the stack. The last item in the list will become the current state.
+     */
     fun initialStates(init: StateMapQuery<C, S>) {
         require(!completed) { "Statemachine has been completed" }
         deriveInitialStateMap = init
     }
 
+    /**
+     * This function will be use to define a named statemap.
+     * @param name The name of the StateMap. It must be unique.
+     * @param validStates The set of valid states for the StateMap.
+     */
     fun stateMap(
         name: String,
         validStates: Set<S>
@@ -64,6 +74,9 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
         )
     }
 
+    /**
+     * This function can be used the define a new state machine.
+     */
     inline fun stateMachine(handler: DslStateMachineHandler<S, E, C, A, R>.() -> Unit): DslStateMachineHandler<S, E, C, A, R> =
         DslStateMachineHandler(this).apply(handler)
 
@@ -76,7 +89,6 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-
     fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, targetState, guard, action)
 
@@ -88,7 +100,6 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-
     fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: StateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, guard, action)
 
