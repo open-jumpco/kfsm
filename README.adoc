@@ -21,6 +21,7 @@ The state machine implementation supports events triggering transitions from one
 * Multiple state maps with push / pop transitions
 * Automatic transitions
 * Externalisation of state.
+* Typed event parameters and return values.
 
 == Todo
 * [x] Multiple state maps
@@ -28,7 +29,7 @@ The state machine implementation supports events triggering transitions from one
 * [x] Automatic transitions
 * [x] Externalisation of state
 * [x] Typed event parameters
-* [x] Event returns
+* [x] Typed event return values
 * [ ] Timers / Timeouts
 * [ ] Corountines
 

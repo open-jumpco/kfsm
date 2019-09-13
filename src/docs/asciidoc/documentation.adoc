@@ -492,7 +492,7 @@ whenState(State.S1) {
 ----
 ==== `onEvent`
 * Arguments: `(event: E [to targetState: S],[guard: {}])`
-* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/transition.html[DslStateMachineEventHandler::transition]
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-map-event-handler/on-event.html[DslStateMachineEventHandler::onEvent]
 * Mandatory: _Optional_
 * Cardinality: _Multiple_
 
