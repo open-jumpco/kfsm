@@ -228,6 +228,94 @@ Reset coins=0
 entering:UNLOCKED ([10]) for Turnstile(locked=false,coins=0)
 ```
 
+=== Secure Turnstile Example
+
+Unless you grew up in a city with a subway you may not be familiar with a turnstile accepting counts.
+You may be familiar with turnstile that responds to RFID or NFC cards.
+
+We would add a complexity that allows for an override card to allow cards to pass even if they are invalid.
+
+We will use guard expressions to identify the override card and the validity of the card.
+When the override card is tapped a 2nd time it will cancel the override or lock the turnstile depending on the state.
+
+image::secure-turnstile-fsm.png[Secure Turnstile FSM]
+
+==== State Table
+
+|===
+|Start State |Event |Guard Expression | End State | Action
+
+|LOCKED
+|CARD(id)
+| isOverrideCard(id) and overrideActive
+|
+| cancelOverride()
+
+|LOCKED
+|CARD(id)
+|isOverrideCard(id)
+|
+|activateOverride()
+
+|LOCKED
+|CARD(id)
+| overrideActive or isValidCard(id)
+| UNLOCKED
+| unlock()
+
+|LOCKED
+|CARD(id)
+| not isValidVard(id)
+|
+| invalidCard()
+
+|UNLOCKED
+|PASS
+|
+|LOCKED
+| lock()
+
+| *default*
+|
+|
+|
+| buzzer()
+
+|===
+
+
+==== Context class
+
+The context class doesn't make decisions about the behaviour of the turnstile.
+The context will provide information about the state of turnstile and validity of cards
+The context class stores values and will update value in very specific ways.
+[source,kotlin]
+----
+include::../../commonTest/kotlin/SecureTurnstile.kt[tag=context]
+----
+
+==== States and Events
+
+[source,kotlin]
+----
+include::../../commonTest/kotlin/SecureTurnstile.kt[tag=states-events]
+----
+We add a stateMap named `coins` with the state `COINS`.
+The statemap  will be entered when there are coins.
+The automatic transitions will be triggered based on the guard expressions.
+
+==== State machine definition packaged
+[source,kotlin]
+----
+include::../../commonTest/kotlin/SecureTurnstile.kt[tag=packaged]
+----
+
+==== Test
+[source,kotlin]
+----
+include::../../jvmTest/kotlin/PayingTurnstileFsmTests.kt[tag=test]
+----
+
 === Packet Reader Example
 
 image::packet-reader-fsm.png[]

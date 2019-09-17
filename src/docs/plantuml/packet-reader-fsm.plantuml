@@ -1,5 +1,8 @@
 @startuml
 
+skinparam classFontSize 9
+skinparam classFontName Monospaced
+
 [*] --> RCVPCKT : SOH
 RCVPCKT --> RCVDATA : STX / addField
 RCVDATA --> RCVDATA : BYTE / addByte(byte)

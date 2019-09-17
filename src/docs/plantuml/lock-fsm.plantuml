@@ -1,5 +1,8 @@
 @startuml
 
+skinparam classFontSize 9
+skinparam classFontName Monospaced
+
 [*] --> LOCKED
 LOCKED --> UNLOCKED : UNLOCK
 UNLOCKED ---> LOCKED : LOCK

@@ -9,16 +9,19 @@
 
 package io.jumpco.open.kfsm
 
+// tag::states-events[]
 enum class SecureTurnstileEvents {
     CARD,
     PASS
 }
+// end::states-events[]
 
 enum class SecureTurnstileStates {
     LOCKED,
     UNLOCKED
 }
 
+// tag::context[]
 class SecureTurnstile {
     var locked: Boolean = true
         private set
@@ -30,9 +33,15 @@ class SecureTurnstile {
         println("override activated")
     }
 
+    fun cancelOverride() {
+        overrideActive = false
+        println("override canceled")
+    }
+
     fun lock() {
         println("lock")
         locked = true
+        overrideActive = false
     }
 
     fun unlock() {
@@ -41,11 +50,15 @@ class SecureTurnstile {
         overrideActive = false
     }
 
-    fun error(msg: String) {
-        println(msg)
+    fun buzzer() {
+        println("BUZZER")
     }
 
-    fun isOverridCard(cardId: Int): Boolean {
+    fun invalidCard(cardId: Int) {
+        println("Invalid card $cardId")
+    }
+
+    fun isOverrideCard(cardId: Int): Boolean {
         return cardId == 42
     }
 
@@ -53,7 +66,9 @@ class SecureTurnstile {
         return cardId % 2 == 1
     }
 }
+// end::context[]
 
+// tag:packaged[]
 class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
     companion object {
         private val definition = stateMachine(
@@ -65,19 +80,22 @@ class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
             initialState { if (locked) SecureTurnstileStates.LOCKED else SecureTurnstileStates.UNLOCKED }
             default {
                 action { _, _, _ ->
-                    error("Buzzer")
+                    buzzer()
                 }
             }
             whenState(SecureTurnstileStates.LOCKED) {
-                onEvent(SecureTurnstileEvents.CARD, guard = { cardId ->
-                    requireNotNull(cardId) { "cardId is required" }
-                    isOverridCard(cardId)
+                onEvent(SecureTurnstileEvents.CARD, guard = { cardId -> requireNotNull(cardId)
+                    isOverrideCard(cardId) && overrideActive
+                }) {
+                    cancelOverride()
+                }
+                onEvent(SecureTurnstileEvents.CARD, guard = { cardId -> requireNotNull(cardId)
+                    isOverrideCard(cardId)
                 }) {
                     activateOverride()
                 }
                 onEvent(SecureTurnstileEvents.CARD to SecureTurnstileStates.UNLOCKED,
-                    guard = { cardId ->
-                        requireNotNull(cardId) { "cardId is required" }
+                    guard = { cardId -> requireNotNull(cardId)
                         overrideActive || isValidCard(cardId)
                     }) {
                     unlock()
@@ -85,11 +103,16 @@ class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
                 onEvent(SecureTurnstileEvents.CARD, guard = { cardId ->
                     requireNotNull(cardId) { "cardId is required" }
                     !isValidCard(cardId)
-                }) {
-                    error("Invalid card")
+                }) { cardId -> requireNotNull(cardId)
+                    invalidCard(cardId)
                 }
             }
             whenState(SecureTurnstileStates.UNLOCKED) {
+                onEvent(SecureTurnstileEvents.CARD to SecureTurnstileStates.LOCKED, guard = { cardId -> requireNotNull(cardId)
+                    isOverrideCard(cardId)
+                }) {
+                    lock()
+                }
                 onEvent(SecureTurnstileEvents.PASS to SecureTurnstileStates.LOCKED) {
                     lock()
                 }
@@ -102,3 +125,4 @@ class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
     fun pass() = fsm.sendEvent(SecureTurnstileEvents.PASS)
     fun allowEvent(): Set<String> = fsm.allowed().map { it.name.toLowerCase() }.toSet()
 }
+// end:packaged[]

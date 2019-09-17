@@ -1,0 +1,15 @@
+@startuml
+
+skinparam classFontSize 9
+skinparam classFontName Monospaced
+
+[*] -right-> LOCKED
+
+LOCKED ----> UNLOCKED : CARD(id)\n guard={ isOverrideCard(id) }\n{ activateOverride() }
+LOCKED ----> UNLOCKED : CARD(id)\n guard={ isValid(id) || overrideActive }\n{ unlock() }
+LOCKED ----> UNLOCKED : CARD(id)\n guard={ !isValid(id) }\n{ error("Invalid card") }
+
+UNLOCKED ----> LOCKED : PASS\n{ lock() }
+UNLOCKED ----> LOCKED : CARD(id)\n guard={ isOverrideCard(id) }\n{ lock() }
+
+@enduml

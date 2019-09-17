@@ -19,9 +19,11 @@ class SecureTurnstileTests {
         val turnstile = SecureTurnstile()
         val fsm = SecureTurnstileFSM(turnstile)
         // when
+        assertTrue { fsm.allowEvent() == setOf("card") }
         assertTrue { turnstile.locked }
         fsm.card(1)
         assertTrue { !turnstile.locked }
+        assertTrue { fsm.allowEvent() == setOf("pass", "card") }
         fsm.pass()
         assertTrue { turnstile.locked }
     }
@@ -31,8 +33,10 @@ class SecureTurnstileTests {
         val turnstile = SecureTurnstile()
         val fsm = SecureTurnstileFSM(turnstile)
         // when
+        assertTrue { fsm.allowEvent() == setOf("card") }
         assertTrue { turnstile.locked }
         fsm.card(2)
+        assertTrue { fsm.allowEvent() == setOf("card") }
         assertTrue { turnstile.locked }
         fsm.pass()
         assertTrue { turnstile.locked }
@@ -50,6 +54,38 @@ class SecureTurnstileTests {
         fsm.card(2)
         assertTrue { !turnstile.locked }
         fsm.pass()
+        assertTrue { turnstile.locked }
+    }
+    @Test
+    fun `test cancel override to lock`() {
+        // given
+        val turnstile = SecureTurnstile()
+        val fsm = SecureTurnstileFSM(turnstile)
+        // when
+        assertTrue { turnstile.locked }
+        fsm.card(2)
+        assertTrue { turnstile.locked }
+        fsm.card(42) // override card
+        fsm.card(2)
+        assertTrue { !turnstile.locked }
+        assertTrue { fsm.allowEvent() == setOf("card", "pass") }
+        fsm.card(42) // override card
+        assertTrue { turnstile.locked }
+    }
+    @Test
+    fun `test cancel override`() {
+        // given
+        val turnstile = SecureTurnstile()
+        val fsm = SecureTurnstileFSM(turnstile)
+        // when
+        assertTrue { turnstile.locked }
+        fsm.card(2)
+        assertTrue { turnstile.locked }
+        fsm.card(42) // override card
+        assertTrue { turnstile.overrideActive }
+        fsm.card(42) // override card
+        assertTrue { !turnstile.overrideActive }
+        fsm.card(2)
         assertTrue { turnstile.locked }
     }
 }

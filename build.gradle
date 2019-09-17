@@ -68,3 +68,15 @@ ktlint {
 plantUml {
     render input: 'src/docs/plantuml/*.plantuml', output: 'src/docs/asciidoc', format: 'png', withMetadata: false
 }
+
+project.afterEvaluate {
+    def envVar = System.getenv('GRAPHVIZ_DOT')
+    if (envVar) {
+        def dot = file(envVar)
+        if (!dot.exists()) {
+            throw new RuntimeException("Could not find $dot")
+        }
+    } else {
+        logger.warn("GRAPHVIZ_DOT env var not found")
+    }
+}
