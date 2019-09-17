@@ -61,7 +61,7 @@ enum class TurnstileEvents {
 /**
  * @suppress
  */
-// tag:packaged[]
+// tag::packaged[]
 class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
     private val fsm = definition.create(turnstile, savedState)
 

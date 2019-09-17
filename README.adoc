@@ -212,6 +212,12 @@ The FSM can derive the formal state from the value(s) of properties of the conte
 
 The link:https://open.jumpco.io/projects/kfsm/index.html[Documentation] contains more detail on creating finite state machine implementations.
 
+The documentation contains examples for:
+
+* link:https://open.jumpco.io/projects/kfsm/index.html#advanced-features[Turnstile providing for coin values.]
+* link:https://open.jumpco.io/projects/kfsm/index.html#secure-turnstile-example[Secure turnstile with card and override.]
+* link:https://open.jumpco.io/projects/kfsm/index.html#packet-reader-example[Packet Reader finite state machine.]
+
 === Repository
 
 Use this repository for SNAPSHOT builds. Releases are on Maven Central

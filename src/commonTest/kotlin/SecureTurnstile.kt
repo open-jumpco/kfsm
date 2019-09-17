@@ -68,7 +68,8 @@ class SecureTurnstile {
 }
 // end::context[]
 
-// tag:packaged[]
+
+// tag::fsm[]
 class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
     companion object {
         private val definition = stateMachine(
@@ -125,4 +126,4 @@ class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
     fun pass() = fsm.sendEvent(SecureTurnstileEvents.PASS)
     fun allowEvent(): Set<String> = fsm.allowed().map { it.name.toLowerCase() }.toSet()
 }
-// end:packaged[]
+// end::fsm[]

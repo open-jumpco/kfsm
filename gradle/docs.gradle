@@ -54,6 +54,7 @@ dokka {
 }
 
 asciidoctor {
+    inputs.files(fileTree('src/commonTest/kotlin/*'))
     baseDirFollowsSourceDir()
     logDocuments = true
     asciidoctorj {

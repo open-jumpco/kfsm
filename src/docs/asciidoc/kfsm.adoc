@@ -300,14 +300,11 @@ include::../../commonTest/kotlin/SecureTurnstile.kt[tag=context]
 ----
 include::../../commonTest/kotlin/SecureTurnstile.kt[tag=states-events]
 ----
-We add a stateMap named `coins` with the state `COINS`.
-The statemap  will be entered when there are coins.
-The automatic transitions will be triggered based on the guard expressions.
 
 ==== State machine definition packaged
 [source,kotlin]
 ----
-include::../../commonTest/kotlin/SecureTurnstile.kt[tag=packaged]
+include::../../commonTest/kotlin/SecureTurnstile.kt[tag=fsm]
 ----
 
 ==== Test
@@ -368,3 +365,10 @@ It may be worthwhile to have a mechanism for providing a different substate cont
 An interface/class exposed to the substate instead of the full context.
 In this example `Block` will be exposed to the stateMap. The stateMap can then pop after adding the byte.
 In the case of an invalid character the statemap will still transition to the end state.
+
+The Secure Turnstile is an example of where a timeout would be useful. Allowing override should only be active for a limited period.
+This means it could be done by creating a timer that when triggered will cancel the override.
+The allow override could also be handled with a statemap which behaves differently but the states in this state map will all have timeouts associated.
+The timeout will trigger an optional transition and action.
+
+A requirement for timeout handling is correct concurrent handling of events.
