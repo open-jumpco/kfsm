@@ -73,7 +73,7 @@ image::src/docs/asciidoc/turnstile-fsm.png[Turnstile state diagram]
 |===
 
 ==== Context class
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 class Turnstile(var locked: Boolean = true) {
     fun unlock() {
@@ -104,7 +104,7 @@ class Turnstile(var locked: Boolean = true) {
 ==== Enums for States and Events
 We declare 2 enums, one for the possible states and one for the possible events.
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 enum class TurnstileStates {
     LOCKED,
@@ -118,7 +118,7 @@ enum class TurnstileEvents {
 ----
 
 ==== Packaged definition and execution
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 class TurnstileFSM(turnstile: Turnstile) {
     private val fsm = definition.create(turnstile)
@@ -182,7 +182,7 @@ When the state is `LOCKED` and on event `PASS` we perform the action `alarm()` w
 ==== Usage
 Then we instantiate the FSM and provide a context to operate on:
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 val turnstile = Turnstile()
 val fsm = TurnstileFSM(turnstile)
@@ -191,7 +191,7 @@ val fsm = TurnstileFSM(turnstile)
 Now we have a context that is independent of the FSM.
 
 Sending events may invoke actions:
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 // State state is LOCKED
 fsm.coin()
@@ -217,6 +217,7 @@ The documentation contains examples for:
 * link:https://open.jumpco.io/projects/kfsm/index.html#advanced-features[Turnstile providing for coin values.]
 * link:https://open.jumpco.io/projects/kfsm/index.html#secure-turnstile-example[Secure turnstile with card and override.]
 * link:https://open.jumpco.io/projects/kfsm/index.html#packet-reader-example[Packet Reader finite state machine.]
+* link:https://open.jumpco.io/projects/kfsm/index.html#immutable-context-example[ImmutableLock and FSM.]
 
 === Repository
 

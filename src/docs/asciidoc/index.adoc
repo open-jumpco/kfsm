@@ -33,6 +33,11 @@ This Finite state machine implementation has the following features:
 * Automatic transitions
 * Externalisation of state.
 
+== Todo
+* [ ] Timeouts and Timers
+* [ ] Coroutines
+
+
 == Tutorial
 include::kfsm.adoc[]
 

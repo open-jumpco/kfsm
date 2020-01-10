@@ -142,6 +142,13 @@ inline fun <S, E, C : Any> stateMachine(
     handler: DslStateMachineHandler<S, E, C, Any, Any>.() -> Unit
 ) = stateMachine<S, E, C, Any, Any>(validStates, validEvents, contextClass, Any::class, Any::class, handler)
 
+inline fun <S, E, C : Any> functionalStateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    handler: DslStateMachineHandler<S, E, C, C, C>.() -> Unit
+) = StateMachineBuilder<S, E, C, C, C>(validStates, validEvents).stateMachine(handler)
+
 /**
  * An extension function that evaluates the expression and invokes the provided `block` if true or the `otherwise` block is false.
  */

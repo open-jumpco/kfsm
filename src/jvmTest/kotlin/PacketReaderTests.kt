@@ -14,10 +14,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Test
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.junit.Test
 
 // tag::context[]
 class Block {

@@ -68,7 +68,6 @@ class SecureTurnstile {
 }
 // end::context[]
 
-
 // tag::fsm[]
 class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
     companion object {

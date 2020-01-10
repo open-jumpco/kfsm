@@ -34,7 +34,7 @@ image::turnstile-fsm.png[LockStateDiagram]
 |===
 
 ==== Context class
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/TurnstileTypes.kt[tag=context]
 ----
@@ -42,13 +42,13 @@ include::../../commonTest/kotlin/TurnstileTypes.kt[tag=context]
 ==== Enums for States and Events
 We declare 2 enums, one for the possible states and one for the possible events.
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=states-events]
 ----
 
 ==== Packaged definition and execution
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]
 ----
@@ -57,7 +57,7 @@ include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]
 ==== Usage
 Then we instantiate the FSM and provide a context to operate on:
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 val turnstile = Turnstile()
 val fsm = TurnstileFSM(turnstile)
@@ -66,7 +66,7 @@ val fsm = TurnstileFSM(turnstile)
 Now we have a context that is independent of the FSM.
 
 Sending events may invoke actions:
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 // State state is LOCKED
 fsm.coin()
@@ -89,13 +89,13 @@ image::statemachine-model.png[StateMachineModel]
 We can add arguments to events and use named state maps with push / pop and automatic transitions.
 
 Arguments are sent as follows:
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 fsm.sendEvent(EVENT1, arg1)
 ----
 
 The argument is references in the action as follows:
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 onEvent(EVENT1) { args ->
     val value = args[0] as Int
@@ -159,14 +159,14 @@ We will further place COINS state in a named state map to illustrate how these c
 
 The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=context]
 ----
 
 ==== States and Events
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=states-events]
 ----
@@ -175,13 +175,13 @@ The statemap  will be entered when there are coins.
 The automatic transitions will be triggered based on the guard expressions.
 
 ==== State machine definition packaged
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]
 ----
 
 ==== Test
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/PayingTurnstileFsmTests.kt[tag=test]
 ----
@@ -289,26 +289,26 @@ image::secure-turnstile-fsm.png[Secure Turnstile FSM]
 The context class doesn't make decisions about the behaviour of the turnstile.
 The context will provide information about the state of turnstile and validity of cards
 The context class stores values and will update value in very specific ways.
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/SecureTurnstile.kt[tag=context]
 ----
 
 ==== States and Events
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/SecureTurnstile.kt[tag=states-events]
 ----
 
 ==== State machine definition packaged
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/SecureTurnstile.kt[tag=fsm]
 ----
 
 ==== Test
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/PayingTurnstileFsmTests.kt[tag=test]
 ----
@@ -331,30 +331,76 @@ image::packet-reader-fsm-guard.png[]
 
 The current checksum is a trivial implementation for the demonstration where the checksum has a character that matches the first character of each field.
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=context]
 ----
 
 ==== States and Events
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=states-events]
 ----
 
 ==== Packaged FSM
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=packaged]
 ----
 
 ==== Tests
 
-[source,kotlin]
+[source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/PacketReaderTests.kt[tag=tests]
+----
+
+=== Immutable Context Example
+
+In the case where you want a pure functional context that is immutable the following example will provide what you need:
+
+==== Immutable Context
+The immutable context doesn't modify a variable. It returns a copy containing the new context
+
+[source,kotlin,numbered]
+----
+include::../../commonTest/kotlin/ImmutableLockFSM.kt[tag=context]
+----
+
+==== Definition
+The definition only exposes one method to handle an event given a context and return the new context.
+
+[source,kotlin,numbered]
+----
+include::../../commonTest/kotlin/ImmutableLockFSM.kt[tag=definition]
+----
+
+==== Usage
+We also added an overloaded plus operator. The provides for a way of signaling the application of event to context.
+[source,kotlin]
+----
+include::../../commonTest/kotlin/ImmutableLockFSM.kt[tag=test]
+----
+
+In the case where the argument to the state action will be something other than the context you can use a `Pair` and even when the state is needed separately:
+
+[source,kotlin]
+----
+    val locked = ImmutablePayingTurnstile(50)
+    val (state, newTurnStile) = locked + (COIN to 10)
+----
+
+This assumes the argument is defined as type `Int` and the return as `Pair<LockStates,ImmutablePayingTurnstile>`
+The `handleEventMethod` will be:
+[source,kotlin]
+----
+    fun handleEvent(context: ImmutablePayingTurnstile, event: Pair<LockEvents, Int>): Pair<LockStates,ImmutablePayingTurnstile> {
+        val fsm = definition.create(context)
+        val result = fsm.sendEvent(event.first, event.second) ?: error("Expected context not null")
+        return Pair(fsm.currentState, result)
+    }
 ----
 
 === Further thoughts
