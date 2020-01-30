@@ -6,6 +6,8 @@ This is a small implementation of an FSM in Kotlin.
 * link:https://open.jumpco.io/projects/kfsm/index.html[Documentation]
 * link:https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html[API Docs]
 * link:https://github.com/open-jumpco/kfsm-samples[Sample Project]
+* link:https://github.com/open-jumpco/kfsm-web[Turnstile Sample for Browser]
+* link:https://github.com/open-jumpco/kfsm-android[Turnstile Sample for Android]
 
 == Getting Started
 
