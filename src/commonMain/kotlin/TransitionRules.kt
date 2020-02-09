@@ -16,9 +16,11 @@ package io.jumpco.open.kfsm
  * @param transition The transition to use if there are no guarded transitions or no guarded transitions match.
  */
 class TransitionRules<S, E, C, A, R>(
-    private val guardedTransitions: MutableList<GuardedTransition<S, E, C, A, R>> = mutableListOf(),
-    internal var transition: SimpleTransition<S, E, C, A, R>? = null
+    val guardedTransitions: MutableList<GuardedTransition<S, E, C, A, R>> = mutableListOf(),
+    transition: SimpleTransition<S, E, C, A, R>? = null
 ) {
+    var transition: SimpleTransition<S, E, C, A, R>? = transition
+        internal set
     /**
      * Add a guarded transition to the end of the list
      */

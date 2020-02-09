@@ -59,6 +59,7 @@ class ImmutableLockFSM() {
             LockEvents.values().toSet(),
             ImmutableLock::class
         ) {
+            defaultInitialState = LockStates.LOCKED
             initialState {
                 when (locked) {
                     0 -> LockStates.UNLOCKED

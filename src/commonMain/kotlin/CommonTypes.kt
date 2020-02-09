@@ -91,7 +91,11 @@ enum class TransitionType {
     /**
      * A pop transition will pop the stack and make the transition current. If the pop transition provided a new targetMap or targetState that will result in push or normal transition behaviour.
      */
-    POP
+    POP,
+    /**
+     * A default transition will take place when no configured state/event pair matches.
+     */
+    DEFAULT
 }
 
 /**

@@ -69,6 +69,7 @@ class LockFSM(context: Lock) {
             LockEvents.values().toSet(),
             Lock::class
         ) {
+            defaultInitialState = LockStates.LOCKED
             initialState {
                 when (locked) {
                     0 -> LockStates.UNLOCKED

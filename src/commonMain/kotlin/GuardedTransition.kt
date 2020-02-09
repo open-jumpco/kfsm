@@ -25,7 +25,7 @@ open class GuardedTransition<S, E, C, A, R>(
     targetMap: String?,
     automatic: Boolean,
     type: TransitionType,
-    private val guard: StateGuard<C, A>,
+    val guard: StateGuard<C, A>,
     action: StateAction<C, A, R>?
 ) : SimpleTransition<S, E, C, A, R>(startState, event, targetState, targetMap, automatic, type, action) {
     /**

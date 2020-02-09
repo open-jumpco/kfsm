@@ -20,7 +20,7 @@ open class Transition<S, E, C, A, R>(
     val targetMap: String? = null,
     val automatic: Boolean = false,
     val type: TransitionType = TransitionType.NORMAL,
-    private val action: StateAction<C, A, R>? = null
+    val action: StateAction<C, A, R>? = null
 ) {
     init {
         if (type == TransitionType.PUSH) {

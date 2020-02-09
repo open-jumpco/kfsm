@@ -36,6 +36,7 @@ The state machine implementation supports events triggering transitions from one
 * [x] Typed event return values
 * [ ] Timers / Timeouts
 * [ ] Corountines
+* [ ] Different type of contexts for Nested statemaps
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)

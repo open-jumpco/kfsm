@@ -17,6 +17,7 @@ package io.jumpco.open.kfsm
  */
 class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
     private var completed = false
+    var defaultInitialState: S? = null
     private var deriveInitialState: StateQuery<C, S>? = null
     private var deriveInitialStateMap: StateMapQuery<C, S>? = null
     internal val defaultStateMap = StateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
@@ -67,6 +68,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
             require(this.deriveInitialState == null) { "deriveInitialState cannot be used with named state maps" }
         }
         return StateMachineDefinition(
+            this.defaultInitialState,
             this.deriveInitialState,
             this.deriveInitialStateMap,
             this.defaultStateMap.toMap(),
