@@ -44,6 +44,4 @@ This Finite state machine implementation has the following features:
 == Tutorial
 include::kfsm.adoc[]
 
-include::visualization.adoc[]
-
 include::documentation.adoc[]
