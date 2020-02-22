@@ -20,8 +20,8 @@ import io.jumpco.open.kfsm.TransitionType
 
 /**
  * The visualization provided by these methods will not be able to provide any detail about guard expressions or actions.
- * This visualisation only provides states and transitions.
- * The separate kfsm-viz module and associated Gradle plugin will provide visualisation after parsing the definition DSL.
+ * This visualization only provides states and transitions.
+ * The separate kfsm-viz module and associated Gradle plugin will provide visualization after parsing the definition DSL.
  */
 data class TransitionView(
     val sourceMap: String? = null,

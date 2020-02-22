@@ -34,44 +34,44 @@ class VisualizeTurnstileTest {
     @Test
     fun produceVisualizationTurnstileFSM() {
         println("== TurnStile")
-        val visualisation =
+        val visualization =
             visualize(TurnstileFSM.definition)
-        visualisation.forEach { v ->
+        visualization.forEach { v ->
             println("$v")
         }
-        File("generated", "turnstile.plantuml").writeText(plantUml(visualisation))
+        File("generated", "turnstile.plantuml").writeText(plantUml(visualization))
     }
 
     @Test
     fun produceVisualizationPayingTurnstile() {
         println("== PayingTurnstile")
-        val visualisation =
+        val visualization =
             visualize(PayingTurnstileFSM.definition)
-        visualisation.forEach { v ->
+        visualization.forEach { v ->
             println("$v")
         }
-        File("generated", "paying-turnstile.plantuml").writeText(plantUml(visualisation))
+        File("generated", "paying-turnstile.plantuml").writeText(plantUml(visualization))
     }
 
     @Test
     fun produceVisualizationSecureTurnstile() {
         println("== SecureTurnstile")
-        val visualisation =
+        val visualization =
             visualize(SecureTurnstileFSM.definition)
-        visualisation.forEach { v ->
+        visualization.forEach { v ->
             println("$v")
         }
-        File("generated", "secure-turnstile.plantuml").writeText(plantUml(visualisation))
+        File("generated", "secure-turnstile.plantuml").writeText(plantUml(visualization))
     }
 
     @Test
     fun produceVisualizationPacketReader() {
         println("== PacketReader")
-        val visualisation =
+        val visualization =
             visualize(PacketReaderFSM.definition)
-        visualisation.forEach { v ->
+        visualization.forEach { v ->
             println("$v")
         }
-        File("generated", "packet-reader.plantuml").writeText(plantUml(visualisation))
+        File("generated", "packet-reader.plantuml").writeText(plantUml(visualization))
     }
 }

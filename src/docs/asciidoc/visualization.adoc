@@ -12,8 +12,8 @@ You will typically add a method to a unit test class as follows:
 @Test
 fun produceVisualizationTurnstileFSM() {
     println("== TurnStile")
-    val visualisation = visualize(TurnstileFSM.definition) // <1>
-    File("generated", "turnstile.plantuml").writeText(plantUml(visualisation)) // <2>
+    val visualization = visualize(TurnstileFSM.definition) // <1>
+    File("generated", "turnstile.plantuml").writeText(plantUml(visualization)) // <2>
 }
 ----
 <1> `TurnstileFSM.definition` is the definition that will be rendered.
@@ -28,10 +28,10 @@ You may invoke the parser from a unit test similar to the simple case.
 @Test
 fun produceVisualizationTurnstileFSM() {
     println("== TurnStile")
-    val visualisation = parseStateMachine("TurnstileFSM", File("src/test/kotlin/Turnstile.kt")) // <1>
-    println(visualisation)
-    File("generated-parsed", "turnstile.plantuml").writeText(plantUml(visualisation)) // <2>
-    File("generated-parsed", "turnstile.adoc").writeText(asciiDoc(visualisation)) // <3>
+    val visualization = parseStateMachine("TurnstileFSM", File("src/test/kotlin/Turnstile.kt")) // <1>
+    println(visualization)
+    File("generated-parsed", "turnstile.plantuml").writeText(plantUml(visualization)) // <2>
+    File("generated-parsed", "turnstile.adoc").writeText(asciiDoc(visualization)) // <3>
 }
 ----
 <1> Provide classname for the class holding the definition DSL and the sourcefile where the class may be found.

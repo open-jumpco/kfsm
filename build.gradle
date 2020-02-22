@@ -74,6 +74,15 @@ ktlint {
     }
 }
 
+task copyPng(type:Copy) {
+    from (projectDir) {
+        include '*.png'
+    }
+    into "$buildDir/docs/asciidoc"
+}
+
+asciidoctor.dependsOn(copyPng)
+
 plantUml {
     render input: 'src/docs/plantuml/*.plantuml', output: 'src/docs/asciidoc', format: 'png', withMetadata: false
 }
