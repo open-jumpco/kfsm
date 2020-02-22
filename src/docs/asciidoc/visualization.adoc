@@ -1,0 +1,39 @@
+=== Visualization
+
+State Definitions can be generated as link:https://plantuml.com/[PlantUML] state diagrams or link:https://asciidoctor.org/[Asciidoc] formatted state tables.
+
+==== Simple Visualization
+
+The simple visualization uses the resulting definition and can render states and transitions.
+You will typically add a method to a unit test class as follows:
+
+[source,kotlin]
+----
+@Test
+fun produceVisualizationTurnstileFSM() {
+    println("== TurnStile")
+    val visualisation = visualize(TurnstileFSM.definition) // <1>
+    File("generated", "turnstile.plantuml").writeText(plantUml(visualisation)) // <2>
+}
+----
+<1> `TurnstileFSM.definition` is the definition that will be rendered.
+<2> The `plantuml` method accepts the output of `visualize` and produces a state diagram in the plantuml format.
+
+==== Detail Visualisation
+
+You may invoke the parser from a unit test similar to the simple case.
+
+[source,kotlin]
+----
+@Test
+fun produceVisualizationTurnstileFSM() {
+    println("== TurnStile")
+    val visualisation = parseStateMachine("TurnstileFSM", File("src/test/kotlin/Turnstile.kt")) // <1>
+    println(visualisation)
+    File("generated-parsed", "turnstile.plantuml").writeText(plantUml(visualisation)) // <2>
+    File("generated-parsed", "turnstile.adoc").writeText(asciiDoc(visualisation)) // <3>
+}
+----
+<1> Provide classname for the class holding the definition DSL and the sourcefile where the class may be found.
+<2> Use the `plantuml` method to generate the text for a plantuml state diagram.
+<3> Use the `asciidoc` method to generate an Asciidoc formatted state table.

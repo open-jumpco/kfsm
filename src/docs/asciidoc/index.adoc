@@ -32,6 +32,9 @@ This Finite state machine implementation has the following features:
 * Multiple state maps with push / pop transitions
 * Automatic transitions
 * Externalisation of state.
+* Simple Visualization.
+* Detailed Visualization.
+* Visualization Gradle Plugin
 
 == Todo
 * [ ] Timeouts and Timers
@@ -40,5 +43,8 @@ This Finite state machine implementation has the following features:
 
 == Tutorial
 include::kfsm.adoc[]
+
+== Visualization
+include::visualization.adoc[]
 
 include::documentation.adoc[]

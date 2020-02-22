@@ -37,6 +37,9 @@ The state machine implementation supports events triggering transitions from one
 * [ ] Timers / Timeouts
 * [ ] Corountines
 * [ ] Different type of contexts for Nested statemaps
+* [ ] Simple Visualization
+* [ ] Detail Visualization
+* [ ] Gradle Plugin for Visualization
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
@@ -280,6 +283,49 @@ dependencies {
     implementation 'io.jumpco.open:kfsm-macosX64:1.0.0'
 }
 ----
+
+== Simple Visualisation
+
+By using the StateMachineDefinition created by the DSL we do not have access to the details of guard expressions or actions.
+
+For more detailed visualization use link:https://github.com/open-jumpco/kfsm-viz[kfsm-viz]
+
+[source,kotlin]
+----
+@Test
+fun produceVisualizationTurnstileFSM() {
+    println("== TurnStile")
+    val visualisation = visualize(TurnstileFSM.definition)
+    File("generated", "turnstile.plantuml").writeText(plantUml(visualisation))
+}
+----
+
+
+=== Plantuml
+
+==== Turnstile FSM
+
+link:./src/commonTest/kotlin/TurnstileTypes.kt[TurnstileTypes.kt]
+
+image::turnstile.png[]
+
+==== Paying Turnstile FSM
+
+link:./src/commonTest/kotlin/PayingTurnstileTypes.kt[PayingTurnstileTypes.kt]
+
+image::paying_turnstile.png[]
+
+==== Secure Turnstile FSM
+
+link:./src/commonTest/kotlin/SecureTurnstile.kt[SecureTurnstile.kt]
+
+image::secure_turnstile.png[]
+
+==== Packer Reader FSM
+
+link:./src/jvmTest/kotlin/PacketReaderTests.kt[PacketReaderTests.kt]
+
+image::packet_reader.png[]
 
 
 == Questions:
