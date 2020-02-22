@@ -5,7 +5,7 @@ This is a small implementation of an FSM in Kotlin.
 == Resources
 * link:https://open.jumpco.io/projects/kfsm/index.html[Documentation]
 * link:https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html[API Docs]
-* link:
+* link:https://github.com/open-jumpco/kfsm-viz[Visualization Support kfsm-viz]
 * link:https://github.com/open-jumpco/kfsm-samples[Sample Project]
 * link:https://github.com/open-jumpco/kfsm-web[Turnstile Sample for Browser]
 * link:https://github.com/open-jumpco/kfsm-android[Turnstile Sample for Android]
@@ -35,12 +35,12 @@ The state machine implementation supports events triggering transitions from one
 * [x] Externalisation of state
 * [x] Typed event parameters
 * [x] Typed event return values
+* [x] Simple Visualization
+* [x] Detail Visualization
+* [ ] Gradle Plugin for Visualization
 * [ ] Timers / Timeouts
 * [ ] Corountines
 * [ ] Different type of contexts for Nested statemaps
-* [ ] Simple Visualization
-* [ ] Detail Visualization
-* [ ] Gradle Plugin for Visualization
 
 ## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
