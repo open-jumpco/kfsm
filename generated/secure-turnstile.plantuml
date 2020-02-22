@@ -1,0 +1,11 @@
+@startuml
+state default {
+  [*] --> LOCKED
+  LOCKED --> LOCKED : CARD
+  UNLOCKED --> UNLOCKED : CARD
+  UNLOCKED --> LOCKED : PASS
+  LOCKED --> LOCKED : CARD
+  LOCKED --> UNLOCKED : CARD
+  UNLOCKED --> LOCKED : CARD
+}
+@enduml

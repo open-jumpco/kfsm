@@ -1,0 +1,14 @@
+@startuml
+state coins {
+  COINS --> COINS : COIN
+  COINS --> COINS
+}
+state default {
+  [*] --> LOCKED
+  LOCKED --> COINS : COIN
+  UNLOCKED --> UNLOCKED : COIN
+  UNLOCKED --> LOCKED : PASS
+  LOCKED --> COINS : COIN
+  COINS --> UNLOCKED : <<automatic>>
+}
+@enduml

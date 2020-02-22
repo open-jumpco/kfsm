@@ -1,0 +1,27 @@
+@startuml
+state default {
+  [*] --> START
+  START --> START : CTRL
+  RCVPCKT --> RCVPCKT : CTRL
+  RCVPCKT --> RCVCHK : BYTE
+  RCVDATA --> RCVDATA : BYTE
+  RCVDATA --> RCVDATA : CTRL
+  RCVDATA --> RCVESC : ESC
+  RCVESC --> RCVDATA : ESC
+  RCVESC --> RCVDATA : CTRL
+  RCVCHK --> RCVCHK : BYTE
+  RCVCHK --> RCVCHKESC : ESC
+  RCVCHK --> RCVCHK : CTRL
+  RCVCHKESC --> RCVCHK : ESC
+  RCVCHKESC --> RCVCHK : CTRL
+  START --> RCVPCKT : CTRL
+  RCVPCKT --> RCVDATA : CTRL
+  RCVDATA --> RCVPCKT : CTRL
+  RCVCHK --> CHKSUM : CTRL
+  default --> END : BYTE
+  default --> END : CTRL
+  default --> END : ESC
+  CHKSUM --> CHKSUM
+  CHKSUM --> END : <<automatic>>
+}
+@enduml

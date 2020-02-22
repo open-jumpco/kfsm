@@ -149,7 +149,7 @@ enum class ReaderStates {
 class PacketReaderFSM(private val packetHandler: PacketHandler) {
     companion object {
 
-        private val definition = stateMachine(
+        val definition = stateMachine(
             ReaderStates.values().toSet(),
             ReaderEvents.values().toSet(),
             PacketHandler::class,
