@@ -85,3 +85,8 @@ kfsmViz {
 }
 
 ----
+
+===== Examples
+
+Many examples can be found at:
+https://github.com/open-jumpco/kfsm-viz
