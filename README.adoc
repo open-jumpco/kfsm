@@ -245,7 +245,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:1.0.0'
+    implementation 'io.jumpco.open:kfsm-jvm:1.0.1'
 }
 ----
 
@@ -254,7 +254,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:1.0.0'
+    implementation 'io.jumpco.open:kfsm-js:1.0.1'
 }
 ----
 
@@ -263,7 +263,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:1.0.0'
+    implementation 'io.jumpco.open:kfsm-linuxX64:1.0.1'
 }
 ----
 
@@ -272,7 +272,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:1.0.0'
+    implementation 'io.jumpco.open:kfsm-mingwX64:1.0.1'
 }
 ----
 
@@ -281,7 +281,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:1.0.0'
+    implementation 'io.jumpco.open:kfsm-macosX64:1.0.1'
 }
 ----
 

@@ -37,3 +37,29 @@ fun produceVisualizationTurnstileFSM() {
 <1> Provide classname for the class holding the definition DSL and the sourcefile where the class may be found.
 <2> Use the `plantuml` method to generate the text for a plantuml state diagram.
 <3> Use the `asciidoc` method to generate an Asciidoc formatted state table.
+
+==== Detail Visualization with Gradle Plugin
+[source,groovy]
+----
+plugins {
+    id 'io.jumpco.open.kfsm.viz-plugin' version '1.0.0'
+}
+
+kfsmViz {
+    fsm('TurnstileFSM') {
+        input = file('resources/Turnstile.kt')
+        output = 'turnstile'
+        outputFolder = file('generated')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+    }
+    fsm('PacketReaderFSM') {
+        input = file('resources/PacketReader.kt')
+        output = 'packet-reader'
+        outputFolder = file('generated')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+    }
+}
+
+----
