@@ -12,6 +12,9 @@ package io.jumpco.open.kfsm
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/**
+ * @suppress
+ */
 // tag::context[]
 data class ImmutableLock(val locked: Int = 1) {
 
