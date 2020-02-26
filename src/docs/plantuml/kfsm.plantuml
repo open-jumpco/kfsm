@@ -1,0 +1,12 @@
+@startuml
+
+skinparam classFontSize 9
+skinparam classFontName Monospaced
+skinparam state {
+    BackgroundColor #1b74bc
+}
+
+[*] --right-> Convoluted : Code
+Convoluted --right-> Organized : KFSM
+
+@enduml
