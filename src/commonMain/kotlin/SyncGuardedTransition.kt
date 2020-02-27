@@ -18,7 +18,7 @@ package io.jumpco.open.kfsm
  * @param guard Expression lambda returning a Boolean
  * @param action An optional lambda that will be invoked.
  */
-open class GuardedTransition<S, E, C, A, R>(
+open class SyncGuardedTransition<S, E, C, A, R>(
     startState: S,
     event: E?,
     targetState: S?,
@@ -26,8 +26,26 @@ open class GuardedTransition<S, E, C, A, R>(
     automatic: Boolean,
     type: TransitionType,
     val guard: StateGuard<C, A>,
-    action: StateAction<C, A, R>?
-) : SimpleTransition<S, E, C, A, R>(startState, event, targetState, targetMap, automatic, type, action) {
+    action: SyncStateAction<C, A, R>?
+) : SimpleSyncTransition<S, E, C, A, R>(startState, event, targetState, targetMap, automatic, type, action) {
+    /**
+     * This function will invoke the guard expression using the provided context to determine if transition can be considered.
+     * @param context The provided context
+     * @return result of guard lambda
+     */
+    fun guardMet(context: C, arg: A?): Boolean = guard.invoke(context, arg)
+}
+
+open class AsyncGuardedTransition<S, E, C, A, R>(
+    startState: S,
+    event: E?,
+    targetState: S?,
+    targetMap: String?,
+    automatic: Boolean,
+    type: TransitionType,
+    val guard: StateGuard<C, A>,
+    action: AsyncStateAction<C, A, R>?
+) : SimpleAsyncTransition<S, E, C, A, R>(startState, event, targetState, targetMap, automatic, type, action) {
     /**
      * This function will invoke the guard expression using the provided context to determine if transition can be considered.
      * @param context The provided context

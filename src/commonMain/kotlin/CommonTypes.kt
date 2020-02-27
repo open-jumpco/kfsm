@@ -15,7 +15,9 @@ import kotlin.reflect.KClass
  * This represents an action that may be invoked during a transition.
  * @param C The context: C will be available to the lambda.
  */
-typealias StateAction<C, A, R> = C.(A?) -> R?
+typealias SyncStateAction<C, A, R> = C.(A?) -> R?
+
+typealias AsyncStateAction<C, A, R> = suspend C.(A?) -> R?
 
 /**
  * This represents a guard expression that may be used to select a specific transition.
@@ -63,6 +65,8 @@ typealias DefaultEntryExitAction<C, S, A> = C.(S, S, A?) -> Unit
  * @param A argumentType: A an arg: will be available to the lambda as the 3rd argument.
  */
 typealias DefaultStateAction<C, S, E, A, R> = C.(S, E, A?) -> R?
+
+typealias DefaultAsyncStateAction<C, S, E, A, R> = suspend C.(S, E, A?) -> R?
 
 /**
  * This represents an event and targetState pair that can be written as `event to state`
@@ -152,6 +156,55 @@ inline fun <S, E, C : Any> functionalStateMachine(
     contextClass: KClass<out C>,
     handler: DslStateMachineHandler<S, E, C, C, C>.() -> Unit
 ) = StateMachineBuilder<S, E, C, C, C>(validStates, validEvents).stateMachine(handler)
+
+/**
+ * These function are use to create statemachines where the actions are suspend functions.
+ */
+inline fun <S, E, C : Any, A : Any, R : Any> asyncStateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    argumentClass: KClass<out A>,
+    returnClass: KClass<out R>,
+    handler: AsyncDslStateMachineHandler<S, E, C, A, R>.() -> Unit
+) = AsyncStateMachineBuilder<S, E, C, A, R>(validStates, validEvents).stateMachine(handler)
+
+/**
+ * Defines the start of a state machine DSL declaration with `Any` as the return type
+ * @param validStates A set of the possible states supported by the top-level state map
+ * @param eventClass The class of the possible events
+ * @param contextClass The class of the context
+ * @param argumentClass The class of the argument to events/actions
+ * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ */
+inline fun <S, E, C : Any, A : Any> asyncStateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    argumentClass: KClass<out A>,
+    handler: AsyncDslStateMachineHandler<S, E, C, A, Any>.() -> Unit
+) = asyncStateMachine<S, E, C, A, Any>(validStates, validEvents, contextClass, argumentClass, Any::class, handler)
+
+/**
+ * Defines the start of a state machine DSL declaration with `Any` as the type of arguments and returns types for events/actions
+ * @param validStates A set of the possible states supported by the top-level state map
+ * @param eventClass The class of the possible events
+ * @param contextClass The class of the context
+ * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ */
+inline fun <S, E, C : Any> asyncStateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    handler: AsyncDslStateMachineHandler<S, E, C, Any, Any>.() -> Unit
+) = asyncStateMachine<S, E, C, Any, Any>(validStates, validEvents, contextClass, Any::class, Any::class, handler)
+
+inline fun <S, E, C : Any> asyncFunctionalStateMachine(
+    validStates: Set<S>,
+    validEvents: Set<E>,
+    contextClass: KClass<out C>,
+    handler: AsyncDslStateMachineHandler<S, E, C, C, C>.() -> Unit
+) = AsyncStateMachineBuilder<S, E, C, C, C>(validStates, validEvents).stateMachine(handler)
 
 /**
  * An extension function that evaluates the expression and invokes the provided `block` if true or the `otherwise` block is false.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -9,11 +9,7 @@
 
 package io.jumpco.open.kfsm
 
-/**
- * The build will be created to assist with create the top level or named state maps.
- * All transitions are assigned to a state map.
- */
-class StateMapBuilder<S, E, C, A, R>(
+class AsyncStateMapBuilder<S, E, C, A, R>(
     /**
      * The set of states the state map supports
      */
@@ -25,15 +21,15 @@ class StateMapBuilder<S, E, C, A, R>(
     /**
      * The parent state machine builder
      */
-    val parentBuilder: StateMachineBuilder<S, E, C, A, R>
+    val parentBuilder: AsyncStateMachineBuilder<S, E, C, A, R>
 ) {
-    private val transitionRules: MutableMap<Pair<S, E>, SyncTransitionRules<S, E, C, A, R>> = mutableMapOf()
-    private val defaultTransitions: MutableMap<E, DefaultSyncTransition<S, E, C, A, R>> = mutableMapOf()
+    private val transitionRules: MutableMap<Pair<S, E>, AsyncTransitionRules<S, E, C, A, R>> = mutableMapOf()
+    private val defaultTransitions: MutableMap<E, DefaultAsyncTransition<S, E, C, A, R>> = mutableMapOf()
     private val entryActions: MutableMap<S, DefaultEntryExitAction<C, S, A>> = mutableMapOf()
     private val exitActions: MutableMap<S, DefaultEntryExitAction<C, S, A>> = mutableMapOf()
-    private val defaultActions: MutableMap<S, DefaultStateAction<C, S, E, A, R>> = mutableMapOf()
-    private val automaticTransitions: MutableMap<S, SyncTransitionRules<S, E, C, A, R>> = mutableMapOf()
-    private var globalDefault: DefaultStateAction<C, S, E, A, R>? = null
+    private val defaultActions: MutableMap<S, DefaultAsyncStateAction<C, S, E, A, R>> = mutableMapOf()
+    private val automaticTransitions: MutableMap<S, AsyncTransitionRules<S, E, C, A, R>> = mutableMapOf()
+    private var globalDefault: DefaultAsyncStateAction<C, S, E, A, R>? = null
     private var defaultEntryAction: DefaultEntryExitAction<C, S, A>? = null
     private var defaultExitAction: DefaultEntryExitAction<C, S, A>? = null
 
@@ -46,18 +42,12 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(
-        startState: S,
-        event: E,
-        targetState: S,
-        guard: StateGuard<C, A>,
-        action: SyncStateAction<C, A, R>?
-    ) {
+    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SyncGuardedTransition<S, E, C, A, R>(
+        val transition = AsyncGuardedTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -68,7 +58,7 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            val rule = SyncTransitionRules<S, E, C, A, R>()
+            val rule = AsyncTransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -84,12 +74,12 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) {
+    fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SyncGuardedTransition<S, E, C, A, R>(
+        val transition = AsyncGuardedTransition<S, E, C, A, R>(
             startState,
             event,
             null,
@@ -100,7 +90,7 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            val rule = SyncTransitionRules<S, E, C, A, R>()
+            val rule = AsyncTransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -116,12 +106,12 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetState FSM will transition to targetState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, targetState: S, action: SyncStateAction<C, A, R>?) {
+    fun transition(startState: S, event: E, targetState: S, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleSyncTransition<S, E, C, A, R>(
+        val transition = SimpleAsyncTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -131,7 +121,8 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = SyncTransitionRules<S, E, C, A, R>(transition = transition)
+            transitionRules[key] =
+                AsyncTransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -144,12 +135,12 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
-    fun transition(startState: S, event: E, action: SyncStateAction<C, A, R>?) {
+    fun transition(startState: S, event: E, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleSyncTransition<S, E, C, A, R>(
+        val transition = SimpleAsyncTransition<S, E, C, A, R>(
             startState,
             event,
             null,
@@ -159,7 +150,8 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = SyncTransitionRules<S, E, C, A, R>(transition = transition)
+            transitionRules[key] =
+                AsyncTransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -174,11 +166,11 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetMap The map after the transition
      * @param action The optional action that will be invoked.
      */
-    fun popTransition(startState: S, event: E, targetState: S?, targetMap: String?, action: SyncStateAction<C, A, R>?) {
+    fun popTransition(startState: S, event: E, targetState: S?, targetMap: String?, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleSyncTransition<S, E, C, A, R>(
+        val transition = SimpleAsyncTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -188,7 +180,8 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = SyncTransitionRules<S, E, C, A, R>(transition = transition)
+            transitionRules[key] =
+                AsyncTransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -210,13 +203,13 @@ class StateMapBuilder<S, E, C, A, R>(
         targetState: S?,
         targetMap: String?,
         guard: StateGuard<C, A>,
-        action: SyncStateAction<C, A, R>?
+        action: AsyncStateAction<C, A, R>?
     ) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SyncGuardedTransition<S, E, C, A, R>(
+        val transition = AsyncGuardedTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -227,7 +220,7 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            val rule = SyncTransitionRules<S, E, C, A, R>()
+            val rule = AsyncTransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -243,13 +236,13 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetMap The map after the transition
      * @param action The optional action will be invoked
      */
-    fun pushTransition(startState: S, event: E, targetMap: String, targetState: S, action: SyncStateAction<C, A, R>?) {
+    fun pushTransition(startState: S, event: E, targetMap: String, targetState: S, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         require(parentBuilder.namedStateMaps.containsKey(targetMap)) { "$targetMap map not found in ${parentBuilder.namedStateMaps.keys}" }
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
-        val transition = SimpleSyncTransition<S, E, C, A, R>(
+        val transition = SimpleAsyncTransition<S, E, C, A, R>(
             startState,
             event,
             targetState,
@@ -259,7 +252,8 @@ class StateMapBuilder<S, E, C, A, R>(
             action
         )
         if (transitionRule == null) {
-            transitionRules[key] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(), transition)
+            transitionRules[key] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(), transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on $event already defined" }
             transitionRule.transition = transition
@@ -281,7 +275,7 @@ class StateMapBuilder<S, E, C, A, R>(
         targetMap: String,
         targetState: S,
         guard: StateGuard<C, A>,
-        action: SyncStateAction<C, A, R>?
+        action: AsyncStateAction<C, A, R>?
     ) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
@@ -289,7 +283,7 @@ class StateMapBuilder<S, E, C, A, R>(
         val key = Pair(startState, event)
         val transitionRule = transitionRules[key]
         val transition =
-            SyncGuardedTransition<S, E, C, A, R>(
+            AsyncGuardedTransition<S, E, C, A, R>(
                 startState,
                 event,
                 targetState,
@@ -300,7 +294,7 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            val rule = SyncTransitionRules<S, E, C, A, R>()
+            val rule = AsyncTransitionRules<S, E, C, A, R>()
             rule.addGuarded(transition)
             transitionRules[key] = rule
         } else {
@@ -314,12 +308,12 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetState The state after the transition
      * @param action The optional action will be invoked
      */
-    fun automatic(startState: S, targetState: S, action: SyncStateAction<C, A, R>?) {
+    fun automatic(startState: S, targetState: S, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleSyncTransition<S, E, C, A, R>(
+            SimpleAsyncTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -329,7 +323,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(), transition)
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(), transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -342,12 +337,12 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automatic(startState: S, targetState: S, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) {
+    fun automatic(startState: S, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(targetState)) { "$targetState must be one of $validStates" }
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SyncGuardedTransition<S, E, C, A, R>(
+            AsyncGuardedTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -358,7 +353,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -370,13 +366,22 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetState The state after the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetState: S, action: SyncStateAction<C, A, R>?) {
+    fun automaticPop(startState: S, targetState: S, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleSyncTransition<S, E, C, A, R>(startState, null, targetState, null, true, TransitionType.POP, action)
+            SimpleAsyncTransition<S, E, C, A, R>(
+                startState,
+                null,
+                targetState,
+                null,
+                true,
+                TransitionType.POP,
+                action
+            )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(), transition)
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(), transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -388,13 +393,22 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param startState The transition will apply to the specific state.
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, action: SyncStateAction<C, A, R>?) {
+    fun automaticPop(startState: S, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleSyncTransition<S, E, C, A, R>(startState, null, null, null, true, TransitionType.POP, action)
+            SimpleAsyncTransition<S, E, C, A, R>(
+                startState,
+                null,
+                null,
+                null,
+                true,
+                TransitionType.POP,
+                action
+            )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(transition = transition)
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -408,11 +422,11 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetMap The map after the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetMap: String, targetState: S, action: SyncStateAction<C, A, R>?) {
+    fun automaticPop(startState: S, targetMap: String, targetState: S, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleSyncTransition<S, E, C, A, R>(
+            SimpleAsyncTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -422,7 +436,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(transition = transition)
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -436,11 +451,11 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, targetState: S, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) {
+    fun automaticPop(startState: S, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SyncGuardedTransition<S, E, C, A, R>(
+            AsyncGuardedTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -451,7 +466,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -463,13 +479,23 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(startState: S, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) {
+    fun automaticPop(startState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SyncGuardedTransition<S, E, C, A, R>(startState, null, null, null, true, TransitionType.POP, guard, action)
+            AsyncGuardedTransition<S, E, C, A, R>(
+                startState,
+                null,
+                null,
+                null,
+                true,
+                TransitionType.POP,
+                guard,
+                action
+            )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -483,17 +509,11 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPop(
-        startState: S,
-        targetMap: String,
-        targetState: S,
-        guard: StateGuard<C, A>,
-        action: SyncStateAction<C, A, R>?
-    ) {
+    fun automaticPop(startState: S, targetMap: String, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SyncGuardedTransition<S, E, C, A, R>(
+            AsyncGuardedTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -504,7 +524,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -517,11 +538,11 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param targetState The state after the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPush(startState: S, targetMap: String, targetState: S, action: SyncStateAction<C, A, R>?) {
+    fun automaticPush(startState: S, targetMap: String, targetState: S, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SimpleSyncTransition<S, E, C, A, R>(
+            SimpleAsyncTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -531,7 +552,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(transition = transition)
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(transition = transition)
         } else {
             require(transitionRule.transition == null) { "Unguarded Transition for $startState on already defined" }
             transitionRule.transition = transition
@@ -546,17 +568,11 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param guard The expression must be true to trigger the transition
      * @param action The optional action will be invoked
      */
-    fun automaticPush(
-        startState: S,
-        targetMap: String,
-        targetState: S,
-        guard: StateGuard<C, A>,
-        action: SyncStateAction<C, A, R>?
-    ) {
+    fun automaticPush(startState: S, targetMap: String, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         require(validStates.contains(startState)) { "$startState must be one of $validStates" }
         val transitionRule = automaticTransitions[startState]
         val transition =
-            SyncGuardedTransition<S, E, C, A, R>(
+            AsyncGuardedTransition<S, E, C, A, R>(
                 startState,
                 null,
                 targetState,
@@ -567,7 +583,8 @@ class StateMapBuilder<S, E, C, A, R>(
                 action
             )
         if (transitionRule == null) {
-            automaticTransitions[startState] = SyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
+            automaticTransitions[startState] =
+                AsyncTransitionRules<S, E, C, A, R>(mutableListOf(transition))
         } else {
             transitionRule.addGuarded(transition)
         }
@@ -578,7 +595,7 @@ class StateMapBuilder<S, E, C, A, R>(
      * This will be an internal transition and will not cause a change in state or invoke entry or exit functions.
      * @param action This action will be performed
      */
-    fun defaultAction(action: DefaultStateAction<C, S, E, A, R>) {
+    fun defaultAction(action: DefaultAsyncStateAction<C, S, E, A, R>) {
         globalDefault = action
     }
 
@@ -603,7 +620,7 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun default(currentState: S, action: DefaultStateAction<C, S, E, A, R>) {
+    fun default(currentState: S, action: DefaultAsyncStateAction<C, S, E, A, R>) {
         require(validStates.contains(currentState)) { "$currentState must be one of $validStates" }
         require(defaultActions[currentState] == null) { "Default defaultAction already defined for $currentState" }
         defaultActions[currentState] = action
@@ -614,11 +631,18 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: EventState<E, S>, action: SyncStateAction<C, A, R>?) {
+    fun default(event: EventState<E, S>, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event.first)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(defaultTransitions[event.first] == null) { "Default transition for ${event.first} already defined" }
         defaultTransitions[event.first] =
-            DefaultSyncTransition<S, E, C, A, R>(event.first, event.second, null, false, TransitionType.NORMAL, action)
+            DefaultAsyncTransition<S, E, C, A, R>(
+                event.first,
+                event.second,
+                null,
+                false,
+                TransitionType.NORMAL,
+                action
+            )
     }
 
     /**
@@ -626,11 +650,17 @@ class StateMapBuilder<S, E, C, A, R>(
      * @param event The event to match this transition.
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: E, action: SyncStateAction<C, A, R>?) {
+    fun default(event: E, action: AsyncStateAction<C, A, R>?) {
         require(parentBuilder.validEvents.contains(event)) { "$event must be one of ${parentBuilder.validEvents}" }
         require(defaultTransitions[event] == null) { "Default transition for $event already defined" }
-        defaultTransitions[event] =
-            DefaultSyncTransition<S, E, C, A, R>(event, null, null, false, TransitionType.NORMAL, action)
+        defaultTransitions[event] = DefaultAsyncTransition<S, E, C, A, R>(
+            event,
+            null,
+            null,
+            false,
+            TransitionType.NORMAL,
+            action
+        )
     }
 
     /**
@@ -658,17 +688,18 @@ class StateMapBuilder<S, E, C, A, R>(
     /**
      * Creates a `StateMapDefinition` from the data in this builder
      */
-    fun toMap(): StateMapDefinition<S, E, C, A, R> = StateMapDefinition(
-        this.name,
-        this.validStates,
-        this.transitionRules.toMap(),
-        this.defaultTransitions.toMap(),
-        this.entryActions.toMap(),
-        this.exitActions.toMap(),
-        this.defaultActions.toMap(),
-        this.automaticTransitions.toMap(),
-        this.globalDefault,
-        this.defaultEntryAction,
-        this.defaultExitAction
-    )
+    fun toMap(): AsyncStateMapDefinition<S, E, C, A, R> =
+        AsyncStateMapDefinition(
+            this.name,
+            this.validStates,
+            this.transitionRules.toMap(),
+            this.defaultTransitions.toMap(),
+            this.entryActions.toMap(),
+            this.exitActions.toMap(),
+            this.defaultActions.toMap(),
+            this.automaticTransitions.toMap(),
+            this.globalDefault,
+            this.defaultEntryAction,
+            this.defaultExitAction
+        )
 }

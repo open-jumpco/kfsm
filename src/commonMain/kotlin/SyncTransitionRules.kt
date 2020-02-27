@@ -15,16 +15,16 @@ package io.jumpco.open.kfsm
  * @param guardedTransitions The list of guarded transitions
  * @param transition The transition to use if there are no guarded transitions or no guarded transitions match.
  */
-class TransitionRules<S, E, C, A, R>(
-    val guardedTransitions: MutableList<GuardedTransition<S, E, C, A, R>> = mutableListOf(),
-    transition: SimpleTransition<S, E, C, A, R>? = null
+class SyncTransitionRules<S, E, C, A, R>(
+    val guardedTransitions: MutableList<SyncGuardedTransition<S, E, C, A, R>> = mutableListOf(),
+    transition: SimpleSyncTransition<S, E, C, A, R>? = null
 ) {
-    var transition: SimpleTransition<S, E, C, A, R>? = transition
+    var transition: SimpleSyncTransition<S, E, C, A, R>? = transition
         internal set
     /**
      * Add a guarded transition to the end of the list
      */
-    fun addGuarded(guardedTransition: GuardedTransition<S, E, C, A, R>) {
+    fun addGuarded(guardedTransition: SyncGuardedTransition<S, E, C, A, R>) {
         guardedTransitions.add(guardedTransition)
     }
 
@@ -32,6 +32,27 @@ class TransitionRules<S, E, C, A, R>(
      * Find the first entry in the list of guarded transitions that match/
      * @param context The given context.
      */
-    fun findGuard(context: C, arg: A? = null): GuardedTransition<S, E, C, A, R>? =
+    fun findGuard(context: C, arg: A? = null): SyncGuardedTransition<S, E, C, A, R>? =
+        guardedTransitions.firstOrNull { it.guardMet(context, arg) }
+}
+
+class AsyncTransitionRules<S, E, C, A, R>(
+    val guardedTransitions: MutableList<AsyncGuardedTransition<S, E, C, A, R>> = mutableListOf(),
+    transition: SimpleAsyncTransition<S, E, C, A, R>? = null
+) {
+    var transition: SimpleAsyncTransition<S, E, C, A, R>? = transition
+        internal set
+    /**
+     * Add a guarded transition to the end of the list
+     */
+    fun addGuarded(guardedTransition: AsyncGuardedTransition<S, E, C, A, R>) {
+        guardedTransitions.add(guardedTransition)
+    }
+
+    /**
+     * Find the first entry in the list of guarded transitions that match/
+     * @param context The given context.
+     */
+    fun findGuard(context: C, arg: A? = null): AsyncGuardedTransition<S, E, C, A, R>? =
         guardedTransitions.firstOrNull { it.guardMet(context, arg) }
 }

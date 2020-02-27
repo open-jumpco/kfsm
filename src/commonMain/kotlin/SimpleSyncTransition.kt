@@ -11,16 +11,28 @@ package io.jumpco.open.kfsm
 
 /**
  * @suppress
- * Represents a DefaultTransition
- * @param event The event identifies the transition
+ * Represents a transition from a given state and event.
+ * @param startState The given state
+ * @param event The given event
  * @param targetState when optional represents an internal transition
- * @param action optional lambda will be invoked when transition occurs.
+ * @param action An optional lambda that will be invoked.
  */
-class DefaultTransition<S, E, C, A, R>(
-    internal val event: E,
+open class SimpleSyncTransition<S, E, C, A, R>(
+    internal val startState: S,
+    internal val event: E?,
     targetState: S?,
     targetMap: String?,
     automatic: Boolean,
     type: TransitionType,
-    action: StateAction<C, A, R>?
-) : Transition<S, E, C, A, R>(targetState, targetMap, automatic, type, action)
+    action: SyncStateAction<C, A, R>?
+) : SyncTransition<S, E, C, A, R>(targetState, targetMap, automatic, type, action)
+
+open class SimpleAsyncTransition<S, E, C, A, R>(
+    internal val startState: S,
+    internal val event: E?,
+    targetState: S?,
+    targetMap: String?,
+    automatic: Boolean,
+    type: TransitionType,
+    action: AsyncStateAction<C, A, R>?
+) : AsyncTransition<S, E, C, A, R>(targetState, targetMap, automatic, type, action)

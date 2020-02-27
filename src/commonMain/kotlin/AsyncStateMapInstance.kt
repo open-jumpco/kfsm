@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -9,15 +9,12 @@
 
 package io.jumpco.open.kfsm
 
-/**
- * @suppress
- */
-class StateMapInstance<S, E, C, A, R>(
+class AsyncStateMapInstance<S, E, C, A, R>(
     val context: C,
     val newState: S,
     val name: String?,
-    val parentFsm: StateMachineInstance<S, E, C, A, R>,
-    val definition: StateMapDefinition<S, E, C, A, R>
+    val parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
+    val definition: AsyncStateMapDefinition<S, E, C, A, R>
 ) {
     init {
         require(definition.validStates.contains(newState)) { "Initial state is $newState and not in ${definition.validStates}" }
@@ -26,7 +23,7 @@ class StateMapInstance<S, E, C, A, R>(
     var currentState: S = newState
         internal set
 
-    internal fun execute(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
+    internal suspend fun execute(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val result = transition.execute(context, this, arg)
         if (transition.isExternal()) {
             currentState = transition.targetState!!
@@ -34,7 +31,7 @@ class StateMapInstance<S, E, C, A, R>(
         return result
     }
 
-    internal fun executeEntry(context: C, targetState: S, arg: A?) {
+    internal suspend fun executeEntry(context: C, targetState: S, arg: A?) {
         val entryAction =
             definition.entryActions[targetState] ?: parentFsm.definition.defaultStateMap.entryActions[targetState]
         entryAction?.invoke(context, currentState, targetState, arg)
@@ -42,7 +39,7 @@ class StateMapInstance<S, E, C, A, R>(
         defaultEntry?.invoke(context, currentState, targetState, arg)
     }
 
-    internal fun executeExit(context: C, targetState: S, arg: A?) {
+    internal suspend fun executeExit(context: C, targetState: S, arg: A?) {
         val exitAction =
             definition.exitActions[currentState] ?: parentFsm.definition.defaultStateMap.exitActions[targetState]
         exitAction?.invoke(context, currentState, targetState, arg)
@@ -50,7 +47,7 @@ class StateMapInstance<S, E, C, A, R>(
         defaultExitAction?.invoke(context, currentState, targetState, arg)
     }
 
-    private fun executeDefaultAction(event: E, arg: A?): R? {
+    private suspend fun executeDefaultAction(event: E, arg: A?): R? {
         return with(
             definition.defaultActions[currentState]
                 ?: definition.globalDefault
@@ -66,7 +63,7 @@ class StateMapInstance<S, E, C, A, R>(
      * This function will process the on and advance the state machine according to the FSM definition.
      * @param event The on received,
      */
-    fun sendEvent(event: E, arg: A? = null): R? {
+    suspend fun sendEvent(event: E, arg: A? = null): R? {
         var result: R? = null
         definition.transitionRules[Pair(currentState, event)]?.apply rule@{
             this.findGuard(context, arg)?.apply {
@@ -102,7 +99,7 @@ class StateMapInstance<S, E, C, A, R>(
     fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
         definition.eventAllowed(event, currentState, includeDefault)
 
-    internal fun executeAutomatic(currentTransition: SyncTransition<S, E, C, A, R>, state: S, arg: A?): Boolean {
+    internal suspend fun executeAutomatic(currentTransition: AsyncTransition<S, E, C, A, R>, state: S, arg: A?): Boolean {
         var result: Boolean = false
         definition.automaticTransitions[state]?.apply rule@{
             val defaultTransition = this.transition

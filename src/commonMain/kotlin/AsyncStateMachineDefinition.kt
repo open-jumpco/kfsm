@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -9,34 +9,47 @@
 
 package io.jumpco.open.kfsm
 
-/**
- * This class represents an immutable definition of a state machine.
- */
-class StateMachineDefinition<S, E, C, A, R>(
+class AsyncStateMachineDefinition<S, E, C, A, R>(
     val defaultInitialState: S?,
     private val deriveInitialState: StateQuery<C, S>?,
     private val deriveInitialMap: StateMapQuery<C, S>?,
     /**
      * The top level state map will be created when the state machine is created.
      */
-    val defaultStateMap: StateMapDefinition<S, E, C, A, R>,
+    val defaultStateMap: AsyncStateMapDefinition<S, E, C, A, R>,
     /**
      * The named state maps can be accessed via a push transition.
      */
-    val namedStateMaps: Map<String, StateMapDefinition<S, E, C, A, R>>
+    val namedStateMaps: Map<String, AsyncStateMapDefinition<S, E, C, A, R>>
 
 ) {
     private fun createMap(
         mapName: String,
         context: C,
-        parentFsm: StateMachineInstance<S, E, C, A, R>,
+        parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
         initial: S
     ) {
         if (mapName == "default") {
-            parentFsm.pushMap(StateMapInstance(context, initial, null, parentFsm, defaultStateMap))
+            parentFsm.pushMap(
+                AsyncStateMapInstance(
+                    context,
+                    initial,
+                    null,
+                    parentFsm,
+                    defaultStateMap
+                )
+            )
         } else {
             val stateMap = namedStateMaps[mapName] ?: error("Invalid map $mapName")
-            parentFsm.pushMap(StateMapInstance(context, initial, mapName, parentFsm, stateMap))
+            parentFsm.pushMap(
+                AsyncStateMapInstance(
+                    context,
+                    initial,
+                    mapName,
+                    parentFsm,
+                    stateMap
+                )
+            )
         }
     }
 
@@ -48,10 +61,10 @@ class StateMachineDefinition<S, E, C, A, R>(
      */
     internal fun create(
         context: C,
-        parentFsm: StateMachineInstance<S, E, C, A, R>,
+        parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
         initialState: S? = null,
         intitialExternalState: ExternalState<S>? = null
-    ): StateMapInstance<S, E, C, A, R> {
+    ): AsyncStateMapInstance<S, E, C, A, R> {
         if (intitialExternalState != null) {
             intitialExternalState.forEach { (initial, mapName) ->
                 createMap(mapName, context, parentFsm, initial)
@@ -65,17 +78,23 @@ class StateMachineDefinition<S, E, C, A, R>(
         } else {
             val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
             ?: error("Definition requires deriveInitialState or deriveInitialMap")
-            return StateMapInstance(context, initial, null, parentFsm, defaultStateMap)
+            return AsyncStateMapInstance(
+                context,
+                initial,
+                null,
+                parentFsm,
+                defaultStateMap
+            )
         }
     }
 
     internal fun createStateMap(
         name: String,
         context: C,
-        parentFsm: StateMachineInstance<S, E, C, A, R>,
+        parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
         initialState: S
-    ): StateMapInstance<S, E, C, A, R> =
-        StateMapInstance(
+    ): AsyncStateMapInstance<S, E, C, A, R> =
+        AsyncStateMapInstance(
             context,
             initialState,
             name,
@@ -88,8 +107,13 @@ class StateMachineDefinition<S, E, C, A, R>(
      * @param context The instance will operate on the provided context
      * @param initialExternalState The previously externalised state
      */
-    fun create(context: C, initialExternalState: ExternalState<S>): StateMachineInstance<S, E, C, A, R> =
-        StateMachineInstance<S, E, C, A, R>(context, this, null, initialExternalState)
+    fun create(context: C, initialExternalState: ExternalState<S>): AsyncStateMachineInstance<S, E, C, A, R> =
+        AsyncStateMachineInstance<S, E, C, A, R>(
+            context,
+            this,
+            null,
+            initialExternalState
+        )
 
     /**
      * This function will create a state machine instance and set it to the initial state.
@@ -97,8 +121,8 @@ class StateMachineDefinition<S, E, C, A, R>(
      * @param initial The initial state
      *
      */
-    fun create(context: C, initial: S? = null): StateMachineInstance<S, E, C, A, R> =
-        StateMachineInstance<S, E, C, A, R>(context, this, initial)
+    fun create(context: C, initial: S? = null): AsyncStateMachineInstance<S, E, C, A, R> =
+        AsyncStateMachineInstance<S, E, C, A, R>(context, this, initial)
 
     /**
      * This function will provide a list of possible events given a specific state.
@@ -117,4 +141,3 @@ class StateMachineDefinition<S, E, C, A, R>(
         return result.toSet()
     }
 }
-

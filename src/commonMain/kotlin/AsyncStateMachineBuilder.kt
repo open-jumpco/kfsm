@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -9,19 +9,14 @@
 
 package io.jumpco.open.kfsm
 
-/**
- * This class represents the definition of a statemachine.
- * @param S is an enum representing all the states of the FSM
- * @param E is en enum representing all the events the FSM may receive
- * @param C is the class of the Context where the action will be applied.
- */
-class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
+class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
     private var completed = false
     var defaultInitialState: S? = null
     private var deriveInitialState: StateQuery<C, S>? = null
     private var deriveInitialStateMap: StateMapQuery<C, S>? = null
-    internal val defaultStateMap = StateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
-    internal val namedStateMaps: MutableMap<String, StateMapBuilder<S, E, C, A, R>> = mutableMapOf()
+    internal val defaultStateMap =
+        AsyncStateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
+    internal val namedStateMaps: MutableMap<String, AsyncStateMapBuilder<S, E, C, A, R>> = mutableMapOf()
     /**
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
@@ -49,11 +44,12 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
     fun stateMap(
         name: String,
         validStates: Set<S>
-    ): StateMapBuilder<S, E, C, A, R> {
+    ): AsyncStateMapBuilder<S, E, C, A, R> {
         require(name.trim().length > 0) { "statemap name must not be empty" }
         require(name != "default") { "Map cannot be named 'default'" }
         require(validStates.isNotEmpty()) { "Provide at least one entty in validStates" }
-        val stateMapBuilder = StateMapBuilder<S, E, C, A, R>(validStates, name, this)
+        val stateMapBuilder =
+            AsyncStateMapBuilder<S, E, C, A, R>(validStates, name, this)
         namedStateMaps[name] = stateMapBuilder
         return stateMapBuilder
     }
@@ -62,12 +58,12 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * This function enables completed for the state machine definition prevent further changes to the state
      * machine behaviour.
      */
-    fun complete(): StateMachineDefinition<S, E, C, A, R> {
+    fun complete(): AsyncStateMachineDefinition<S, E, C, A, R> {
         completed = true
         if (namedStateMaps.isNotEmpty()) {
             require(this.deriveInitialState == null) { "deriveInitialState cannot be used with named state maps" }
         }
-        return StateMachineDefinition(
+        return AsyncStateMachineDefinition(
             this.defaultInitialState,
             this.deriveInitialState,
             this.deriveInitialStateMap,
@@ -79,8 +75,8 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
     /**
      * This function can be used the define a new state machine.
      */
-    inline fun stateMachine(handler: DslStateMachineHandler<S, E, C, A, R>.() -> Unit): DslStateMachineHandler<S, E, C, A, R> =
-        DslStateMachineHandler(this).apply(handler)
+    inline fun stateMachine(handler: AsyncDslStateMachineHandler<S, E, C, A, R>.() -> Unit): AsyncDslStateMachineHandler<S, E, C, A, R> =
+        AsyncDslStateMachineHandler(this).apply(handler)
 
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
@@ -91,7 +87,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) =
+    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, targetState, guard, action)
 
     /**
@@ -102,7 +98,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) =
+    fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, guard, action)
 
     /**
@@ -113,7 +109,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param targetState FSM will transition to targetState.
      * @param action The actions will be invoked
      */
-    fun transition(startState: S, event: E, targetState: S, action: SyncStateAction<C, A, R>?) =
+    fun transition(startState: S, event: E, targetState: S, action: AsyncStateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, targetState, action)
 
     /**
@@ -122,7 +118,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
-    fun transition(startState: S, event: E, action: SyncStateAction<C, A, R>?) =
+    fun transition(startState: S, event: E, action: AsyncStateAction<C, A, R>?) =
         defaultStateMap.transition(startState, event, action)
 
     /**
@@ -130,7 +126,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * This will be an internal transition and will not cause a change in state or invoke entry or exit functions.
      * @param action This action will be performed
      */
-    fun defaultAction(action: DefaultStateAction<C, S, E, A, R>) =
+    fun defaultAction(action: DefaultAsyncStateAction<C, S, E, A, R>) =
         defaultStateMap.defaultAction(action)
 
     /**
@@ -152,7 +148,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param currentState The provided state
      * @param action This action will be invoked
      */
-    fun default(currentState: S, action: DefaultStateAction<C, S, E, A, R>) =
+    fun default(currentState: S, action: DefaultAsyncStateAction<C, S, E, A, R>) =
         defaultStateMap.default(currentState, action)
 
     /**
@@ -160,7 +156,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: EventState<E, S>, action: SyncStateAction<C, A, R>?) =
+    fun default(event: EventState<E, S>, action: AsyncStateAction<C, A, R>?) =
         defaultStateMap.default(event, action)
 
     /**
@@ -168,7 +164,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param event The event to match this transition.
      * @param action The option action will be executed when this default transition occurs.
      */
-    fun default(event: E, action: SyncStateAction<C, A, R>?) =
+    fun default(event: E, action: AsyncStateAction<C, A, R>?) =
         defaultStateMap.default(event, action)
 
     /**
@@ -186,7 +182,4 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      */
     fun exit(currentState: S, action: DefaultEntryExitAction<C, S, A>) =
         defaultStateMap.exit(currentState, action)
-}
-
-typealias AnyStateMachineBuilder<S, E, C> = StateMachineBuilder<S, E, C, Any, Any>
-
+}typealias AsyncAnyStateMachineBuilder<S, E, C> = AsyncStateMachineBuilder<S, E, C, Any, Any>

@@ -15,12 +15,12 @@ package io.jumpco.open.kfsm
  * @param targetState when optional represents an internal transition
  * @param action optional lambda will be invoked when transition occurs.
  */
-open class Transition<S, E, C, A, R>(
+open class SyncTransition<S, E, C, A, R>(
     val targetState: S? = null,
     val targetMap: String? = null,
     val automatic: Boolean = false,
     val type: TransitionType = TransitionType.NORMAL,
-    val action: StateAction<C, A, R>? = null
+    val action: SyncStateAction<C, A, R>? = null
 ) {
     init {
         if (type == TransitionType.PUSH) {
@@ -50,6 +50,61 @@ open class Transition<S, E, C, A, R>(
         context: C,
         sourceMap: StateMapInstance<S, E, C, A, R>,
         targetMap: StateMapInstance<S, E, C, A, R>?,
+        arg: A?
+    ): R? {
+
+        if (isExternal()) {
+            sourceMap.executeExit(context, targetState!!, arg)
+        }
+        val result = action?.invoke(context, arg)
+        if (targetMap != null && isExternal()) {
+            targetMap.executeEntry(context, targetState!!, arg)
+        }
+        return result
+    }
+
+    /**
+     * This function provides an indicator if a Transition is internal or external.
+     * When there is no targetState defined a Transition is considered internal and will not trigger entry or exit actions.
+     */
+    fun isExternal(): Boolean = targetState != null
+}
+
+open class AsyncTransition<S, E, C, A, R>(
+    val targetState: S? = null,
+    val targetMap: String? = null,
+    val automatic: Boolean = false,
+    val type: TransitionType = TransitionType.NORMAL,
+    val action: AsyncStateAction<C, A, R>? = null
+) {
+    init {
+        if (type == TransitionType.PUSH) {
+            require(targetState != null) { "targetState is required for push transition" }
+        }
+    }
+
+    /**
+     * Executed exit, optional and entry actions specific in the transition.
+     */
+    open suspend fun execute(context: C, instance: AsyncStateMapInstance<S, E, C, A, R>, arg: A?): R? {
+
+        if (isExternal()) {
+            instance.executeExit(context, targetState!!, arg)
+        }
+        val result = action?.invoke(context, arg)
+        if (isExternal()) {
+            instance.executeEntry(context, targetState!!, arg)
+        }
+        return result
+    }
+
+    /**
+     * Executed exit, optional and entry actions specific in the transition.
+     */
+    open suspend fun execute(
+        context: C,
+        sourceMap: AsyncStateMapInstance<S, E, C, A, R>,
+        targetMap: AsyncStateMapInstance<S, E, C, A, R>?,
         arg: A?
     ): R? {
 

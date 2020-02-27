@@ -30,3 +30,25 @@ class DslStateMapHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C
             DslStateMapDefaultEventHandler<S, E, C, A, R> =
         DslStateMapDefaultEventHandler(fsm).apply(handler)
 }
+
+/**
+ * This handler will be active inside the top level of the stateMachine definition.
+ */
+class AsyncDslStateMapHandler<S, E, C, A, R>(private val fsm: AsyncStateMapBuilder<S, E, C, A, R>) {
+    /**
+     * Defines a section for a specific state.
+     * @param currentState The give state
+     * @param handler A lambda with definitions for the given state
+     */
+    fun whenState(currentState: S, handler: AsyncDslStateMapEventHandler<S, E, C, A, R>.() -> Unit):
+        AsyncDslStateMapEventHandler<S, E, C, A, R> =
+        AsyncDslStateMapEventHandler(currentState, fsm).apply(handler)
+
+    /**
+     * Defines a section for default behaviour for the state machine.
+     * @param handler A lambda with definition for the default behaviour of the state machine.
+     */
+    fun default(handler: AsyncDslStateMapDefaultEventHandler<S, E, C, A, R>.() -> Unit):
+        AsyncDslStateMapDefaultEventHandler<S, E, C, A, R> =
+        AsyncDslStateMapDefaultEventHandler(fsm).apply(handler)
+}

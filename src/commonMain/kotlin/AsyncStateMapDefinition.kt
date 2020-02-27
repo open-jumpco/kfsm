@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -9,10 +9,7 @@
 
 package io.jumpco.open.kfsm
 
-/**
- * Contains the definition of a state map. A state machine has at least one top-level state map.
- */
-class StateMapDefinition<S, E, C, A, R>(
+class AsyncStateMapDefinition<S, E, C, A, R>(
     /**
      * The name of the statemap. The top-level state map name is `null`
      */
@@ -25,11 +22,11 @@ class StateMapDefinition<S, E, C, A, R>(
      * transitionRule contains a map of TransitionRules that is keyed by a Pair of state,event
      * This will be the most common transition rule.
      */
-    val transitionRules: Map<Pair<S, E>, SyncTransitionRules<S, E, C, A, R>>,
+    val transitionRules: Map<Pair<S, E>, AsyncTransitionRules<S, E, C, A, R>>,
     /**
      * The default transitions will be used if no transition of found matching a given event
      */
-    val defaultTransitions: Map<E, DefaultSyncTransition<S, E, C, A, R>>,
+    val defaultTransitions: Map<E, DefaultAsyncTransition<S, E, C, A, R>>,
     /**
      * This is a map of actions keyed by the state. A specific action will be invoked when a state is entered.
      */
@@ -41,15 +38,15 @@ class StateMapDefinition<S, E, C, A, R>(
     /**
      * This is a map of default actions for event on specific startState.
      */
-    val defaultActions: Map<S, DefaultStateAction<C, S, E, A, R>>,
+    val defaultActions: Map<S, DefaultAsyncStateAction<C, S, E, A, R>>,
     /**
      * This a map of TransitionRules by state for automatic transitions.
      */
-    val automaticTransitions: Map<S, SyncTransitionRules<S, E, C, A, R>>,
+    val automaticTransitions: Map<S, AsyncTransitionRules<S, E, C, A, R>>,
     /**
      * This is the action that will be invoked of no other has been matched
      */
-    val globalDefault: DefaultStateAction<C, S, E, A, R>?,
+    val globalDefault: DefaultAsyncStateAction<C, S, E, A, R>?,
     /**
      * This is the default action that will be invoked when entering any state when no other action has been matched.
      */
