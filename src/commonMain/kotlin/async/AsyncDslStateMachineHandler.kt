@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -7,17 +7,17 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
 
-/**
- * This handler will be active inside the top level of the stateMachine definition.
- */
-class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder<S, E, C, A, R>) {
+import io.jumpco.open.kfsm.StateMapQuery
+import io.jumpco.open.kfsm.StateQuery
+
+class AsyncDslStateMachineHandler<S, E, C, A, R>(private val fsm: AsyncStateMachineBuilder<S, E, C, A, R>) {
     /**
      * Defines an expression that will determine the initial state of the state machine based on the values of the context.
      * @param deriveInitialState A lambda expression receiving context:C and returning state S.
      */
-    fun initialState(deriveInitialState: StateQuery<C, S>): DslStateMachineHandler<S, E, C, A, R> {
+    fun initialState(deriveInitialState: StateQuery<C, S>): AsyncDslStateMachineHandler<S, E, C, A, R> {
         fsm.initialState(deriveInitialState)
         return this
     }
@@ -47,7 +47,7 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
     }
     ```
      */
-    fun initialStates(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C, A, R> {
+    fun initialStates(deriveInitialMap: StateMapQuery<C, S>): AsyncDslStateMachineHandler<S, E, C, A, R> {
         fsm.initialStates(deriveInitialMap)
         return this
     }
@@ -57,17 +57,17 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
      * @param currentState The give state
      * @param handler A lambda with definitions for the given state
      */
-    fun whenState(currentState: S, handler: DslStateMapEventHandler<S, E, C, A, R>.() -> Unit):
-        DslStateMapEventHandler<S, E, C, A, R> =
-        DslStateMapEventHandler(currentState, fsm.defaultStateMap).apply(handler)
+    fun whenState(currentState: S, handler: AsyncDslStateMapEventHandler<S, E, C, A, R>.() -> Unit):
+        AsyncDslStateMapEventHandler<S, E, C, A, R> =
+        AsyncDslStateMapEventHandler(currentState, fsm.defaultStateMap).apply(handler)
 
     /**
      * Defines a section for default behaviour for the state machine.
      * @param handler A lambda with definition for the default behaviour of the state machine.
      */
-    fun default(handler: DslStateMapDefaultEventHandler<S, E, C, A, R>.() -> Unit):
-        DslStateMapDefaultEventHandler<S, E, C, A, R> =
-        DslStateMapDefaultEventHandler(fsm.defaultStateMap).apply(handler)
+    fun default(handler: AsyncDslStateMapDefaultEventHandler<S, E, C, A, R>.() -> Unit):
+        AsyncDslStateMapDefaultEventHandler<S, E, C, A, R> =
+        AsyncDslStateMapDefaultEventHandler(fsm.defaultStateMap).apply(handler)
 
     /**
      * Returns the completed fsm.
@@ -89,8 +89,13 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
         /**
          * The lambda to configure the statemap
          */
-        handler: DslStateMapHandler<S, E, C, A, R>.() -> Unit
-    ): DslStateMapHandler<S, E, C, A, R> {
-        return DslStateMapHandler(fsm.stateMap(name.trim(), validStates)).apply(handler)
+        handler: AsyncDslStateMapHandler<S, E, C, A, R>.() -> Unit
+    ): AsyncDslStateMapHandler<S, E, C, A, R> {
+        return AsyncDslStateMapHandler(
+            fsm.stateMap(
+                name.trim(),
+                validStates
+            )
+        ).apply(handler)
     }
 }

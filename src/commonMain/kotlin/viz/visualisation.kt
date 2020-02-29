@@ -10,10 +10,10 @@
 package io.jumpco.open.kfsm.viz
 
 import io.jumpco.open.kfsm.DefaultSyncTransition
-import io.jumpco.open.kfsm.SyncGuardedTransition
 import io.jumpco.open.kfsm.SimpleSyncTransition
 import io.jumpco.open.kfsm.StateMachineDefinition
 import io.jumpco.open.kfsm.StateMapDefinition
+import io.jumpco.open.kfsm.SyncGuardedTransition
 import io.jumpco.open.kfsm.SyncTransition
 import io.jumpco.open.kfsm.SyncTransitionRules
 import io.jumpco.open.kfsm.TransitionType
@@ -136,5 +136,3 @@ fun <S, E, C, A, R> makeView(
 ) {
     makeView(definition, mapName, from?.toString(), event, rules?.transition, output)
 }
-
-

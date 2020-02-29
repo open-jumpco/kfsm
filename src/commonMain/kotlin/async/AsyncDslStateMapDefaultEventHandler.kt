@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -7,17 +7,19 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
 
-/**
- * This handler will be active inside the default section of the statemachine.
- */
-class DslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C, A, R>) {
+import io.jumpco.open.kfsm.AsyncStateAction
+import io.jumpco.open.kfsm.DefaultAsyncStateAction
+import io.jumpco.open.kfsm.DefaultEntryExitAction
+import io.jumpco.open.kfsm.EventState
+
+class AsyncDslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: AsyncStateMapBuilder<S, E, C, A, R>) {
     /**
      * Define a default action that will be applied when no other transitions are matched.
      * @param action Will be invoked when no transitions matches
      */
-    fun action(action: DefaultStateAction<C, S, E, A, R>) {
+    fun action(action: DefaultAsyncStateAction<C, S, E, A, R>) {
         fsm.defaultAction(action)
     }
 
@@ -42,7 +44,7 @@ class DslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: StateMapBui
      * @param event Pair representing an on and targetState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
-    fun onEvent(event: EventState<E, S>, action: SyncStateAction<C, A, R>?): DslStateMapDefaultEventHandler<S, E, C, A, R> {
+    fun onEvent(event: EventState<E, S>, action: AsyncStateAction<C, A, R>?): AsyncDslStateMapDefaultEventHandler<S, E, C, A, R> {
         fsm.default(event, action)
         return this
     }
@@ -52,7 +54,7 @@ class DslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: StateMapBui
      * @param event The event that triggers this transition
      * @param action The action will be invoked for this transition
      */
-    fun onEvent(event: E, action: SyncStateAction<C, A, R>?): DslStateMapDefaultEventHandler<S, E, C, A, R> {
+    fun onEvent(event: E, action: AsyncStateAction<C, A, R>?): AsyncDslStateMapDefaultEventHandler<S, E, C, A, R> {
         fsm.default(event, action)
         return this
     }

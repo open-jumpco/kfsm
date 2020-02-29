@@ -117,4 +117,3 @@ class StateMachineDefinition<S, E, C, A, R>(
         return result.toSet()
     }
 }
-

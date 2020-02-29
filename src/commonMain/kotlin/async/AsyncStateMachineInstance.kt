@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -7,16 +7,13 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
 
-/**
- * This class represents an instance of a state machine.
- * It will process events, matching transitions, invoking entry, transition and exit actions.
- * @param context The events may trigger actions on the context of class C
- * @param definition The defined state machine that provides all the behaviour
- * @param initialState The initial state of the instance.
- */
-class StateMachineInstance<S, E, C, A, R>(
+import io.jumpco.open.kfsm.ExternalState
+import io.jumpco.open.kfsm.Stack
+import io.jumpco.open.kfsm.TransitionType
+
+class AsyncStateMachineInstance<S, E, C, A, R>(
     /**
      * The transition actions are performed by manipulating the context.
      */
@@ -24,22 +21,23 @@ class StateMachineInstance<S, E, C, A, R>(
     /**
      * The Immutable definition of the state machine.
      */
-    val definition: StateMachineDefinition<S, E, C, A, R>,
+    val definition: AsyncStateMachineDefinition<S, E, C, A, R>,
     /**
      * The initialState will be assigned to the currentState
      */
     initialState: S? = null,
     initialExternalState: ExternalState<S>? = null
 ) {
-    internal val namedInstances: MutableMap<String, StateMapInstance<S, E, C, A, R>> = mutableMapOf()
+    internal val namedInstances: MutableMap<String, AsyncStateMapInstance<S, E, C, A, R>> = mutableMapOf()
 
-    internal val mapStack: Stack<StateMapInstance<S, E, C, A, R>> = Stack()
+    internal val mapStack: Stack<AsyncStateMapInstance<S, E, C, A, R>> =
+        Stack()
 
     /**
      * This represents the current state of the state machine.
      * It will be modified during transitions
      */
-    internal var currentStateMap: StateMapInstance<S, E, C, A, R>
+    internal var currentStateMap: AsyncStateMapInstance<S, E, C, A, R>
 
     val currentState: S
         get() = currentStateMap.currentState
@@ -50,7 +48,7 @@ class StateMachineInstance<S, E, C, A, R>(
      * @param definition The definition of the state machine instance.
      * @param initialExternalState The previously externalised state.
      */
-    constructor(context: C, definition: StateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
+    constructor(context: C, definition: AsyncStateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
         this(context, definition, null, initialExternalState) {
     }
 
@@ -59,23 +57,23 @@ class StateMachineInstance<S, E, C, A, R>(
     }
 
     internal fun pushMap(
-        defaultInstance: StateMapInstance<S, E, C, A, R>,
+        defaultInstance: AsyncStateMapInstance<S, E, C, A, R>,
         initial: S,
         name: String,
-        stateMap: StateMapDefinition<S, E, C, A, R>
-    ): StateMapInstance<S, E, C, A, R> {
+        stateMap: AsyncStateMapDefinition<S, E, C, A, R>
+    ): AsyncStateMapInstance<S, E, C, A, R> {
         mapStack.push(defaultInstance)
-        val pushedMap = StateMapInstance(context, initial, name, this, stateMap)
+        val pushedMap = AsyncStateMapInstance(context, initial, name, this, stateMap)
         currentStateMap = pushedMap
         return pushedMap
     }
 
-    internal fun pushMap(stateMap: StateMapInstance<S, E, C, A, R>): StateMapInstance<S, E, C, A, R> {
+    internal fun pushMap(stateMap: AsyncStateMapInstance<S, E, C, A, R>): AsyncStateMapInstance<S, E, C, A, R> {
         mapStack.push(stateMap)
         return stateMap
     }
 
-    internal fun execute(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
+    internal suspend fun execute(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val result = if (transition.type == TransitionType.PUSH) {
             require(transition.targetState != null) { "Target state cannot be null for pushTransition" }
             require(transition.targetMap != null) { "Target map cannot be null for pushTransition" }
@@ -93,7 +91,7 @@ class StateMachineInstance<S, E, C, A, R>(
         return result
     }
 
-    private fun executePop(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
+    private suspend fun executePop(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val sourceMap = currentStateMap
         val targetMap = mapStack.pop()
         currentStateMap = targetMap
@@ -115,7 +113,7 @@ class StateMachineInstance<S, E, C, A, R>(
         }
     }
 
-    private fun executePush(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
+    private suspend fun executePush(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
             definition.createStateMap(transition.targetMap, context, this, transition.targetState!!).apply {
                 namedInstances.put(transition.targetMap, this)
@@ -149,7 +147,7 @@ class StateMachineInstance<S, E, C, A, R>(
      * This function will process the on and advance the state machine according to the FSM definition.
      * @param event The on received,
      */
-    fun sendEvent(event: E, arg: A? = null) = currentStateMap.sendEvent(event, arg)
+    suspend fun sendEvent(event: E, arg: A? = null) = currentStateMap.sendEvent(event, arg)
 
     /**
      * This function will provide the external state that can be use when creating the instance at a later time.
@@ -166,4 +164,4 @@ class StateMachineInstance<S, E, C, A, R>(
     }
 }
 
-typealias AnyStateMachineInstance<S, E, C> = StateMachineInstance<S, E, C, Any, Any>
+typealias AsyncAnyStateMachineInstance<S, E, C> = AsyncStateMachineInstance<S, E, C, Any, Any>

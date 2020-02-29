@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -7,20 +7,17 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
 
-/**
- * @suppress
- * The base for all transitions.
- * @param targetState when optional represents an internal transition
- * @param action optional lambda will be invoked when transition occurs.
- */
-open class SyncTransition<S, E, C, A, R>(
+import io.jumpco.open.kfsm.AsyncStateAction
+import io.jumpco.open.kfsm.TransitionType
+
+open class AsyncTransition<S, E, C, A, R>(
     val targetState: S? = null,
     val targetMap: String? = null,
     val automatic: Boolean = false,
     val type: TransitionType = TransitionType.NORMAL,
-    val action: SyncStateAction<C, A, R>? = null
+    val action: AsyncStateAction<C, A, R>? = null
 ) {
     init {
         if (type == TransitionType.PUSH) {
@@ -31,7 +28,7 @@ open class SyncTransition<S, E, C, A, R>(
     /**
      * Executed exit, optional and entry actions specific in the transition.
      */
-    open fun execute(context: C, instance: StateMapInstance<S, E, C, A, R>, arg: A?): R? {
+    open suspend fun execute(context: C, instance: AsyncStateMapInstance<S, E, C, A, R>, arg: A?): R? {
 
         if (isExternal()) {
             instance.executeExit(context, targetState!!, arg)
@@ -46,13 +43,12 @@ open class SyncTransition<S, E, C, A, R>(
     /**
      * Executed exit, optional and entry actions specific in the transition.
      */
-    open fun execute(
+    open suspend fun execute(
         context: C,
-        sourceMap: StateMapInstance<S, E, C, A, R>,
-        targetMap: StateMapInstance<S, E, C, A, R>?,
+        sourceMap: AsyncStateMapInstance<S, E, C, A, R>,
+        targetMap: AsyncStateMapInstance<S, E, C, A, R>?,
         arg: A?
     ): R? {
-
         if (isExternal()) {
             sourceMap.executeExit(context, targetState!!, arg)
         }

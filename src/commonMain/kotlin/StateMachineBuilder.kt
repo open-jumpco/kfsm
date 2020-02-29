@@ -91,7 +91,13 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?) =
+    fun transition(
+        startState: S,
+        event: E,
+        targetState: S,
+        guard: StateGuard<C, A>,
+        action: SyncStateAction<C, A, R>?
+    ) =
         defaultStateMap.transition(startState, event, targetState, guard, action)
 
     /**
@@ -189,4 +195,3 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
 }
 
 typealias AnyStateMachineBuilder<S, E, C> = StateMachineBuilder<S, E, C, Any, Any>
-

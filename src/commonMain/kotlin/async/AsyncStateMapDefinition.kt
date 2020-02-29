@@ -7,7 +7,10 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
+
+import io.jumpco.open.kfsm.DefaultAsyncStateAction
+import io.jumpco.open.kfsm.DefaultEntryExitAction
 
 class AsyncStateMapDefinition<S, E, C, A, R>(
     /**
@@ -43,6 +46,10 @@ class AsyncStateMapDefinition<S, E, C, A, R>(
      * This a map of TransitionRules by state for automatic transitions.
      */
     val automaticTransitions: Map<S, AsyncTransitionRules<S, E, C, A, R>>,
+    /**
+     * The timer definitions will be activated on entry to state and deactivated on state exit
+     */
+    val timerDefinitions: Map<S, AsyncTimerDefinition<S, E, C, A, R>>,
     /**
      * This is the action that will be invoked of no other has been matched
      */

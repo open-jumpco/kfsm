@@ -9,7 +9,6 @@
 
 package io.jumpco.open.example.kfsm
 
-
 import io.jumpco.open.kfsm.PacketReaderFSM
 import io.jumpco.open.kfsm.PayingTurnstileFSM
 import io.jumpco.open.kfsm.SecureTurnstileFSM

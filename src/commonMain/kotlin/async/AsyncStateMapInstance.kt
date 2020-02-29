@@ -7,7 +7,7 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
 
 class AsyncStateMapInstance<S, E, C, A, R>(
     val context: C,
@@ -22,11 +22,16 @@ class AsyncStateMapInstance<S, E, C, A, R>(
 
     var currentState: S = newState
         internal set
+    val timers: MutableList<AsyncTimer<S, E, C, A, R>> = mutableListOf()
 
     internal suspend fun execute(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
+        cancelTimers()
         val result = transition.execute(context, this, arg)
         if (transition.isExternal()) {
             currentState = transition.targetState!!
+        }
+        if (transition.targetState != null) {
+            createTimers(transition.targetState, context, arg)
         }
         return result
     }
@@ -37,6 +42,18 @@ class AsyncStateMapInstance<S, E, C, A, R>(
         entryAction?.invoke(context, currentState, targetState, arg)
         val defaultEntry = definition.defaultEntryAction ?: parentFsm.definition.defaultStateMap.defaultEntryAction
         defaultEntry?.invoke(context, currentState, targetState, arg)
+    }
+
+    internal fun cancelTimers() {
+        timers.forEach { it.cancel() }
+        timers.clear()
+    }
+
+    internal fun createTimers(targetState: S, context: C, arg: A?) {
+        val timerDefinition = definition.timerDefinitions[targetState]
+        if (timerDefinition != null) {
+            timers.add(AsyncTimer(this, context, arg, timerDefinition))
+        }
     }
 
     internal suspend fun executeExit(context: C, targetState: S, arg: A?) {
@@ -99,7 +116,11 @@ class AsyncStateMapInstance<S, E, C, A, R>(
     fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
         definition.eventAllowed(event, currentState, includeDefault)
 
-    internal suspend fun executeAutomatic(currentTransition: AsyncTransition<S, E, C, A, R>, state: S, arg: A?): Boolean {
+    internal suspend fun executeAutomatic(
+        currentTransition: AsyncTransition<S, E, C, A, R>,
+        state: S,
+        arg: A?
+    ): Boolean {
         var result: Boolean = false
         definition.automaticTransitions[state]?.apply rule@{
             val defaultTransition = this.transition

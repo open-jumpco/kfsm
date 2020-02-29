@@ -7,7 +7,15 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
+
+import io.jumpco.open.kfsm.AsyncStateAction
+import io.jumpco.open.kfsm.DefaultAsyncStateAction
+import io.jumpco.open.kfsm.DefaultEntryExitAction
+import io.jumpco.open.kfsm.EventState
+import io.jumpco.open.kfsm.StateGuard
+import io.jumpco.open.kfsm.StateMapQuery
+import io.jumpco.open.kfsm.StateQuery
 
 class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val validEvents: Set<E>) {
     private var completed = false
@@ -87,7 +95,13 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
      * @param guard The guard expression will have to be met to consider the transition
      * @param action The optional action will be executed when the transition occurs.
      */
-    fun transition(startState: S, event: E, targetState: S, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) =
+    fun transition(
+        startState: S,
+        event: E,
+        targetState: S,
+        guard: StateGuard<C, A>,
+        action: AsyncStateAction<C, A, R>?
+    ) =
         defaultStateMap.transition(startState, event, targetState, guard, action)
 
     /**
@@ -99,7 +113,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
      * @param action The optional action will be executed when the transition occurs.
      */
     fun transition(startState: S, event: E, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) =
-        defaultStateMap.transition(startState, event, guard, action)
+        defaultStateMap.transition(startState, event, null, guard, action)
 
     /**
      * This function defines a transition that will be triggered when the currentState is the same as the startState and on is received. The FSM currentState will change to the targetState after the action was executed.
@@ -110,7 +124,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
      * @param action The actions will be invoked
      */
     fun transition(startState: S, event: E, targetState: S, action: AsyncStateAction<C, A, R>?) =
-        defaultStateMap.transition(startState, event, targetState, action)
+        defaultStateMap.transition(startState, event, targetState, null, action)
 
     /**
      * This function defines a transition that doesn't change the state of the state machine when the currentState is startState and the on is received and after the action was performed. No entry or exit actions performed.
@@ -119,7 +133,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
      * @param action actions will be invoked
      */
     fun transition(startState: S, event: E, action: AsyncStateAction<C, A, R>?) =
-        defaultStateMap.transition(startState, event, action)
+        defaultStateMap.transition(startState, event, null, null, action)
 
     /**
      * This function defines an action to be invoked when no action is found matching the current state and event.
@@ -182,4 +196,6 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
      */
     fun exit(currentState: S, action: DefaultEntryExitAction<C, S, A>) =
         defaultStateMap.exit(currentState, action)
-}typealias AsyncAnyStateMachineBuilder<S, E, C> = AsyncStateMachineBuilder<S, E, C, Any, Any>
+}
+
+typealias AsyncAnyStateMachineBuilder<S, E, C> = AsyncStateMachineBuilder<S, E, C, Any, Any>

@@ -9,7 +9,6 @@
 package io.jumpco.open.kfsm.viz
 
 import io.jumpco.open.kfsm.TransitionType
-import io.jumpco.open.kfsm.viz.TransitionView
 
 public fun plantUml(input: Iterable<TransitionView>): String {
     val output = StringBuilder()
@@ -27,7 +26,7 @@ public fun plantUml(input: Iterable<TransitionView>): String {
     }
     output.append("state default {\n")
     input.filter { it.sourceMap == "default" }.forEach { transition ->
-        output.append("  ");
+        output.append("  ")
         output.append(printPlantUmlTransition(transition))
         output.append("\n")
     }
@@ -39,9 +38,10 @@ public fun plantUml(input: Iterable<TransitionView>): String {
 
 private fun printPlantUmlTransition(transition: TransitionView): String {
     val startName =
-        if (transition.type == TransitionType.DEFAULT) transition.sourceMap else
+        if (transition.type == TransitionType.DEFAULT) transition.sourceMap else {
             if ("<<start>>" == transition.start) "[*]" else transition.start
                 ?: transition.target
+        }
     val endName = transition.target ?: transition.start
     val event = if (transition.automatic) "<<automatic>>" else transition.event
     return if (event != null) {

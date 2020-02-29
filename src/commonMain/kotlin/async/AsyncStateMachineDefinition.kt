@@ -7,7 +7,11 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
+
+import io.jumpco.open.kfsm.ExternalState
+import io.jumpco.open.kfsm.StateMapQuery
+import io.jumpco.open.kfsm.StateQuery
 
 class AsyncStateMachineDefinition<S, E, C, A, R>(
     val defaultInitialState: S?,

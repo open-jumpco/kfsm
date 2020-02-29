@@ -82,7 +82,11 @@ class DslStateMapEventHandler<S, E, C, A, R>(
      * @param guard The guard expression must be met before the transition is considered.
      * @param action The optional action that may be executed
      */
-    fun onEvent(event: E, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?): DslStateMapEventHandler<S, E, C, A, R> {
+    fun onEvent(
+        event: E,
+        guard: StateGuard<C, A>,
+        action: SyncStateAction<C, A, R>?
+    ): DslStateMapEventHandler<S, E, C, A, R> {
         fsm.transition(currentState, event, guard, action)
         return this
     }
@@ -103,6 +107,7 @@ class DslStateMapEventHandler<S, E, C, A, R>(
         fsm.pushTransition(currentState, event, targetMap, targetState, action)
         return this
     }
+
     /**
      * Defines a push transition on event for a targetMap and targetState when the guard evaluates to `true`
      * @param event The event the will trigger the transition.
@@ -150,7 +155,11 @@ class DslStateMapEventHandler<S, E, C, A, R>(
         return this
     }
 
-    fun onEventPop(event: E, guard: StateGuard<C, A>, action: SyncStateAction<C, A, R>?): DslStateMapEventHandler<S, E, C, A, R> {
+    fun onEventPop(
+        event: E,
+        guard: StateGuard<C, A>,
+        action: SyncStateAction<C, A, R>?
+    ): DslStateMapEventHandler<S, E, C, A, R> {
         fsm.popTransition(currentState, event, null, null, guard, action)
         return this
     }
@@ -206,4 +215,3 @@ class DslStateMapEventHandler<S, E, C, A, R>(
         fsm.automaticPush(currentState, targetMap, targetState, guard, action)
     }
 }
-

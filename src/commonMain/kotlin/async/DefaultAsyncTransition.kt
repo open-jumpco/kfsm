@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Open JumpCO
+ * Copyright (c) 2020. Open JumpCO
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -7,22 +7,16 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.async
 
-/**
- * @suppress
- * Represents a transition from a given state and event.
- * @param startState The given state
- * @param event The given event
- * @param targetState when optional represents an internal transition
- * @param action An optional lambda that will be invoked.
- */
-open class SimpleSyncTransition<S, E, C, A, R>(
-    internal val startState: S,
-    internal val event: E?,
+import io.jumpco.open.kfsm.AsyncStateAction
+import io.jumpco.open.kfsm.TransitionType
+
+class DefaultAsyncTransition<S, E, C, A, R>(
+    internal val event: E,
     targetState: S?,
     targetMap: String?,
     automatic: Boolean,
     type: TransitionType,
-    action: SyncStateAction<C, A, R>?
-) : SyncTransition<S, E, C, A, R>(targetState, targetMap, automatic, type, action)
+    action: AsyncStateAction<C, A, R>?
+) : AsyncTransition<S, E, C, A, R>(targetState, targetMap, automatic, type, action)

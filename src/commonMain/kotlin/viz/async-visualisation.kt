@@ -9,14 +9,14 @@
 
 package io.jumpco.open.kfsm.viz
 
-import io.jumpco.open.kfsm.AsyncGuardedTransition
-import io.jumpco.open.kfsm.AsyncStateMachineDefinition
-import io.jumpco.open.kfsm.AsyncStateMapDefinition
-import io.jumpco.open.kfsm.AsyncTransition
-import io.jumpco.open.kfsm.AsyncTransitionRules
-import io.jumpco.open.kfsm.DefaultAsyncTransition
-import io.jumpco.open.kfsm.SimpleAsyncTransition
 import io.jumpco.open.kfsm.TransitionType
+import io.jumpco.open.kfsm.async.AsyncGuardedTransition
+import io.jumpco.open.kfsm.async.AsyncStateMachineDefinition
+import io.jumpco.open.kfsm.async.AsyncStateMapDefinition
+import io.jumpco.open.kfsm.async.AsyncTransition
+import io.jumpco.open.kfsm.async.AsyncTransitionRules
+import io.jumpco.open.kfsm.async.DefaultAsyncTransition
+import io.jumpco.open.kfsm.async.SimpleAsyncTransition
 
 /**
  * The visualization provided by these methods will not be able to provide any detail about guard expressions or actions.
@@ -142,4 +142,3 @@ fun <S, E, C, A, R> makeView(
 ) {
     makeView(definition, mapName, from?.toString(), event, rules?.transition, output)
 }
-
