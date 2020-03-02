@@ -184,6 +184,38 @@ val definition = stateMachine(
 }.build()
 ----
 
+=== `asyncStateMachine`
+
+This method provides for creating a statemachine definition and instances that have `suspend` functions as actions.
+This also adds the support for `timeout` on the state map handler.
+
+* link:javadoc/kfsm/io.jumpco.open.kfsm.async/async-state-machine.html[asyncStateMachine]
+* link:javadoc/kfsm/io.jumpco.open.kfsm.async/-async-state-machine-builder/state-machine.html
+
+There are 3 overloaded variations on `stateMachine` for providing `Any` as the return type and the argument to events/actions in cases where they are not used.
+[source,kotlin,numbered]
+----
+// using global function
+val definition = asyncStateMachine(
+    State.values().toSet(),
+    Event.values().toSet(),
+    ContextType::class,
+    ArgType::class,
+    ReturnType::class
+) {
+    default { // global defaults
+    }
+    initialState { // initial state expression
+    }
+    initialStates { // define expression for deriving state stack for nested maps.
+    }
+    stateMap { // define named statemap
+    }
+    whenState { // state definition
+    }
+}.build()
+----
+
 === `default`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/default.html[DslStateMachineHandler::default]
 * Mandatory: _Optional_
@@ -535,3 +567,10 @@ whenState(State.S1) {
     }
 }
 ----
+==== `timeout`
+* Arguments: `(targetState: S, timeout: Long, [guard:{}])`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm.async/-async-dsl-state-map-event-handler/timeout.html[AsyncDslStateMapEventHandler::onEventPop]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 2 versions. One adds the support for a guard expression that will be evaluated and the action will only trigger if the guard evaluates true.
