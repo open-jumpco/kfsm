@@ -37,9 +37,9 @@ The state machine implementation supports events triggering transitions from one
 * [x] Typed event return values
 * [x] Simple Visualization
 * [x] Detail Visualization
-* [ ] Gradle Plugin for Visualization
-* [ ] Timers / Timeouts
-* [ ] Corountines
+* [x] Gradle Plugin for Visualization
+* [x] Timeouts
+* [x] Corountines
 * [ ] Different type of contexts for Nested statemaps
 
 ## Quick Tutorial
@@ -245,7 +245,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:1.0.1'
+    implementation 'io.jumpco.open:kfsm-jvm:1.0.2'
 }
 ----
 
@@ -254,7 +254,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:1.0.1'
+    implementation 'io.jumpco.open:kfsm-js:1.0.2'
 }
 ----
 
@@ -263,7 +263,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:1.0.1'
+    implementation 'io.jumpco.open:kfsm-linuxX64:1.0.2'
 }
 ----
 
@@ -272,7 +272,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:1.0.1'
+    implementation 'io.jumpco.open:kfsm-mingwX64:1.0.2'
 }
 ----
 
@@ -281,7 +281,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:1.0.1'
+    implementation 'io.jumpco.open:kfsm-macosX64:1.0.2'
 }
 ----
 

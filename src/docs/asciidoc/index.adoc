@@ -35,10 +35,8 @@ This Finite state machine implementation has the following features:
 * Simple Visualization.
 * Detailed Visualization.
 * Visualization Gradle Plugin
-
-== Todo
-* [ ] Timeouts and Timers
-* [ ] Coroutines
+* Coroutines
+* Timeout Transitions
 
 
 == Tutorial

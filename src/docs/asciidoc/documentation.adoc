@@ -17,7 +17,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:1.0.1'
+    implementation 'io.jumpco.open:kfsm-jvm:1.0.2'
 }
 ----
 
@@ -26,7 +26,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:1.0.1'
+    implementation 'io.jumpco.open:kfsm-js:1.0.2'
 }
 ----
 
@@ -35,7 +35,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-wasm32:1.0.1'
+    implementation 'io.jumpco.open:kfsm-wasm32:1.0.2'
 }
 ----
 
@@ -44,7 +44,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:1.0.1'
+    implementation 'io.jumpco.open:kfsm-linuxX64:1.0.2'
 }
 ----
 
@@ -53,7 +53,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:1.0.1'
+    implementation 'io.jumpco.open:kfsm-mingwX64:1.0.2'
 }
 ----
 
@@ -62,7 +62,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:1.0.1'
+    implementation 'io.jumpco.open:kfsm-macosX64:1.0.2'
 }
 ----
 == Operation
@@ -163,26 +163,10 @@ The top level element is `stateMachine` either by using the function
 There are 3 overloaded variations on `stateMachine` for providing `Any` as the return type and the argument to events/actions in cases where they are not used.
 [source,kotlin,numbered]
 ----
-// using builder function
-val definition = StateMachineBuilder<StateEnum, EventEnum, ContextType, ArgType, ReturnType>(
-    StateEnum.values().toSet(),
-    EventEnum.values().toSet()
-).stateMachine {
-    default { // global defaults
-    }
-    initialState { // initial state expression
-    }
-    initialStates { // define expression for deriving state stack for nested maps.
-    }
-    stateMap { // define named statemap
-    }
-    whenState { // state definition
-    }
-}.build()
 // using global function
 val definition = stateMachine(
-    StateEnum.values().toSet(),
-    EventEnum.values().toSet(),
+    State.values().toSet(),
+    Event.values().toSet(),
     ContextType::class,
     ArgType::class,
     ReturnType::class
@@ -357,25 +341,17 @@ whenState(State.STATE) {
     }
     onEvent(Event.EV2 to State.S1, guard = {flag == 1 }) { // external transition with guard expression
     }
-    onEvent(Event.EV2 to State.S1) { // external transition
-    }
-    onEvent(Event.EV1, guard = { flag == 2 }) { // internal transition with guard expression
-    }
-    onEvent(Event.EV1) { // internal guard expression
-    }
     onEventPush(Event.EV2, "mapName", State.S1, gaurd = { flag == 1}) { // push transition to new map with guard expression
-    }
-    onEventPush(Event.EV2, "mapName", State.S1) { // push transition to new map
-    }
-    onEventPop(Event.EV3) { // pop transition without targetState
-    }
-    onEventPop(Event.EV3, State.S2) { // pop transition changing state while executing current action only
     }
     onEventPop(Event.EV3, "newMap", State.S3) { // pop transition leading into new push transition while executing current action only
     }
     automatic(State.S1, guard = { flag == 1}) { // automatic transition to new state when guard is met
     }
-    automatic(State.S1) { // automatic transition to new state
+    timeout(State.S1, timeout, gaurd = { expression }) { // transition to S1 when timeout is triggered and guard is true
+    }
+    timeoutPop(State.S1, timeout, gaurd = { expression }) { // transition to S1 when timeout is triggered and guard is true
+    }
+    timeoutPush(State.S1, "mapName",  timeout, gaurd = { expression }) { // transition to S1 when timeout is triggered and guard is true
     }
 }
 ----
