@@ -171,6 +171,35 @@ val definition = stateMachine(
     ArgType::class,
     ReturnType::class
 ) {
+    defaultInitialState = State.S1 // optional start state
+    default { // global defaults
+    }
+    initialState { // initial state expression
+    }
+    initialStates { // define expression for deriving state stack for nested maps.
+    }
+    stateMap { // define named statemap
+    }
+    whenState { // state definition
+    }
+}.build()
+----
+
+=== `functionalStateMachine`
+The top level element is `functionalStateMachine` either by using the function
+
+* link:javadoc/kfsm/io.jumpco.open.kfsm/functional-state-machine.html[functionalStateMachine]
+
+It provides the same as `stateMachine` but in this case the Context, argument and return types are all the same.
+[source,kotlin,numbered]
+----
+// using global function
+val definition = stateMachine(
+    State.values().toSet(),
+    Event.values().toSet(),
+    ContextType::class
+) {
+    defaultInitialState = State.S1 // optional start state
     default { // global defaults
     }
     initialState { // initial state expression
@@ -203,6 +232,35 @@ val definition = asyncStateMachine(
     ArgType::class,
     ReturnType::class
 ) {
+    defaultInitialState = State.S1 // optional
+    default { // global defaults
+    }
+    initialState { // initial state expression
+    }
+    initialStates { // define expression for deriving state stack for nested maps.
+    }
+    stateMap { // define named statemap
+    }
+    whenState { // state definition
+    }
+}.build()
+----
+
+=== `asyncFunctionalStateMachine`
+
+This is the same as `asyncStateMachine` except that Context, argument and return types are all the same.
+
+* link:javadoc/kfsm/io.jumpco.open.kfsm.async/async-functional-state-machine.html[asyncFunctionalStateMachine]
+
+[source,kotlin,numbered]
+----
+// using global function
+val definition = asyncFunctionalStateMachine(
+    State.values().toSet(),
+    Event.values().toSet(),
+    ContextType::class
+) {
+    defaultInitialState = State.S1 // optional
     default { // global defaults
     }
     initialState { // initial state expression
@@ -379,11 +437,12 @@ whenState(State.STATE) {
     }
     automatic(State.S1, guard = { flag == 1}) { // automatic transition to new state when guard is met
     }
-    timeout(State.S1, timeout, gaurd = { expression }) { // transition to S1 when timeout is triggered and guard is true
+    // timeout is limited to AsyncStateMachineBuilder
+    timeout(State.S1, timeout, [guard = { expression }]) { // transition to S1 when timeout is triggered and guard is true
     }
-    timeoutPop(State.S1, timeout, gaurd = { expression }) { // transition to S1 when timeout is triggered and guard is true
+    timeoutPop(State.S1, timeout, [guard = { expression }]) { // transition to S1 when timeout is triggered and guard is true
     }
-    timeoutPush(State.S1, "mapName",  timeout, gaurd = { expression }) { // transition to S1 when timeout is triggered and guard is true
+    timeoutPush(State.S1, "mapName",  timeout, [guard = { expression }]) { // transition to S1 when timeout is triggered and guard is true
     }
 }
 ----
@@ -567,6 +626,7 @@ whenState(State.S1) {
     }
 }
 ----
+
 ==== `timeout`
 * Arguments: `(targetState: S, timeout: Long, [guard:{}])`
 * Handler: link:javadoc/kfsm/io.jumpco.open.kfsm.async/-async-dsl-state-map-event-handler/timeout.html[AsyncDslStateMapEventHandler::onEventPop]
@@ -574,3 +634,20 @@ whenState(State.S1) {
 * Cardinality: _Multiple_
 
 There are 2 versions. One adds the support for a guard expression that will be evaluated and the action will only trigger if the guard evaluates true.
+
+==== `timeoutPop`
+* Arguments: `([targetMap: String], targetState: S, timeout: Long, [guard:{}])`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm.async/-async-dsl-state-map-event-handler/timeout-pop.html[AsyncDslStateMapEventHandler::timeoutPop]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 5 versions.
+Combinations exist to add the optional guard expression and the targetMap.
+
+==== `timeoutPush`
+* Arguments: `(targetMap: String, targetState: S, timeout: Long, [guard:{}])`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm.async/-async-dsl-state-map-event-handler/timeout-push.html[AsyncDslStateMapEventHandler::timeoutPush]
+* Mandatory: _Optional_
+* Cardinality: _Multiple_
+
+There are 2 variations, the 2nd adds the optional guard expression.
