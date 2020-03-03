@@ -96,10 +96,10 @@ The current state map is usually top-level state map unless you have defined nam
 === Send Event
 The normal operation is to invoke the following actions:
 
-* sendEvent
-** if(external) exitAction
-** action
-** if(external) entryAction
+* `sendEvent`
+** `if(external) exitAction()`
+** `action()`
+** `if(external) entryAction()`
 
 The exit action is chosen from one of:
 
