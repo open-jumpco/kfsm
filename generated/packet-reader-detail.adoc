@@ -1,0 +1,148 @@
+== PacketReaderFSM State Chart
+
+=== PacketReaderFSM State Map
+
+|===
+| Start | Event[Guard] | Target | Action
+
+| [*]
+| CTRL `[{byte->byte == CharacterConstants.SOH}]`
+| RCVPCKT
+a| 
+
+| RCVPCKT
+| CTRL `[{byte->byte == CharacterConstants.STX}]`
+| RCVDATA
+a| [source,kotlin]
+----
+{
+addField()
+}
+----
+
+| RCVPCKT
+| BYTE
+| RCVCHK
+a| [source,kotlin]
+----
+{byte->
+require(byte != null)
+addChecksum(byte)
+}
+----
+
+| RCVDATA
+| BYTE
+| RCVDATA
+a| [source,kotlin]
+----
+{byte->
+require(byte != null)
+addByte(byte)
+}
+----
+
+| RCVDATA
+| CTRL `[{byte->byte == CharacterConstants.ETX}]`
+| RCVPCKT
+a| [source,kotlin]
+----
+{
+endField()
+}
+----
+
+| RCVDATA
+| ESC
+| RCVESC
+a| 
+
+| RCVESC
+| ESC
+| RCVDATA
+a| [source,kotlin]
+----
+{
+addByte(CharacterConstants.ESC)
+}
+----
+
+| RCVESC
+| CTRL
+| RCVDATA
+a| [source,kotlin]
+----
+{byte->
+require(byte != null)
+addByte(byte)
+}
+----
+
+| RCVCHK
+| BYTE
+| RCVCHK
+a| [source,kotlin]
+----
+{byte->
+require(byte != null)
+addChecksum(byte)
+}
+----
+
+| RCVCHK
+| ESC
+| RCVCHKESC
+a| 
+
+| RCVCHK
+| CTRL `[{byte->byte == CharacterConstants.EOT}]`
+| CHKSUM
+a| [source,kotlin]
+----
+{
+checksum()
+}
+----
+
+| CHKSUM
+| \<<automatic>> `[{!checksumValid}]`
+| [*]
+a| [source,kotlin]
+----
+{
+sendNACK()
+}
+----
+
+| CHKSUM
+| \<<automatic>> `[{checksumValid}]`
+| [*]
+a| [source,kotlin]
+----
+{
+sendACK()
+}
+----
+
+| RCVCHKESC
+| ESC
+| RCVCHK
+a| [source,kotlin]
+----
+{
+addChecksum(CharacterConstants.ESC)
+}
+----
+
+| RCVCHKESC
+| CTRL
+| RCVCHK
+a| [source,kotlin]
+----
+{byte->
+require(byte != null)
+addChecksum(byte)
+}
+----
+|===
+

@@ -1,0 +1,24 @@
+@startuml
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam state {
+    BackgroundColor LightBlue
+}
+state PacketReaderFSM {
+[*] --> RCVPCKT : CTRL [{byte->byte == CharacterConstants.SOH}]
+RCVPCKT --> RCVDATA : CTRL [{byte->byte == CharacterConstants.STX}]\l<<action>> {\laddField()\l}
+RCVPCKT --> RCVCHK : BYTE\l<<action>> {byte->\lrequire(byte != null)\laddChecksum(byte)\l}
+RCVDATA --> RCVDATA : BYTE\l<<action>> {byte->\lrequire(byte != null)\laddByte(byte)\l}
+RCVDATA --> RCVPCKT : CTRL [{byte->byte == CharacterConstants.ETX}]\l<<action>> {\lendField()\l}
+RCVDATA --> RCVESC : ESC
+RCVESC --> RCVDATA : ESC\l<<action>> {\laddByte(CharacterConstants.ESC)\l}
+RCVESC --> RCVDATA : CTRL\l<<action>> {byte->\lrequire(byte != null)\laddByte(byte)\l}
+RCVCHK --> RCVCHK : BYTE\l<<action>> {byte->\lrequire(byte != null)\laddChecksum(byte)\l}
+RCVCHK --> RCVCHKESC : ESC
+RCVCHK --> CHKSUM : CTRL [{byte->byte == CharacterConstants.EOT}]\l<<action>> {\lchecksum()\l}
+CHKSUM --> [*] : <<automatic>> [{!checksumValid}]\l<<action>> {\lsendNACK()\l}
+CHKSUM --> [*] : <<automatic>> [{checksumValid}]\l<<action>> {\lsendACK()\l}
+RCVCHKESC --> RCVCHK : ESC\l<<action>> {\laddChecksum(CharacterConstants.ESC)\l}
+RCVCHKESC --> RCVCHK : CTRL\l<<action>> {byte->\lrequire(byte != null)\laddChecksum(byte)\l}
+}
+@enduml

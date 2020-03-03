@@ -100,7 +100,7 @@ class TimeoutSecureTurnstileTests {
         runBlocking { fsm.card(2) }
         assertTrue { turnstile.locked }
     }
-
+    // tag::test[]
     @Test
     fun `test timeout`() {
         val turnstile = TimerSecureTurnstile()
@@ -117,4 +117,5 @@ class TimeoutSecureTurnstileTests {
             assertTrue { turnstile.locked }
         }
     }
+    // end::test[]
 }

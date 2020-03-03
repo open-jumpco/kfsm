@@ -7,9 +7,11 @@ plugins {
     id 'org.jlleitschuh.gradle.ktlint' version '9.1.1'
     id 'org.jlleitschuh.gradle.ktlint-idea' version '9.1.1'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
+    id 'io.jumpco.open.kfsm.viz-plugin' version '1.0.9'
 }
 
 repositories {
+    mavenLocal()
     jcenter()
     mavenCentral()
 }
@@ -115,5 +117,48 @@ project.afterEvaluate {
         }
     } else {
         logger.warn("GRAPHVIZ_DOT env var not found")
+    }
+}
+
+assemble.dependsOn('generateFsmViz')
+docs.dependsOn('generateFsmViz')
+
+kfsmViz {
+    fsm('TurnstileFSM') {
+        outputFolder = file('generated')
+        input = file('src/commonTest/kotlin/TurnstileTypes.kt')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = 'turnstile-detail'
+    }
+    fsm('PayingTurnstileFSM') {
+        outputFolder = file('generated')
+        input = file('src/commonTest/kotlin/PayingTurnstileTypes.kt')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = 'paying-turnstile-detail'
+    }
+
+    fsm('SecureTurnstileFSM') {
+        outputFolder = file('generated')
+        input = file('src/commonTest/kotlin/SecureTurnstile.kt')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = 'secure-turnstile-detail'
+    }
+
+    fsm('TimerSecureTurnstileFSM') {
+        outputFolder = file('generated')
+        input = file('src/commonTest/kotlin/TimeoutSecureTurnstile.kt')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = 'timeout-turnstile-detail'
+    }
+    fsm('PacketReaderFSM') {
+        outputFolder = file('generated')
+        input = file('src/jvmTest/kotlin/PacketReaderTests.kt')
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = 'packet-reader-detail'
     }
 }

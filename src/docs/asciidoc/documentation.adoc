@@ -651,3 +651,13 @@ Combinations exist to add the optional guard expression and the targetMap.
 * Cardinality: _Multiple_
 
 There are 2 variations, the 2nd adds the optional guard expression.
+
+=== Notes on concurrency and coroutines.
+The implementations of the AsyncTimer on the different platform work slightly differently depending on the platform.
+
+==== JVM
+The code in the JVM implemenetation uses `CoroutineScope(Dispatchers.Default)` to `launch` the trigger. Your action will be responsible for ensuring proper handling if a UI thread is impacted.
+
+==== JavaScript
+The current code assumes you are executing in the browser in uses `window.setTimeout to configure a function that will use `GlobalScope` to `launch` the trigger.
+

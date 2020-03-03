@@ -1,0 +1,101 @@
+== PayingTurnstileFSM State Chart
+
+=== State Map coins
+
+|===
+| Start | Event[Guard] | Target | Action
+
+| COINS
+| \<<automatic>> `[{coins > requiredCoins}]`
+| UNLOCKED
+a| [source,kotlin]
+----
+{
+println("automaticPop:returnCoin")
+returnCoin(coins-requiredCoins)
+unlock()
+reset()
+}
+----
+
+| COINS
+| \<<automatic>> `[{coins == requiredCoins}]`
+| UNLOCKED
+a| [source,kotlin]
+----
+{
+println("automaticPop")
+unlock()
+reset()
+}
+----
+
+| COINS
+| COIN
+| COINS
+a| [source,kotlin]
+----
+{value->
+require(value != null){"argument required for COIN"}
+coin(value)
+println("Coins=$coins")
+if(coins < requiredCoins){
+println("Please add ${requiredCoins-coins}")
+}
+}
+----
+|===
+
+=== PayingTurnstileFSM State Map
+
+|===
+| Start | Event[Guard] | Target | Action
+
+| LOCKED
+| COIN
+| COINS
+a| [source,kotlin]
+----
+{value->
+require(value != null){"argument required for COIN"}
+coin(value)
+unlock()
+reset()
+}
+----
+
+| LOCKED
+| COIN `[{value->require(value != null){"argument required for COIN"};value+coins < requiredCoins;}]`
+| COINS
+a| [source,kotlin]
+----
+{value->
+require(value != null){"argument required for COIN"}
+println("PUSH TRANSITION")
+coin(value)
+println("Coins=$coins, Please add ${requiredCoins-coins}")
+}
+----
+
+| UNLOCKED
+| COIN
+| UNLOCKED
+a| [source,kotlin]
+----
+{value->
+require(value != null){"argument required for COIN"}
+returnCoin(coin(value))
+}
+----
+
+| UNLOCKED
+| PASS
+| LOCKED
+a| [source,kotlin]
+----
+{
+lock()
+}
+----
+|===
+

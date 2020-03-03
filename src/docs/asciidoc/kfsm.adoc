@@ -5,7 +5,7 @@ We want to ensure that the `lock()` function is only called when the lock is not
 Then we use the DSL to declare a definition of a statemachine matching the diagram:
 
 ==== State Diagram
-image::turnstile-fsm.png[LockStateDiagram]
+image::turnstile_detail.png[LockStateDiagram]
 
 ==== State Table
 
@@ -107,7 +107,7 @@ If we update the turnstile to include the value of the coin in the coin event we
 A named state where decisions regarding coins are made.
 We push to `coins` with COINS state and then the automatic states will be triggered if the guards are met.
 
-image::paying-turnstile-fsm.png[Paying Turnstile]
+image::paying_turnstile_detail.png[Paying Turnstile]
 
 ==== State Table
 
@@ -238,7 +238,7 @@ We would add a complexity that allows for an override card to allow cards to pas
 We will use guard expressions to identify the override card and the validity of the card.
 When the override card is tapped a 2nd time it will cancel the override or lock the turnstile depending on the state.
 
-image::secure-turnstile-fsm.png[Secure Turnstile FSM]
+image::secure_turnstile_detail.png[Secure Turnstile FSM]
 
 ==== State Table
 
@@ -325,7 +325,7 @@ All events have a parameter which is the byte received and the event type is eit
 * CTRL is for SOH,STX,ETX,EOT, ACK, NAK
 * BYTE all other characters
 
-image::packet-reader-fsm-guard.png[]
+image::packet_reader_detail.png[]
 
 ==== Context Classes
 
@@ -403,6 +403,123 @@ The `handleEventMethod` will be:
     }
 ----
 
+=== Secure Turnstile with Timeout Example
+
+We updated the Secure Turnstile with a timeout condition.
+
+image::timeout_turnstile_detail.png[Timeout Secure Turnstile FSM]
+
+==== State Table
+
+=== TimerSecureTurnstileFSM State Map
+
+|===
+| Start | Event[Guard] | Target | Action
+
+| LOCKED
+| CARD `[{cardId->requireNotNull(cardId);isOverrideCard(cardId)&&overrideActive;}]`
+| LOCKED
+a| [source,kotlin]
+----
+{
+cancelOverride()
+}
+----
+
+| LOCKED
+| CARD `[{cardId->requireNotNull(cardId);isOverrideCard(cardId);}]`
+| LOCKED
+a| [source,kotlin]
+----
+{
+activateOverride()
+}
+----
+
+| LOCKED
+| CARD `[{cardId->requireNotNull(cardId);overrideActive\|\|isValidCard(cardId);}]`
+| UNLOCKED
+a| [source,kotlin]
+----
+{
+unlock()
+}
+----
+
+| LOCKED
+| CARD `[{cardId->requireNotNull(cardId){"cardId is required"};!isValidCard(cardId);}]`
+| LOCKED
+a| [source,kotlin]
+----
+{cardId->
+requireNotNull(cardId)
+invalidCard(cardId)
+}
+----
+
+| UNLOCKED
+| \<<timeout = 500>>
+| LOCKED
+a| [source,kotlin]
+----
+{
+println("Timeout. Locking")
+lock()
+}
+----
+
+| UNLOCKED
+| CARD `[{cardId->requireNotNull(cardId);isOverrideCard(cardId);}]`
+| LOCKED
+a| [source,kotlin]
+----
+{
+lock()
+}
+----
+
+| UNLOCKED
+| PASS
+| LOCKED
+a| [source,kotlin]
+----
+{
+lock()
+}
+----
+|===
+
+
+
+==== Context class
+
+The context class doesn't make decisions about the behaviour of the turnstile.
+The context will provide information about the state of turnstile and validity of cards
+The context class stores values and will update value in very specific ways.
+[source,kotlin,numbered]
+----
+include::../../commonTest/kotlin/TimeoutSecureTurnstile.kt[tag=context]
+----
+
+==== States and Events
+
+[source,kotlin,numbered]
+----
+include::../../commonTest/kotlin/TimeoutSecureTurnstile.kt[tag=states-events]
+----
+
+==== State machine definition packaged
+[source,kotlin,numbered]
+----
+include::../../commonTest/kotlin/TimeoutSecureTurnstile.kt[tag=fsm]
+----
+
+==== Test
+[source,kotlin,numbered]
+----
+include::../../jvmTest/kotlin/TimeoutSecureTurnstileTests.kt[tag=test]
+----
+
 === Further thoughts
 
 The escape handling from the packet reader could be a separate statemap.
@@ -412,9 +529,3 @@ An interface/class exposed to the substate instead of the full context.
 In this example `Block` will be exposed to the stateMap. The stateMap can then pop after adding the byte.
 In the case of an invalid character the statemap will still transition to the end state.
 
-The Secure Turnstile is an example of where a timeout would be useful. Allowing override should only be active for a limited period.
-This means it could be done by creating a timer that when triggered will cancel the override.
-The allow override could also be handled with a statemap which behaves differently but the states in this state map will all have timeouts associated.
-The timeout will trigger an optional transition and action.
-
-A requirement for timeout handling is correct concurrent handling of events.
