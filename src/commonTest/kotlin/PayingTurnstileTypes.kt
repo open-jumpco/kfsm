@@ -90,10 +90,7 @@ class PayingTurnstileFSM(
     val fsm = if (initialState != null) {
         definition.create(turnstile, initialState)
     } else {
-        definition.create(
-            turnstile,
-            PayingTurnstileStates.LOCKED
-        )
+        definition.create(turnstile)
     }
 
     fun coin(value: Int) {
@@ -154,8 +151,7 @@ class PayingTurnstileFSM(
                         unlock()
                         reset()
                     }
-                    onEvent(PayingTurnstileEvents.COIN) { value ->
-                        require(value != null) { "argument required for COIN" }
+                    onEvent(PayingTurnstileEvents.COIN) { value -> require(value != null) { "argument required for COIN" }
                         coin(value)
                         println("Coins=$coins")
                         if (coins < requiredCoins) {
@@ -174,8 +170,7 @@ class PayingTurnstileFSM(
                 }
                 // The coins add up to more than required
                 onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
-                    guard = { value ->
-                        require(value != null) { "argument required for COIN" }
+                    guard = { value -> require(value != null) { "argument required for COIN" }
                         value + coins < requiredCoins
                     }) { value ->
                     require(value != null) { "argument required for COIN" }
@@ -185,8 +180,7 @@ class PayingTurnstileFSM(
                 }
             }
             whenState(PayingTurnstileStates.UNLOCKED) {
-                onEvent(PayingTurnstileEvents.COIN) { value ->
-                    require(value != null) { "argument required for COIN" }
+                onEvent(PayingTurnstileEvents.COIN) { value -> require(value != null) { "argument required for COIN" }
                     returnCoin(coin(value))
                 }
                 onEvent(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
