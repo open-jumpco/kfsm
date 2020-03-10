@@ -83,23 +83,20 @@ fsm.coin()
 
 link:https://github.com/open-jumpco/kfsm-samples[Samples]
 
-image::statemachine-model.png[StateMachineModel]
-
 === Advanced Features
-We can add arguments to events and use named state maps with push / pop and automatic transitions.
+We can add an argument to events and use named state maps with push / pop and automatic transitions.
 
-Arguments are sent as follows:
+The argument is sent as follows:
 [source,kotlin,numbered]
 ----
-fsm.sendEvent(EVENT1, arg1)
+fsm.sendEvent(EVENT1, arg)
 ----
 
 The argument is references in the action as follows:
 [source,kotlin,numbered]
 ----
-onEvent(EVENT1) { args ->
-    val value = args[0] as Int
-    // use value
+onEvent(EVENT1) { arg ->
+    val value = arg as Int
 }
 ----
 
