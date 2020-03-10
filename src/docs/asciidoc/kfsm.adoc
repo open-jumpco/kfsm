@@ -44,13 +44,13 @@ We declare 2 enums, one for the possible states and one for the possible events.
 
 [source,kotlin,numbered]
 ----
-include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=states-events]
+include::../../commonTest/kotlin/TurnstileTypes.kt[tag=states-events]
 ----
 
 ==== Packaged definition and execution
 [source,kotlin,numbered]
 ----
-include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]
+include::../../commonTest/kotlin/TurnstileTypes.kt[tag=packaged]
 ----
 
 
@@ -175,6 +175,10 @@ The statemap  will be entered when there are coins.
 The automatic transitions will be triggered based on the guard expressions.
 
 ==== State machine definition packaged
+
+This includes an example of externalizing the state and creating an instance using a previously externalized state.
+The `externalState` method provides a list of states for the case where there are nested statemaps.
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/PayingTurnstileTypes.kt[tag=packaged]

@@ -65,67 +65,47 @@ dependencies {
     implementation 'io.jumpco.open:kfsm-macosX64:1.0.2'
 }
 ----
-== Operation
+== Finite state machines.
 
-The finite state machine follows a specific set of rules.
-This section describes the decision making and order of execution.
+This section will describe the life-cycle and philosophy behind this implementation of Finite state machines.
+
+=== Definition
+An FSM is defined using a DSL as described further in this document.
+
+During this definition the user describes state types, events types as well as the behaviour of the FSM to events and how it will operate on a provided context.
+
+The state and event types should be a value types.
+
+The events may receive an argument and may return a value. The argument for all event must be the same type. However sealed classes can be used to simplify the representation of different argument types.
 
 The state machine will define one or more state maps each representing a subset of possible states of the same type.
 
-The state machine will receive events, constrained by set of events. The events no longer have to be an enum class,
-only a type with equals and hashCode implementations.
+The state machine will receive events, constrained by set of events. The events does not have to be enum, only a value with `equals` and `hashCode` implementations.
 
 The state machine will apply actions to a context. The context represents the work that need to be performed.
-
-An event may have arguments.
 
 An event may trigger a state transition which defines actions to apply when the state machine is in a specific state.
 
 Transitions may have a guard expression that has to evaluate to `true` to allow execution of transition.
 
-Automatic transitions are associated with states and have no events.
-Automatic transitions will be executed if the specific state applies after the exit action.
+An automatic transition can be defined on a state and has no events. Automatic transitions will be executed if the specific state is current after the exit action.
 
-The state can be any type, even though we have been using `enum class` in all samples.
+A timeout transition can be defined on a state and is triggered a configured amount of time after the entry into the state. The transition will be trigger upon timeout unless a configured guard expression doesn't evaluate to `true`.
 
-image::statemachine-sequence.png[FSM sequence]
+The state can be any value type providing `equals` and `hashCode`, even though we have been using `enum class` most examples.
 
-When sendEvent is called the state machine applies the event to the current state map.
-The current state map is usually top-level state map unless you have defined named maps and used a push transition.
+=== Instance
+The philosophy behind the design is that the finite state machine can be used when needed by creating an instance using the definition and providing it with the context and optionally a previously externalized state.
+The state machine can also be defined to derive the current state from the provided context.
 
-=== Send Event
-The normal operation is to invoke the following actions:
+Then events are sent to the FSM with an argument if needed and this may trigger the defined actions.
 
-* `sendEvent`
-** `if(external) exitAction()`
-** `action()`
-** `if(external) entryAction()`
+The FSM provides for a query to determine which events are allowed for the current or a given state. This is useful when user interaction controls need to be disabled or in the case of a back-end application using HATEOAS can add links limited to allowed events.
 
-The exit action is chosen from one of:
+If the FSM is configured with timeout transitions the instance will need to remain active. This is typically only used in UI or embedded interactive applications.
 
-* `stateMap/whenState/onExit`
-* `stateMap/whenState/default/onExit`
-* `stateMap/default/onExit`
-
-The action is chosen from one of:
-
-* `stateMap/whenState/onEvent`
-* `stateMap/whenState/default/action`
-* `stateMap/default/action`
-
-The entry action is chosen from one of:
-
-* `stateMap/whenState/onEntry`
-* `stateMap/whenState/default/onEntry`
-* `stateMap/default/onEntry`
-
-The combination of current state and event determines a set of transition rules that have been applied to that combination by one or more definitions.
-If the transition rules contains guard transitions the guard expressions are evaluated until one evaluates `true`.
-The `onEntry` and `onExit` action are only invoked for `external` transitions.
-
-External transitions have an explicit target state defined. If the target state is not defined it is an internal transition.
-
-The currentState determines the exit action. The target state determines the entry action.
+If the FSM is used in a stateless environment that is driven by requests or events the state can be externalised after use if it isn't derived from the provided context.
+The externalised state is a list of pairs making up the state type and the name of the associated statemap.
 
 === Named Maps and Push / Pop Transitions
 
@@ -134,19 +114,12 @@ A push transition requires a map name and a target state along with the normal e
 The current state map will be pushed on a stack and a statemap instance will be created using the named definition.
 Events will be processed according to the transition rules of the named map.
 
-=== Life-cycle
-The philosophy behind the design is that the finite state machine can be used when needed by creating an instance and providing it with the context.
-The state machine can derive the current state from the context or it can be provided with a previously externalised state.
-Then events can be sent to the FSM which may trigger actions.
-The FSM can also be used to determine which events are allowed for a given state.
-If the FSM is expected to provide timeout transitions the instance will need to remain active. This is typically only used in UI or interactive applications.
-
-
 == DSL
 The DSL provides a way of configuring the statemachine.
 The statemachine supports:
 
 * Transitions: internal and external
+** Transitions are external when the target state is defined even if the target is same as current.
 * Guard expressions
 * Entry and exit actions per state and globally
 * Default actions per state and globally
@@ -655,6 +628,49 @@ Combinations exist to add the optional guard expression and the targetMap.
 * Cardinality: _Multiple_
 
 There are 2 variations, the 2nd adds the optional guard expression.
+
+== Operation
+
+When the FSM was defined and instance can be created providing a context and optional externalized stated.
+
+When sendEvent is called the state machine applies the event to the current state map.
+The current state map is usually top-level state map unless you have defined named maps and used a push transition.
+
+image::statemachine-sequence.png[FSM sequence]
+
+=== Send Event
+The normal operation is to invoke the following actions:
+
+* `sendEvent`
+** `if(external) exitAction()`
+** `action()`
+** `if(external) entryAction()`
+
+The exit action is chosen from one of:
+
+* `stateMap/whenState/onExit`
+* `stateMap/whenState/default/onExit`
+* `stateMap/default/onExit`
+
+The action is chosen from one of:
+
+* `stateMap/whenState/onEvent`
+* `stateMap/whenState/default/action`
+* `stateMap/default/action`
+
+The entry action is chosen from one of:
+
+* `stateMap/whenState/onEntry`
+* `stateMap/whenState/default/onEntry`
+* `stateMap/default/onEntry`
+
+The combination of current state and event determines a set of transition rules that have been applied to that combination by one or more definitions.
+If the transition rules contains guard transitions the guard expressions are evaluated until one evaluates `true`.
+The `onEntry` and `onExit` action are only invoked for `external` transitions.
+
+External transitions have an explicit target state defined. If the target state is not defined it is an internal transition.
+
+The currentState determines the exit action. The target state determines the entry action.
 
 === Notes on concurrency and coroutines.
 The implementations of the AsyncTimer on the different platform work slightly differently depending on the platform.
