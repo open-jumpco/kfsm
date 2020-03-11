@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '1.0.2'
+version = '1.0.3-SNAPSHOT'
 description = 'Kotlin Finite-state machine'
 
 java {

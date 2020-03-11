@@ -11,6 +11,7 @@ package io.jumpco.open.kfsm.async
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -21,10 +22,10 @@ actual class AsyncTimer<S, E, C, A, R> actual constructor(
     val definition: AsyncTimerDefinition<S, E, C, A, R>
 ) {
     var active: Boolean
-
+    val timer: Job
     init {
         active = true
-        CoroutineScope(Dispatchers.Default).launch {
+        timer = CoroutineScope(Dispatchers.Default).launch {
             delay(definition.timeout)
             trigger()
         }
@@ -32,6 +33,7 @@ actual class AsyncTimer<S, E, C, A, R> actual constructor(
 
     actual fun cancel() {
         active = false
+        timer.cancel()
     }
 
     actual suspend fun trigger() {
