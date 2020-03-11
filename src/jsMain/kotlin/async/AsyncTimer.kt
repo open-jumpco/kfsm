@@ -9,8 +9,9 @@
 
 package io.jumpco.open.kfsm.async
 
-import kotlin.browser.window
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 actual class AsyncTimer<S, E, C, A, R> actual constructor(
@@ -20,14 +21,14 @@ actual class AsyncTimer<S, E, C, A, R> actual constructor(
     val definition: AsyncTimerDefinition<S, E, C, A, R>
 ) {
     var active: Boolean
+    val timer: Job
 
     init {
         active = true
-        window.setTimeout({
-            GlobalScope.launch {
-                trigger()
-            }
-        }, definition.timeout.toInt())
+        timer = GlobalScope.launch {
+            delay(definition.timeout)
+            trigger()
+        }
     }
 
     actual fun cancel() {
