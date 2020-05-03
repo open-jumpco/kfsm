@@ -80,5 +80,8 @@ class KeyboardBufferTest {
         assertEquals('B', buffer.read())
         fsm.anyKey('b')
         assertEquals('B', buffer.read())
+        fsm.capsLock()
+        fsm.anyKey('a')
+        assertEquals('a', buffer.read())
     }
 }
