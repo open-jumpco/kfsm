@@ -102,7 +102,7 @@ operator fun Car.plus(event: CarState): Car {
 
 class CarFSMTest {
     @Test
-    fun `test CarFSM`() {
+    fun testCarFSM() {
         var vwGolf = Car(VWGolf)
         vwGolf += Driving
         vwGolf += Parked
