@@ -10,6 +10,8 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @suppress
  * Represents a transition from a given state and event.
  * @param startState The given state

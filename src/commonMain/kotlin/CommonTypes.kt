@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * This represents an action that may be invoked during a transition.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @param C The context: C will be available to the lambda.
  */
 typealias SyncStateAction<C, A, R> = C.(A?) -> R?

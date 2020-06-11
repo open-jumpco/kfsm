@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * This class represents an immutable definition of a state machine.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  */
 class StateMachineDefinition<S, E, C, A, R>(
     val defaultInitialState: S?,

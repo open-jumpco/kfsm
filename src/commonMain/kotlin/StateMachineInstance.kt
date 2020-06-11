@@ -12,6 +12,8 @@ package io.jumpco.open.kfsm
 /**
  * This class represents an instance of a state machine.
  * It will process events, matching transitions, invoking entry, transition and exit actions.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @param context The events may trigger actions on the context of class C
  * @param definition The defined state machine that provides all the behaviour
  * @param initialState The initial state of the instance.

@@ -10,6 +10,10 @@ package io.jumpco.open.kfsm.viz
 
 import io.jumpco.open.kfsm.TransitionType
 
+/**
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
+ */
 public fun plantUml(input: Iterable<TransitionView>): String {
     val output = StringBuilder()
     output.append("@startuml\n")

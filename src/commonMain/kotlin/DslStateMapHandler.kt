@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * This handler will be active inside the top level of the stateMachine definition.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  */
 class DslStateMapHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C, A, R>) {
     /**

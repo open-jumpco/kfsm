@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * This class is used in dsl to handle the state declarations.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  */
 class DslStateMapEventHandler<S, E, C, A, R>(
     private val currentState: S,

@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * @suppress
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  */
 class StateMapInstance<S, E, C, A, R>(
     val context: C,

@@ -35,8 +35,7 @@ reset()
 | COINS
 a| [source,kotlin]
 ----
-{value->
-require(value != null){"argument required for COIN"}
+{value->require(value != null){"argument required for COIN"}
 coin(value)
 println("Coins=$coins")
 if(coins < requiredCoins){
@@ -82,8 +81,7 @@ println("Coins=$coins, Please add ${requiredCoins-coins}")
 | UNLOCKED
 a| [source,kotlin]
 ----
-{value->
-require(value != null){"argument required for COIN"}
+{value->require(value != null){"argument required for COIN"}
 returnCoin(coin(value))
 }
 ----

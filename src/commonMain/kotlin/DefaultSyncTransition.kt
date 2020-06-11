@@ -10,6 +10,8 @@
 package io.jumpco.open.kfsm
 
 /**
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @suppress
  * Represents a DefaultTransition
  * @param event The event identifies the transition

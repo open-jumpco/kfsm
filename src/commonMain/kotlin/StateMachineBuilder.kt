@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * This class represents the definition of a statemachine.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @param S is an enum representing all the states of the FSM
  * @param E is en enum representing all the events the FSM may receive
  * @param C is the class of the Context where the action will be applied.

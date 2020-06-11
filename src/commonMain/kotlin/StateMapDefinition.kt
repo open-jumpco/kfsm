@@ -11,6 +11,8 @@ package io.jumpco.open.kfsm
 
 /**
  * Contains the definition of a state map. A state machine has at least one top-level state map.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  */
 class StateMapDefinition<S, E, C, A, R>(
     /**

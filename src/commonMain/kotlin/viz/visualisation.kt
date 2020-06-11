@@ -18,6 +18,10 @@ import io.jumpco.open.kfsm.SyncTransition
 import io.jumpco.open.kfsm.SyncTransitionRules
 import io.jumpco.open.kfsm.TransitionType
 
+/**
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
+ */
 public fun <S, E, C, A, R> visualize(
     definition: StateMachineDefinition<S, E, C, A, R>
 ): Iterable<TransitionView> {

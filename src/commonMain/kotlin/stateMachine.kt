@@ -13,6 +13,8 @@ import kotlin.reflect.KClass
 
 /**
  * Defines the start of a state machine DSL declaration
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @param validStates A set of the possible states supported by the top-level state map
  * @param eventClass The class of the possible events
  * @param contextClass The class of the context

@@ -12,6 +12,8 @@ package io.jumpco.open.kfsm
 /**
  * @suppress
  * Represents a guarded transition. The transition will be considered if the guard expression is true
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  * @param startState The given state
  * @param event The given event
  * @param targetState when optional represents an internal transition

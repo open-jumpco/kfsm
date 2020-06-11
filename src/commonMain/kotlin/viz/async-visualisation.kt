@@ -22,6 +22,8 @@ import io.jumpco.open.kfsm.async.SimpleAsyncTransition
  * The visualization provided by these methods will not be able to provide any detail about guard expressions or actions.
  * This visualization only provides states and transitions.
  * The separate kfsm-viz module and associated Gradle plugin will provide visualization after parsing the definition DSL.
+ * @author Corneil du Plessis
+ * @soundtrack Wolfgang Amadeus Mozart
  */
 
 public fun <S, E, C, A, R> visualize(
