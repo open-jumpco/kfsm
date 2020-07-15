@@ -78,17 +78,26 @@ enum class PayingTurnstileEvents {
     COIN,
     PASS
 }
+
 // end::states-events[]
+data class PayingTurnstileFSMExternalState(
+    val coins: Int,
+    val locked: Boolean,
+    val initialState: ExternalState<PayingTurnstileStates>
+)
+
 /**
  * @suppress
  */
 // tag::packaged[]
 class PayingTurnstileFSM(
-    turnstile: PayingTurnstile,
-    initialState: ExternalState<PayingTurnstileStates>? = null
+    requiredCoins: Int,
+    savedState: PayingTurnstileFSMExternalState? = null
 ) {
-    val fsm = if (initialState != null) {
-        definition.create(turnstile, initialState)
+    // not private for visibility for tests
+    val turnstile: PayingTurnstile = PayingTurnstile(requiredCoins, savedState?.locked ?: true, savedState?.coins ?: 0)
+    val fsm = if (savedState != null) {
+        definition.create(turnstile, savedState.initialState)
     } else {
         definition.create(turnstile)
     }
@@ -104,7 +113,9 @@ class PayingTurnstileFSM(
     }
 
     fun allowedEvents() = fsm.allowed().map { it.name.toLowerCase() }.toSet()
-    fun externalState() = fsm.externalState()
+    fun externalState(): PayingTurnstileFSMExternalState {
+        return PayingTurnstileFSMExternalState(turnstile.coins, turnstile.locked, fsm.externalState())
+    }
 
     companion object {
         val definition = stateMachine(
@@ -151,7 +162,8 @@ class PayingTurnstileFSM(
                         unlock()
                         reset()
                     }
-                    onEvent(PayingTurnstileEvents.COIN) { value -> require(value != null) { "argument required for COIN" }
+                    onEvent(PayingTurnstileEvents.COIN) { value ->
+                        require(value != null) { "argument required for COIN" }
                         coin(value)
                         println("Coins=$coins")
                         if (coins < requiredCoins) {
@@ -170,7 +182,8 @@ class PayingTurnstileFSM(
                 }
                 // The coins add up to more than required
                 onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
-                    guard = { value -> require(value != null) { "argument required for COIN" }
+                    guard = { value ->
+                        require(value != null) { "argument required for COIN" }
                         value + coins < requiredCoins
                     }) { value ->
                     require(value != null) { "argument required for COIN" }
@@ -180,7 +193,8 @@ class PayingTurnstileFSM(
                 }
             }
             whenState(PayingTurnstileStates.UNLOCKED) {
-                onEvent(PayingTurnstileEvents.COIN) { value -> require(value != null) { "argument required for COIN" }
+                onEvent(PayingTurnstileEvents.COIN) { value ->
+                    require(value != null) { "argument required for COIN" }
                     returnCoin(coin(value))
                 }
                 onEvent(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {
