@@ -79,6 +79,7 @@ dokka {
             'src/commonTest/kotlin/SecureTurnstile.kt'
         ]
     }
+    inputs.dir('src/commonTest/kotlin')
 }
 
 ktlint {
