@@ -80,16 +80,17 @@ enum class PayingTurnstileEvents {
 }
 
 // end::states-events[]
+
+/**
+ * @suppress
+ */
+// tag::packaged[]
 data class PayingTurnstileFSMExternalState(
     val coins: Int,
     val locked: Boolean,
     val initialState: ExternalState<PayingTurnstileStates>
 )
 
-/**
- * @suppress
- */
-// tag::packaged[]
 class PayingTurnstileFSM(
     requiredCoins: Int,
     savedState: PayingTurnstileFSMExternalState? = null
