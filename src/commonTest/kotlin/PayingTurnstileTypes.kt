@@ -164,7 +164,7 @@ class PayingTurnstileFSM(
                         reset()
                     }
                     onEvent(PayingTurnstileEvents.COIN) { value ->
-                        require(value != null) { "argument required for COIN" }
+                        requireNotNull(value) { "argument required for COIN" }
                         coin(value)
                         println("Coins=$coins")
                         if (coins < requiredCoins) {
@@ -176,7 +176,7 @@ class PayingTurnstileFSM(
             whenState(PayingTurnstileStates.LOCKED) {
                 // The coin brings amount to exact amount
                 onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS) { value ->
-                    require(value != null) { "argument required for COIN" }
+                    requireNotNull(value) { "argument required for COIN" }
                     coin(value)
                     unlock()
                     reset()
@@ -184,10 +184,10 @@ class PayingTurnstileFSM(
                 // The coins add up to more than required
                 onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
                     guard = { value ->
-                        require(value != null) { "argument required for COIN" }
+                        requireNotNull(value) { "argument required for COIN" }
                         value + coins < requiredCoins
                     }) { value ->
-                    require(value != null) { "argument required for COIN" }
+                    requireNotNull(value) { "argument required for COIN" }
                     println("PUSH TRANSITION")
                     coin(value)
                     println("Coins=$coins, Please add ${requiredCoins - coins}")
@@ -195,7 +195,7 @@ class PayingTurnstileFSM(
             }
             whenState(PayingTurnstileStates.UNLOCKED) {
                 onEvent(PayingTurnstileEvents.COIN) { value ->
-                    require(value != null) { "argument required for COIN" }
+                    requireNotNull(value) { "argument required for COIN" }
                     returnCoin(coin(value))
                 }
                 onEvent(PayingTurnstileEvents.PASS to PayingTurnstileStates.LOCKED) {

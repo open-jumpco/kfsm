@@ -81,14 +81,14 @@ class Packet(private val protocolHandler: ProtocolHandler) : PacketHandler,
 
     override fun endField() {
         val field = currentField
-        require(field != null) { "expected currentField to have a value" }
+        requireNotNull(field) { "expected currentField to have a value" }
         fields.add(field.byteArrayOutputStream.toByteArray())
         currentField = null
     }
 
     override fun addByte(byte: Int) {
         val field = currentField
-        require(field != null) { "expected currentField to have a value" }
+        requireNotNull(field) { "expected currentField to have a value" }
         field.addByte(byte)
     }
 
@@ -177,13 +177,13 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                     addField()
                 }
                 onEvent(ReaderEvents.BYTE to ReaderStates.RCVCHK) { byte ->
-                    require(byte != null)
+                    requireNotNull(byte)
                     addChecksum(byte)
                 }
             }
             whenState(ReaderStates.RCVDATA) {
                 onEvent(ReaderEvents.BYTE) { byte ->
-                    require(byte != null)
+                    requireNotNull(byte)
                     addByte(byte)
                 }
                 onEvent(ReaderEvents.CTRL to ReaderStates.RCVPCKT, guard = { byte -> byte == CharacterConstants.ETX }) {
@@ -196,13 +196,13 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                     addByte(CharacterConstants.ESC)
                 }
                 onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA) { byte ->
-                    require(byte != null)
+                    requireNotNull(byte)
                     addByte(byte)
                 }
             }
             whenState(ReaderStates.RCVCHK) {
                 onEvent(ReaderEvents.BYTE) { byte ->
-                    require(byte != null)
+                    requireNotNull(byte)
                     addChecksum(byte)
                 }
                 onEvent(ReaderEvents.ESC to ReaderStates.RCVCHKESC) {}
@@ -223,7 +223,7 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
                     addChecksum(CharacterConstants.ESC)
                 }
                 onEvent(ReaderEvents.CTRL to ReaderStates.RCVCHK) { byte ->
-                    require(byte != null)
+                    requireNotNull(byte)
                     addChecksum(byte)
                 }
             }

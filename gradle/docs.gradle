@@ -10,17 +10,6 @@
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'org.asciidoctor.jvm.convert'
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
-    configuration {
-        includeNonPublic = false
-
-        sourceRoot {
-            path = 'src/commonMain/kotlin'
-        }
-    }
-}
 
 asciidoctor {
     inputs.files(fileTree('src/commonTest/kotlin/*'))
@@ -53,14 +42,14 @@ asciidoctor {
 
 }
 
-task docs(type: Zip, dependsOn: [asciidoctor, dokka]) {
+task docs(type: Zip, dependsOn: [asciidoctor, dokkaHtml]) {
     archiveBaseName = project.name
     archiveClassifier = 'doc'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(file('build/docs/asciidoc'))
 
-    from(file('build/javadoc')) {
+    from(file('build/dokka/html')) {
         into('javadoc')
     }
 }

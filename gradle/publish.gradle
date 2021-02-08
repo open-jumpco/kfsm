@@ -14,7 +14,7 @@ def useTarget = project.ext.useTarget
 task javadocJar(type: Jar) {
     archivesBaseName = 'kfsm'
     archiveClassifier = 'javadoc'
-    from dokka.outputDirectory
+    from dokkaHtml.outputDirectory
 }
 
 
