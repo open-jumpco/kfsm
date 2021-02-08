@@ -182,11 +182,15 @@ class PayingTurnstileFSM(
                     reset()
                 }
                 // The coins add up to more than required
-                onEventPush(PayingTurnstileEvents.COIN, "coins", PayingTurnstileStates.COINS,
+                onEventPush(
+                    PayingTurnstileEvents.COIN,
+                    "coins",
+                    PayingTurnstileStates.COINS,
                     guard = { value ->
                         requireNotNull(value) { "argument required for COIN" }
                         value + coins < requiredCoins
-                    }) { value ->
+                    }
+                ) { value ->
                     requireNotNull(value) { "argument required for COIN" }
                     println("PUSH TRANSITION")
                     coin(value)

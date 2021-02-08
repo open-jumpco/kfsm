@@ -52,7 +52,8 @@ class ProtocolSender : ProtocolHandler {
     }
 }
 
-class Packet(private val protocolHandler: ProtocolHandler) : PacketHandler,
+class Packet(private val protocolHandler: ProtocolHandler) :
+    PacketHandler,
     ProtocolHandler by protocolHandler {
     val fields = mutableListOf<ByteArray>()
     private var currentField: Block? = null
@@ -170,7 +171,8 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
             whenState(ReaderStates.START) {
                 onEvent(
                     ReaderEvents.CTRL to ReaderStates.RCVPCKT,
-                    guard = { byte -> byte == CharacterConstants.SOH }) {}
+                    guard = { byte -> byte == CharacterConstants.SOH }
+                ) {}
             }
             whenState(ReaderStates.RCVPCKT) {
                 onEvent(ReaderEvents.CTRL to ReaderStates.RCVDATA, guard = { byte -> byte == CharacterConstants.STX }) {

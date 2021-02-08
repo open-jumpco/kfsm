@@ -34,16 +34,16 @@ class AsyncDslStateMachineHandler<S, E, C, A, R>(private val fsm: AsyncStateMach
      *
     ```
     initialStates {
-    mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-    if (locked) {
-    this.add(PayingTurnstileStates.LOCKED to "default")
-    } else {
-    this.add(PayingTurnstileStates.UNLOCKED to "default")
-    }
-    if (coins > 0) {
-    this.add(PayingTurnstileStates.COINS to "coins")
-    }
-    }
+        mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
+            if (locked) {
+                this.add(PayingTurnstileStates.LOCKED to "default")
+            } else {
+                this.add(PayingTurnstileStates.UNLOCKED to "default")
+            }
+            if (coins > 0) {
+                this.add(PayingTurnstileStates.COINS to "coins")
+            }
+        }
     }
     ```
      */

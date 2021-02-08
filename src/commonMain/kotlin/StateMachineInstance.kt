@@ -54,7 +54,7 @@ class StateMachineInstance<S, E, C, A, R>(
      */
     constructor(context: C, definition: StateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
         this(context, definition, null, initialExternalState) {
-    }
+        }
 
     init {
         currentStateMap = definition.create(context, this, initialState, initialExternalState)

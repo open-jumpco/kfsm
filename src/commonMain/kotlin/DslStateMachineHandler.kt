@@ -34,20 +34,22 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
      * Provides for a list of pairs with state and map name that will be pushed and the last entry will be popped and become the current map.
      * This is required when using state machine with named maps.
      *
+
     ```
     initialStates {
-    mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-    if (locked) {
-    this.add(PayingTurnstileStates.LOCKED to "default")
-    } else {
-    this.add(PayingTurnstileStates.UNLOCKED to "default")
-    }
-    if (coins > 0) {
-    this.add(PayingTurnstileStates.COINS to "coins")
-    }
-    }
+        mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
+            if (locked) {
+                this.add(PayingTurnstileStates.LOCKED to "default")
+            } else {
+                this.add(PayingTurnstileStates.UNLOCKED to "default")
+            }
+            if (coins > 0) {
+                this.add(PayingTurnstileStates.COINS to "coins")
+            }
+        }
     }
     ```
+
      */
     fun initialStates(deriveInitialMap: StateMapQuery<C, S>): DslStateMachineHandler<S, E, C, A, R> {
         fsm.initialStates(deriveInitialMap)

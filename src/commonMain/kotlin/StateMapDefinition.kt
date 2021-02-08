@@ -85,9 +85,7 @@ class StateMapDefinition<S, E, C, A, R>(
      * there is a default transition of handler for the event.
      */
     fun eventAllowed(event: E, given: S, includeDefault: Boolean): Boolean =
-        (includeDefault &&
-            hasDefaultStateHandler(given)) ||
-            allowed(given, includeDefault).contains(event)
+        (includeDefault && hasDefaultStateHandler(given)) || allowed(given, includeDefault).contains(event)
 
     /**
      * This function will provide an indicator if a default action has been defined for a given state.

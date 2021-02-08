@@ -94,29 +94,40 @@ class TimerSecureTurnstileFSM(private val secureTurnstile: TimerSecureTurnstile)
                 }
             }
             whenState(SecureTurnstileStates.LOCKED) {
-                onEvent(SecureTurnstileEvents.CARD, guard = { cardId ->
-                    requireNotNull(cardId)
-                    isOverrideCard(cardId) && overrideActive
-                }) {
+                onEvent(
+                    SecureTurnstileEvents.CARD,
+                    guard = { cardId ->
+                        requireNotNull(cardId)
+                        isOverrideCard(cardId) && overrideActive
+                    }
+                ) {
                     cancelOverride()
                 }
-                onEvent(SecureTurnstileEvents.CARD, guard = { cardId ->
-                    requireNotNull(cardId)
-                    isOverrideCard(cardId)
-                }) {
+                onEvent(
+                    SecureTurnstileEvents.CARD,
+                    guard = { cardId ->
+                        requireNotNull(cardId)
+                        isOverrideCard(cardId)
+                    }
+                ) {
                     activateOverride()
                 }
-                onEvent(SecureTurnstileEvents.CARD to SecureTurnstileStates.UNLOCKED,
+                onEvent(
+                    SecureTurnstileEvents.CARD to SecureTurnstileStates.UNLOCKED,
                     guard = { cardId ->
                         requireNotNull(cardId)
                         overrideActive || isValidCard(cardId)
-                    }) {
+                    }
+                ) {
                     unlock()
                 }
-                onEvent(SecureTurnstileEvents.CARD, guard = { cardId ->
-                    requireNotNull(cardId) { "cardId is required" }
-                    !isValidCard(cardId)
-                }) { cardId ->
+                onEvent(
+                    SecureTurnstileEvents.CARD,
+                    guard = { cardId ->
+                        requireNotNull(cardId) { "cardId is required" }
+                        !isValidCard(cardId)
+                    }
+                ) { cardId ->
                     requireNotNull(cardId)
                     invalidCard(cardId)
                 }
@@ -126,10 +137,13 @@ class TimerSecureTurnstileFSM(private val secureTurnstile: TimerSecureTurnstile)
                     println("Timeout. Locking")
                     lock()
                 }
-                onEvent(SecureTurnstileEvents.CARD to SecureTurnstileStates.LOCKED, guard = { cardId ->
-                    requireNotNull(cardId)
-                    isOverrideCard(cardId)
-                }) {
+                onEvent(
+                    SecureTurnstileEvents.CARD to SecureTurnstileStates.LOCKED,
+                    guard = { cardId ->
+                        requireNotNull(cardId)
+                        isOverrideCard(cardId)
+                    }
+                ) {
                     lock()
                 }
                 onEvent(SecureTurnstileEvents.PASS to SecureTurnstileStates.LOCKED) {

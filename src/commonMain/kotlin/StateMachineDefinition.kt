@@ -66,7 +66,7 @@ class StateMachineDefinition<S, E, C, A, R>(
             return parentFsm.mapStack.pop()
         } else {
             val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
-            ?: error("Definition requires deriveInitialState or deriveInitialMap")
+                ?: error("Definition requires deriveInitialState or deriveInitialMap")
             return StateMapInstance(context, initial, null, parentFsm, defaultStateMap)
         }
     }

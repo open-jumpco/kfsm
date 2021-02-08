@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.4.21'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.4.30'
     id 'org.jetbrains.dokka' version '1.4.10.2'
     id 'maven-publish'
     id 'signing'
@@ -7,7 +7,7 @@ plugins {
     id 'org.jlleitschuh.gradle.ktlint' version '9.4.1'
     id 'org.jlleitschuh.gradle.ktlint-idea' version '9.4.1'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
-    id 'io.jumpco.open.kfsm.viz-plugin' version '1.0.9'
+    id 'io.jumpco.open.kfsm.viz-plugin' version '1.4.0'
 }
 
 repositories {
@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '1.4.0'
+version = '1.4.3'
 description = 'Kotlin Finite-state machine'
 
 java {
@@ -86,6 +86,7 @@ dokkaHtml {
 ktlint {
     debug = true
     verbose = true
+    ignoreFailures = true
     reporters {
         reporter "plain"
         reporter "checkstyle"
