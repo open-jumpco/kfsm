@@ -126,6 +126,9 @@ class PayingTurnstileFSM(
             Int::class
         ) {
             defaultInitialState = PayingTurnstileStates.LOCKED
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             default {
                 onEntry { _, targetState, arg ->
                     if (arg != null) {

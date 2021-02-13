@@ -71,6 +71,9 @@ class ImmutableLockFSM() {
                     else -> error("Invalid state locked=$locked")
                 }
             }
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             default {
                 action { state, event, _ ->
                     println("Default action for state($state) -> on($event) for $this")

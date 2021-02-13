@@ -55,6 +55,7 @@ typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
  * @param A argumentType: A an arg: will be available to the lambda as the 3rd argument.
  */
 typealias DefaultEntryExitAction<C, S, A> = C.(S, S, A?) -> Unit
+typealias StateChangeAction<C, S> = C.(S, S) -> Unit
 
 /**
  * This represents a default action for a specific event. These action will not cause changes in state.

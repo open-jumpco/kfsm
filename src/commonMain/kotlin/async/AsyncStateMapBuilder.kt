@@ -13,6 +13,7 @@ import io.jumpco.open.kfsm.AsyncStateAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
+import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateGuard
 import io.jumpco.open.kfsm.TransitionType
 
@@ -649,7 +650,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
     /**
      * Creates a `StateMapDefinition` from the data in this builder
      */
-    fun toMap(): AsyncStateMapDefinition<S, E, C, A, R> =
+    fun toMap(afterStateChangeAction: StateChangeAction<C, S>?): AsyncStateMapDefinition<S, E, C, A, R> =
         AsyncStateMapDefinition(
             this.name,
             this.validStates,
@@ -662,6 +663,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
             this.timerActions.toMap(),
             this.globalDefault,
             this.defaultEntryAction,
-            this.defaultExitAction
+            this.defaultExitAction,
+            afterStateChangeAction
         )
 }

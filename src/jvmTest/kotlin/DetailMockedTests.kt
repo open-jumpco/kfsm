@@ -100,6 +100,9 @@ class DetailMockedTests {
                             else -> error("Invalid state $state")
                         }
                     }
+                    onStateChange { oldState, newState ->
+                        println("onStateChange:$oldState -> $newState")
+                    }
                     default {
                         onEntry { startState, targetState, _ ->
                             println("entering:to $targetState from $startState for:$this")

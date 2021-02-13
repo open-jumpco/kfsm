@@ -108,6 +108,9 @@ class DetailTests {
                         }
                     }
                 }
+                onStateChange { oldState, newState ->
+                    println("onStateChange:$oldState -> $newState")
+                }
                 default {
                     onEntry { startState, targetState, msg ->
                         println("entering:to $targetState from $startState for:$this:$msg")

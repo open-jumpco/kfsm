@@ -9,10 +9,13 @@
 
 package io.jumpco.open.kfsm.async
 
+import io.jumpco.open.kfsm.StateChangeAction
+
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */
 class AsyncDslStateMapHandler<S, E, C, A, R>(private val fsm: AsyncStateMapBuilder<S, E, C, A, R>) {
+
     /**
      * Defines a section for a specific state.
      * @param currentState The give state

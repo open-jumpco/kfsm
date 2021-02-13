@@ -37,6 +37,7 @@ This Finite state machine implementation has the following features:
 * Visualization Gradle Plugin
 * Coroutines
 * Timeout Transitions
+* StateChange notification action
 
 
 == Tutorial

@@ -13,6 +13,7 @@ import io.jumpco.open.kfsm.AsyncStateAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
+import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateGuard
 import io.jumpco.open.kfsm.StateMapQuery
 import io.jumpco.open.kfsm.StateQuery
@@ -25,6 +26,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     internal val defaultStateMap =
         AsyncStateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
     internal val namedStateMaps: MutableMap<String, AsyncStateMapBuilder<S, E, C, A, R>> = mutableMapOf()
+    internal var afterStateChangeAction: StateChangeAction<C, S>? = null
     /**
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
@@ -75,8 +77,8 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
             this.defaultInitialState,
             this.deriveInitialState,
             this.deriveInitialStateMap,
-            this.defaultStateMap.toMap(),
-            this.namedStateMaps.map { Pair(it.key, it.value.toMap()) }.toMap()
+            this.defaultStateMap.toMap(this.afterStateChangeAction),
+            this.namedStateMaps.map { Pair(it.key, it.value.toMap(this.afterStateChangeAction)) }.toMap()
         )
     }
 
@@ -86,6 +88,14 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     inline fun stateMachine(handler: AsyncDslStateMachineHandler<S, E, C, A, R>.() -> Unit): AsyncDslStateMachineHandler<S, E, C, A, R> =
         AsyncDslStateMachineHandler(this).apply(handler)
 
+
+    /**
+     * This function will set an action that will be invoked when the state has changed and transition is complete.
+     * This will be invoked after onEntry and onExit handlers.
+     */
+    fun afterStateChange(action: StateChangeAction<C,S>) {
+        this.afterStateChangeAction = action
+    }
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
      * received and the guard expression is met. The action is executed after any exit action and before entry actions.

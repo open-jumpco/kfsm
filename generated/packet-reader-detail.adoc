@@ -26,7 +26,7 @@ addField()
 a| [source,kotlin]
 ----
 {byte->
-require(byte != null)
+requireNotNull(byte)
 addChecksum(byte)
 }
 ----
@@ -37,7 +37,7 @@ addChecksum(byte)
 a| [source,kotlin]
 ----
 {byte->
-require(byte != null)
+requireNotNull(byte)
 addByte(byte)
 }
 ----
@@ -73,7 +73,7 @@ addByte(CharacterConstants.ESC)
 a| [source,kotlin]
 ----
 {byte->
-require(byte != null)
+requireNotNull(byte)
 addByte(byte)
 }
 ----
@@ -84,7 +84,7 @@ addByte(byte)
 a| [source,kotlin]
 ----
 {byte->
-require(byte != null)
+requireNotNull(byte)
 addChecksum(byte)
 }
 ----
@@ -140,7 +140,7 @@ addChecksum(CharacterConstants.ESC)
 a| [source,kotlin]
 ----
 {byte->
-require(byte != null)
+requireNotNull(byte)
 addChecksum(byte)
 }
 ----

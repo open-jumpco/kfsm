@@ -84,6 +84,9 @@ class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
                     buzzer()
                 }
             }
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             whenState(SecureTurnstileStates.LOCKED) {
                 onEvent(SecureTurnstileEvents.CARD, guard = { cardId -> requireNotNull(cardId)
                     isOverrideCard(cardId) && overrideActive

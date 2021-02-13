@@ -35,7 +35,8 @@ reset()
 | COINS
 a| [source,kotlin]
 ----
-{value->require(value != null){"argument required for COIN"}
+{value->
+requireNotNull(value){"argument required for COIN"}
 coin(value)
 println("Coins=$coins")
 if(coins < requiredCoins){
@@ -56,7 +57,7 @@ println("Please add ${requiredCoins-coins}")
 a| [source,kotlin]
 ----
 {value->
-require(value != null){"argument required for COIN"}
+requireNotNull(value){"argument required for COIN"}
 coin(value)
 unlock()
 reset()
@@ -64,12 +65,12 @@ reset()
 ----
 
 | LOCKED
-| COIN `[{value->require(value != null){"argument required for COIN"};value+coins < requiredCoins;}]`
+| COIN `[{value->requireNotNull(value){"argument required for COIN"};value+coins < requiredCoins;}]`
 | COINS
 a| [source,kotlin]
 ----
 {value->
-require(value != null){"argument required for COIN"}
+requireNotNull(value){"argument required for COIN"}
 println("PUSH TRANSITION")
 coin(value)
 println("Coins=$coins, Please add ${requiredCoins-coins}")
@@ -81,7 +82,8 @@ println("Coins=$coins, Please add ${requiredCoins-coins}")
 | UNLOCKED
 a| [source,kotlin]
 ----
-{value->require(value != null){"argument required for COIN"}
+{value->
+requireNotNull(value){"argument required for COIN"}
 returnCoin(coin(value))
 }
 ----

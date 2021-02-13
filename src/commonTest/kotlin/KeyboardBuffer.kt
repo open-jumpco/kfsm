@@ -43,6 +43,9 @@ class KeyboardBufferFSM(private val context: KeyboardBuffer) {
             Char::class
         ) {
             initialState { KeyboardBufferStates.DEFAULT }
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             whenState(KeyboardBufferStates.DEFAULT) {
                 onEvent(KeyboardEvent.ANY_KEY) { input ->
                     requireNotNull(input) { "input is required" }
