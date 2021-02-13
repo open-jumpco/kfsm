@@ -157,6 +157,9 @@ class PacketReaderFSM(private val packetHandler: PacketHandler) {
             Int::class
         ) {
             defaultInitialState = ReaderStates.START
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             default {
                 onEvent(ReaderEvents.BYTE to ReaderStates.END) {
                     sendNACK()

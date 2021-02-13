@@ -15,6 +15,7 @@ package io.jumpco.open.kfsm
  * @soundtrack Wolfgang Amadeus Mozart
  */
 class DslStateMapHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C, A, R>) {
+
     /**
      * Defines a section for a specific state.
      * @param currentState The give state

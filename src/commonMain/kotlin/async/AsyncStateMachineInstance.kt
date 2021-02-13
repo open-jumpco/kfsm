@@ -101,13 +101,13 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
             } else {
                 val interim = transition.execute(context, sourceMap, null, arg)
                 targetMap.executeEntry(context, transition.targetState, arg)
-                currentStateMap.currentState = transition.targetState
+                currentStateMap.changeState(transition.targetState)
                 interim
             }
         } else {
             val interim = executePush(transition, arg)
             if (transition.targetState != null) {
-                currentStateMap.currentState = transition.targetState
+                currentStateMap.changeState(transition.targetState)
             }
             interim
         }
@@ -123,7 +123,7 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
         val result = transition.execute(context, currentStateMap, targetStateMap, arg)
         currentStateMap = targetStateMap
         if (transition.targetState != null) {
-            currentStateMap.currentState = transition.targetState
+            currentStateMap.changeState(transition.targetState)
         }
         return result
     }

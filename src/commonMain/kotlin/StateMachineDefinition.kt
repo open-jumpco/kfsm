@@ -26,7 +26,6 @@ class StateMachineDefinition<S, E, C, A, R>(
      * The named state maps can be accessed via a push transition.
      */
     val namedStateMaps: Map<String, StateMapDefinition<S, E, C, A, R>>
-
 ) {
     private fun createMap(
         mapName: String,

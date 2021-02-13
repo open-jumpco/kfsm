@@ -59,7 +59,12 @@ class StateMapDefinition<S, E, C, A, R>(
     /**
      * This is the default action that will be invoked when exiting any state when no other action has been matched.
      */
-    val defaultExitAction: DefaultEntryExitAction<C, S, A>?
+    val defaultExitAction: DefaultEntryExitAction<C, S, A>?,
+    /**
+     * This action will be invoked after a change in the state of the statemachine.
+     * This machine will catch and ignore any exceptions thrown by the handler.
+     */
+    val afterStateChangeAction: StateChangeAction<C, S>?
 ) {
     /**
      * This function will provide the set of allowed events given a specific state. It isn't a guarantee that a

@@ -84,6 +84,9 @@ class TurnstileFSM(turnstile: Turnstile, savedState: TurnstileStates? = null) {
                     else
                         TurnstileStates.UNLOCKED
                 }
+                onStateChange { oldState, newState ->
+                    println("onStateChange:$oldState -> $newState")
+                }
                 default {
                     onEntry { startState, targetState, _ ->
                         println("entering:$startState -> $targetState for $this")

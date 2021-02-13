@@ -93,6 +93,9 @@ class TimerSecureTurnstileFSM(private val secureTurnstile: TimerSecureTurnstile)
                     buzzer()
                 }
             }
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             whenState(SecureTurnstileStates.LOCKED) {
                 onEvent(
                     SecureTurnstileEvents.CARD,

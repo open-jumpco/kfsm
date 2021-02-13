@@ -660,7 +660,7 @@ class StateMapBuilder<S, E, C, A, R>(
     /**
      * Creates a `StateMapDefinition` from the data in this builder
      */
-    fun toMap(): StateMapDefinition<S, E, C, A, R> = StateMapDefinition(
+    fun toMap(afterStateChangeAction: StateChangeAction<C,S>?): StateMapDefinition<S, E, C, A, R> = StateMapDefinition(
         this.name,
         this.validStates,
         this.transitionRules.toMap(),
@@ -671,6 +671,7 @@ class StateMapBuilder<S, E, C, A, R>(
         this.automaticTransitions.toMap(),
         this.globalDefault,
         this.defaultEntryAction,
-        this.defaultExitAction
+        this.defaultExitAction,
+        afterStateChangeAction
     )
 }

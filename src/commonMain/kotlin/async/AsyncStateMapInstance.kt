@@ -28,12 +28,26 @@ class AsyncStateMapInstance<S, E, C, A, R>(
         cancelTimers()
         val result = transition.execute(context, this, arg)
         if (transition.isExternal()) {
-            currentState = transition.targetState!!
+            changeState(transition.targetState!!)
         }
         if (transition.targetState != null) {
             createTimers(transition.targetState, context, arg)
         }
         return result
+    }
+
+    internal fun changeState(targetState: S) {
+        if (currentState != targetState) {
+            val oldState = currentState
+            currentState = targetState
+            if (definition.afterStateChangeAction != null) {
+                try {
+                    definition.afterStateChangeAction.invoke(context, oldState, currentState)
+                } catch (x: Throwable) {
+                    // ignoring
+                }
+            }
+        }
     }
 
     internal suspend fun executeEntry(context: C, targetState: S, arg: A?) {

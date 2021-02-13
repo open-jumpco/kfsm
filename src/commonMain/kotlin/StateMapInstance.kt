@@ -28,10 +28,23 @@ class StateMapInstance<S, E, C, A, R>(
     var currentState: S = newState
         internal set
 
+    internal fun changeState(targetState: S) {
+        if (currentState != targetState) {
+            val oldState = currentState
+            currentState = targetState
+            if (definition.afterStateChangeAction != null) {
+                try {
+                    definition.afterStateChangeAction.invoke(context, oldState, currentState)
+                } catch (x: Throwable) {
+                    println("changeState:ignoring:exception:$x")
+                }
+            }
+        }
+    }
     internal fun execute(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
         val result = transition.execute(context, this, arg)
         if (transition.isExternal()) {
-            currentState = transition.targetState!!
+            changeState(transition.targetState!!)
         }
         return result
     }

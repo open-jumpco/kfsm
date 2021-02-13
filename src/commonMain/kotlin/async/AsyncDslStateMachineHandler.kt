@@ -9,6 +9,7 @@
 
 package io.jumpco.open.kfsm.async
 
+import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateMapQuery
 import io.jumpco.open.kfsm.StateQuery
 
@@ -52,6 +53,13 @@ class AsyncDslStateMachineHandler<S, E, C, A, R>(private val fsm: AsyncStateMach
         return this
     }
 
+    /**
+     * Defines an action that will be invoked after a transition to a new state.
+     * Any exceptions thrown by the action will be ignored.
+     */
+    fun onStateChange(action: StateChangeAction<C, S>) {
+        fsm.afterStateChange(action)
+    }
     /**
      * Defines a section for a specific state.
      * @param currentState The give state

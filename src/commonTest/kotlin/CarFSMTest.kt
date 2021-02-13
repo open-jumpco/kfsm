@@ -60,9 +60,12 @@ class CarFSM(val car: Car) {
             Car::class
         ) {
             initialState { state ?: Parked }
+            onStateChange { oldState, newState ->
+                println("onStateChange:$oldState -> $newState")
+            }
             default {
                 onEntry { fromState, toState, _ ->
-                    println("$fromState -> $toState")
+                    println("onEntry:$fromState -> $toState")
                 }
                 action { state, event, _ ->
                     println("We cannot go from $state, to state $event (data = $this)")

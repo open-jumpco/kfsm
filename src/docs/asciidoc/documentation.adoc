@@ -155,6 +155,9 @@ val definition = stateMachine(
     }
     initialStates { // define expression for deriving state stack for nested maps.
     }
+    onStateChange { // define an event handler to be invoked after a transition when the state has changed.
+
+    }
     stateMap { // define named statemap
     }
     whenState { // state definition
@@ -182,6 +185,9 @@ val definition = stateMachine(
     initialState { // initial state expression
     }
     initialStates { // define expression for deriving state stack for nested maps.
+    }
+    onStateChange { // define an event handler to be invoked after a transition when the state has changed.
+
     }
     stateMap { // define named statemap
     }
@@ -216,6 +222,9 @@ val definition = asyncStateMachine(
     }
     initialStates { // define expression for deriving state stack for nested maps.
     }
+    onStateChange { // define an event handler to be invoked after a transition when the state has changed.
+
+    }
     stateMap { // define named statemap
     }
     whenState { // state definition
@@ -243,6 +252,9 @@ val definition = asyncFunctionalStateMachine(
     initialState { // initial state expression
     }
     initialStates { // define expression for deriving state stack for nested maps.
+    }
+    onStateChange { // define an event handler to be invoked after a transition when the state has changed.
+
     }
     stateMap { // define named statemap
     }
@@ -387,6 +399,12 @@ initialStates {
     }.toMap()
 }
 ----
+=== `onStateChange`
+* Handler: link:javadoc/kfsm/io.jumpco.open.kfsm/-dsl-state-machine-handler/on-state-change.html[DslStateMachineHandler::onStateChange]
+* Mandatory: _Optional_
+* Cardinality: _Single_
+
+The `onStateChange` handler will be invoked after a transition has complete and the new state has taken effect. onExit and onEntry are invoked before a state change and checking allow within those handlers still relfect the previous state.
 
 === `whenState`
 * Arguments: `(currentState: S)`

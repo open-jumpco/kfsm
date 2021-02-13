@@ -24,6 +24,8 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
     private var deriveInitialStateMap: StateMapQuery<C, S>? = null
     internal val defaultStateMap = StateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
     internal val namedStateMaps: MutableMap<String, StateMapBuilder<S, E, C, A, R>> = mutableMapOf()
+    internal var afterStateChangeAction: StateChangeAction<C, S>? = null
+
     /**
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
@@ -73,8 +75,8 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
             this.defaultInitialState,
             this.deriveInitialState,
             this.deriveInitialStateMap,
-            this.defaultStateMap.toMap(),
-            this.namedStateMaps.map { Pair(it.key, it.value.toMap()) }.toMap()
+            this.defaultStateMap.toMap(this.afterStateChangeAction),
+            this.namedStateMaps.map { Pair(it.key, it.value.toMap(this.afterStateChangeAction)) }.toMap()
         )
     }
 
@@ -83,6 +85,14 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
      */
     inline fun stateMachine(handler: DslStateMachineHandler<S, E, C, A, R>.() -> Unit): DslStateMachineHandler<S, E, C, A, R> =
         DslStateMachineHandler(this).apply(handler)
+
+    /**
+     * This function will set an action that will be invoked when the state has changed and transition is complete.
+     * This will be invoked after onEntry and onExit handlers.
+     */
+    fun afterStateChange(action: StateChangeAction<C,S>) {
+        this.afterStateChangeAction = action
+    }
 
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
