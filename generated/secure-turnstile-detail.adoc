@@ -40,7 +40,8 @@ unlock()
 | LOCKED
 a| [source,kotlin]
 ----
-{cardId->requireNotNull(cardId)
+{cardId->
+requireNotNull(cardId)
 invalidCard(cardId)
 }
 ----

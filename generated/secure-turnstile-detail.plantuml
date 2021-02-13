@@ -5,11 +5,11 @@ skinparam state {
     BackgroundColor LightBlue
 }
 state SecureTurnstileFSM {
-LOCKED --> LOCKED : CARD [{cardId->requireNotNull(cardId);\lisOverrideCard(cardId)&&overrideActive;\l}]\l<<action>> {\lcancelOverride()\l}
-LOCKED --> LOCKED : CARD [{cardId->requireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\lactivateOverride()\l}
-LOCKED --> UNLOCKED : CARD [{cardId->requireNotNull(cardId);\loverrideActive||isValidCard(cardId);\l}]\l<<action>> {\lunlock()\l}
-LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId){"cardId is required"};\l!isValidCard(cardId);\l}]\l<<action>> {cardId->requireNotNull(cardId)\linvalidCard(cardId)\l}
-UNLOCKED --> LOCKED : CARD [{cardId->requireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\llock()\l}
+LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId)&&overrideActive;\l}]\l<<action>> {\lcancelOverride()\l}
+LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\lactivateOverride()\l}
+LOCKED --> UNLOCKED : CARD [{cardId->\lrequireNotNull(cardId);\loverrideActive||isValidCard(cardId);\l}]\l<<action>> {\lunlock()\l}
+LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId){"cardId is required"};\l!isValidCard(cardId);\l}]\l<<action>> {cardId->\lrequireNotNull(cardId)\linvalidCard(cardId)\l}
+UNLOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\llock()\l}
 UNLOCKED --> LOCKED : PASS\l<<action>> {\llock()\l}
 }
 @enduml
