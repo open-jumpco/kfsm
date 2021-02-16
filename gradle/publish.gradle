@@ -20,9 +20,6 @@ task javadocJar(type: Jar) {
 
 gradle.afterProject {
     tasks.forEach { task ->
-        if (task.name.endsWith('Classes')) {
-            commonSourcesJar.dependsOn(task)
-        }
         if (task.name.contains('dokka')) {
             javadocJar.dependsOn(task)
         }
@@ -31,15 +28,10 @@ gradle.afterProject {
         }
     }
 }
-task commonSourcesJar(type: Jar) {
-    archivesBaseName = 'kfsm-common'
-    archiveClassifier = 'sources'
-    from files('src/commonMain/kotlin')
-}
+
 
 artifacts {
     archives javadocJar
-    archives commonSourcesJar
 }
 
 def pomConfig = {
@@ -89,15 +81,8 @@ publishing {
     publications.all { publication ->
         pom.withXml(configureMavenCentralMetadata)
         logger.info "publication:$publication.name"
-        if(platforms.contains(publication.name)) {
+        if (platforms.contains(publication.name)) {
             publication.artifact javadocJar
-        }
-    }
-
-    publications {
-        kotlinMultiplatform {
-            artifactId = 'kfsm-common'
-            artifact commonSourcesJar
         }
     }
 }
@@ -108,22 +93,22 @@ signing {
     sign publishing.publications.metadata
     sign publishing.publications.documentation
 
-    if(useTarget['jvm']) {
+    if (useTarget['jvm']) {
         sign publishing.publications.jvm
     }
-    if(useTarget['js']) {
+    if (useTarget['js']) {
         sign publishing.publications.js
     }
-    if(useTarget['macos']) {
+    if (useTarget['macos']) {
         sign publishing.publications.macos
     }
-    if(useTarget['linux']) {
+    if (useTarget['linux']) {
         sign publishing.publications.linux
     }
-    if(useTarget['mingw']) {
+    if (useTarget['mingw']) {
         sign publishing.publications.mingw
     }
-    if(useTarget['wasm']) {
+    if (useTarget['wasm']) {
         sign publishing.publications.wasm
     }
 }
