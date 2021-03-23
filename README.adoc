@@ -8,6 +8,7 @@ This is a small implementation of an FSM in Kotlin.
 * link:https://github.com/open-jumpco/kfsm-viz[Visualization Support kfsm-viz]
 * link:https://github.com/open-jumpco/kfsm-samples[Sample Project]
 * link:https://github.com/open-jumpco/kfsm-web[Turnstile Sample for Browser]
+* link:https://github.com/open-jumpco/kfsm-kvision-web[Turnstile Sample with KVision for Browser]
 * link:https://github.com/open-jumpco/kfsm-android[Turnstile Sample for Android]
 * link:https://github.com/open-jumpco/kfsm-spring[Turnstile Sample for Spring MVC]
 * link:https://github.com/open-jumpco/kfsm-spring-rest[Turnstile Sample for Spring HATEOAS]
