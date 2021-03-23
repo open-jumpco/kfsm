@@ -36,7 +36,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
         return result
     }
 
-    internal fun changeState(targetState: S) {
+    internal suspend fun changeState(targetState: S) {
         if (currentState != targetState) {
             val oldState = currentState
             currentState = targetState

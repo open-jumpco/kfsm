@@ -9,6 +9,7 @@
 
 package io.jumpco.open.kfsm.async
 
+import io.jumpco.open.kfsm.AsyncStateChangeAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.StateChangeAction
@@ -67,7 +68,7 @@ class AsyncStateMapDefinition<S, E, C, A, R>(
      * This action will be invoked after a change in the state of the statemachine.
      * This machine will catch and ignore any exceptions thrown by the handler.
      */
-    val afterStateChangeAction: StateChangeAction<C, S>?
+    val afterStateChangeAction: AsyncStateChangeAction<C, S>?
 ) {
     /**
      * This function will provide the set of allowed events given a specific state. It isn't a guarantee that a

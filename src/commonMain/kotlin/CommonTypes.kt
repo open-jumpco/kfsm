@@ -56,6 +56,7 @@ typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
  */
 typealias DefaultEntryExitAction<C, S, A> = C.(S, S, A?) -> Unit
 typealias StateChangeAction<C, S> = C.(S, S) -> Unit
+typealias AsyncStateChangeAction<C, S> = suspend C.(S, S) -> Unit
 
 /**
  * This represents a default action for a specific event. These action will not cause changes in state.

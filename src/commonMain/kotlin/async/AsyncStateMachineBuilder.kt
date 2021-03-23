@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateAction
+import io.jumpco.open.kfsm.AsyncStateChangeAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
@@ -26,7 +27,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     internal val defaultStateMap =
         AsyncStateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
     internal val namedStateMaps: MutableMap<String, AsyncStateMapBuilder<S, E, C, A, R>> = mutableMapOf()
-    internal var afterStateChangeAction: StateChangeAction<C, S>? = null
+    internal var afterStateChangeAction: AsyncStateChangeAction<C, S>? = null
     /**
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
@@ -93,7 +94,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
      * This function will set an action that will be invoked when the state has changed and transition is complete.
      * This will be invoked after onEntry and onExit handlers.
      */
-    fun afterStateChange(action: StateChangeAction<C,S>) {
+    fun afterStateChange(action: AsyncStateChangeAction<C,S>) {
         this.afterStateChangeAction = action
     }
     /**
