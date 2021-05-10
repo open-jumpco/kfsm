@@ -50,7 +50,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
         }
     }
 
-    internal suspend fun executeEntry(context: C, targetState: S, arg: A?) {
+    internal fun executeEntry(context: C, targetState: S, arg: A?) {
         val entryAction =
             definition.entryActions[targetState] ?: parentFsm.definition.defaultStateMap.entryActions[targetState]
         entryAction?.invoke(context, currentState, targetState, arg)
@@ -70,7 +70,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
         }
     }
 
-    internal suspend fun executeExit(context: C, targetState: S, arg: A?) {
+    internal fun executeExit(context: C, targetState: S, arg: A?) {
         val exitAction =
             definition.exitActions[currentState] ?: parentFsm.definition.defaultStateMap.exitActions[targetState]
         exitAction?.invoke(context, currentState, targetState, arg)
@@ -119,7 +119,6 @@ class AsyncStateMapInstance<S, E, C, A, R>(
     /**
      * This function will provide the list of allowed events given the current state of the machine.
      * @param includeDefaults When `true` will include default transitions in the list of allowed events.
-     * @see StateMachineDefinition.allowed
      */
     fun allowed(includeDefaults: Boolean = false) = definition.allowed(currentState, includeDefaults)
 

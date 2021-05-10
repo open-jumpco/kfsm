@@ -16,10 +16,11 @@ import kotlin.reflect.KClass
  * @author Corneil du Plessis
  * @soundtrack Wolfgang Amadeus Mozart
  * @param validStates A set of the possible states supported by the top-level state map
- * @param eventClass The class of the possible events
+ * @param validEvents The class of the possible events
  * @param contextClass The class of the context
  * @param argumentClass The class of the argument to events/actions
  * @param returnClass The class of the return type of events/actions
+ * @param handler Statemachine handler
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
 inline fun <S, E, C : Any, A : Any, R : Any> stateMachine(
@@ -57,8 +58,9 @@ inline fun <S, E, C : Any, A : Any> stateMachine(
 /**
  * Defines the start of a state machine DSL declaration with `Any` as the type of arguments and returns types for events/actions
  * @param validStates A set of the possible states supported by the top-level state map
- * @param eventClass The class of the possible events
+ * @param validEvents The class of the possible events
  * @param contextClass The class of the context
+ * @param handler The DSL handler
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
 inline fun <S, E, C : Any> stateMachine(

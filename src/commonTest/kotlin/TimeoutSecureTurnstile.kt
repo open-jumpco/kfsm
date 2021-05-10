@@ -78,7 +78,7 @@ class TimerSecureTurnstile {
 // end::context[]
 
 // tag::fsm[]
-class TimerSecureTurnstileFSM(private val secureTurnstile: TimerSecureTurnstile) {
+class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile) {
     companion object {
         val definition = asyncStateMachine(
             SecureTurnstileStates.values().toSet(),

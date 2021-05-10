@@ -22,7 +22,7 @@ import io.jumpco.open.kfsm.TransitionType
  * @author Corneil du Plessis
  * @soundtrack Wolfgang Amadeus Mozart
  */
-public fun <S, E, C, A, R> visualize(
+fun <S, E, C, A, R> visualize(
     definition: StateMachineDefinition<S, E, C, A, R>
 ): Iterable<TransitionView> {
     val output = mutableListOf<TransitionView>()
@@ -138,5 +138,5 @@ fun <S, E, C, A, R> makeView(
     rules: SyncTransitionRules<S, E, C, A, R>?,
     output: MutableList<TransitionView>
 ) {
-    makeView(definition, mapName, from?.toString(), event, rules?.transition, output)
+    makeView(definition, mapName, from, event, rules?.transition, output)
 }

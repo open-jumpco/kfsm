@@ -53,8 +53,7 @@ class StateMachineInstance<S, E, C, A, R>(
      * @param initialExternalState The previously externalised state.
      */
     constructor(context: C, definition: StateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
-        this(context, definition, null, initialExternalState) {
-        }
+        this(context, definition, null, initialExternalState)
 
     init {
         currentStateMap = definition.create(context, this, initialState, initialExternalState)
@@ -120,7 +119,7 @@ class StateMachineInstance<S, E, C, A, R>(
     private fun executePush(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
             definition.createStateMap(transition.targetMap, context, this, transition.targetState!!).apply {
-                namedInstances.put(transition.targetMap, this)
+                namedInstances[transition.targetMap] = this
             }
         }
         mapStack.push(currentStateMap)

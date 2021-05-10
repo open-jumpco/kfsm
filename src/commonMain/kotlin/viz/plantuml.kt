@@ -14,12 +14,12 @@ import io.jumpco.open.kfsm.TransitionType
  * @author Corneil du Plessis
  * @soundtrack Wolfgang Amadeus Mozart
  */
-public fun plantUml(input: Iterable<TransitionView>): String {
+fun plantUml(input: Iterable<TransitionView>): String {
     val output = StringBuilder()
     output.append("@startuml\n")
     val stateMaps = input.filter { it.sourceMap != null && it.sourceMap != "default" }.groupBy { it.sourceMap!! }
     stateMaps.forEach { sm ->
-        val entry = input.filter { it.sourceMap == sm.key }.firstOrNull()
+        val entry = input.firstOrNull { it.sourceMap == sm.key }
         output.append("state ${entry?.sourceMap} {\n")
         sm.value.forEach { transition ->
             output.append("  ")

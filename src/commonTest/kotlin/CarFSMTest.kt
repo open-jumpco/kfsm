@@ -26,7 +26,7 @@ import kotlin.test.Test
  */
 sealed class CarState(val identifier: String) {
     override fun toString(): String {
-        return "$identifier"
+        return identifier
     }
 }
 

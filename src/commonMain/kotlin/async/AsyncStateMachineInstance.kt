@@ -49,8 +49,7 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
      * @param initialExternalState The previously externalised state.
      */
     constructor(context: C, definition: AsyncStateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
-        this(context, definition, null, initialExternalState) {
-    }
+        this(context, definition, null, initialExternalState)
 
     init {
         currentStateMap = definition.create(context, this, initialState, initialExternalState)
@@ -116,7 +115,7 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
     private suspend fun executePush(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
             definition.createStateMap(transition.targetMap, context, this, transition.targetState!!).apply {
-                namedInstances.put(transition.targetMap, this)
+                namedInstances[transition.targetMap] = this
             }
         }
         mapStack.push(currentStateMap)
@@ -152,7 +151,6 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
     /**
      * This function will provide the external state that can be use when creating the instance at a later time.
      * @return The external state a collection of state and map name pairs.
-     * @see StateMachineDefinition.create
      */
     fun externalState(): ExternalState<S> {
         return mapStack.peekContent()

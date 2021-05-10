@@ -106,7 +106,6 @@ class StateMapInstance<S, E, C, A, R>(
     /**
      * This function will provide the list of allowed events given the current state of the machine.
      * @param includeDefaults When `true` will include default transitions in the list of allowed events.
-     * @see StateMachineDefinition.allowed
      */
     fun allowed(includeDefaults: Boolean = false) = definition.allowed(currentState, includeDefaults)
 

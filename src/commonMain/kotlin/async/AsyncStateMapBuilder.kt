@@ -14,7 +14,6 @@ import io.jumpco.open.kfsm.AsyncStateChangeAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
-import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateGuard
 import io.jumpco.open.kfsm.TransitionType
 

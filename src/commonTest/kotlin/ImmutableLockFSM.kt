@@ -21,25 +21,25 @@ data class ImmutableLock(val locked: Int = 1) {
     fun lock(): ImmutableLock {
         require(locked == 0)
         println("Lock")
-        return copy(locked + 1)
+        return copy(locked = locked + 1)
     }
 
     fun doubleLock(): ImmutableLock {
         require(locked == 1)
         println("DoubleLock")
-        return copy(locked + 1)
+        return copy(locked = locked + 1)
     }
 
     fun unlock(): ImmutableLock {
         require(locked == 1)
         println("Unlock")
-        return copy(locked - 1)
+        return copy(locked = locked - 1)
     }
 
     fun doubleUnlock(): ImmutableLock {
         require(locked == 2)
         println("DoubleUnlock")
-        return copy(locked - 1)
+        return copy(locked = locked - 1)
     }
 
     override fun toString(): String {
@@ -49,7 +49,7 @@ data class ImmutableLock(val locked: Int = 1) {
 // end::context[]
 
 // tag::definition[]
-class ImmutableLockFSM() {
+class ImmutableLockFSM {
 
     companion object {
         fun handleEvent(context: ImmutableLock, event: LockEvents): ImmutableLock {
@@ -113,7 +113,7 @@ operator fun ImmutableLock.plus(event: LockEvents): ImmutableLock {
 }
 // end::definition[]
 
-class TestFunctionalLock() {
+class TestFunctionalLock {
     @Test
     fun testState() {
         // tag::test[]

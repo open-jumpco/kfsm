@@ -12,7 +12,6 @@ package io.jumpco.open.kfsm.async
 import io.jumpco.open.kfsm.AsyncStateChangeAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
-import io.jumpco.open.kfsm.StateChangeAction
 
 class AsyncStateMapDefinition<S, E, C, A, R>(
     /**

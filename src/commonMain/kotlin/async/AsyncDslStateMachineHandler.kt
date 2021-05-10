@@ -10,7 +10,6 @@
 package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateChangeAction
-import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateMapQuery
 import io.jumpco.open.kfsm.StateQuery
 

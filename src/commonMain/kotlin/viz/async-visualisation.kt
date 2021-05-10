@@ -26,7 +26,7 @@ import io.jumpco.open.kfsm.async.SimpleAsyncTransition
  * @soundtrack Wolfgang Amadeus Mozart
  */
 
-public fun <S, E, C, A, R> visualize(
+fun <S, E, C, A, R> visualize(
     definition: AsyncStateMachineDefinition<S, E, C, A, R>
 ): Iterable<TransitionView> {
     val output = mutableListOf<TransitionView>()
@@ -142,5 +142,5 @@ fun <S, E, C, A, R> makeView(
     rules: AsyncTransitionRules<S, E, C, A, R>?,
     output: MutableList<TransitionView>
 ) {
-    makeView(definition, mapName, from?.toString(), event, rules?.transition, output)
+    makeView(definition, mapName, from, event, rules?.transition, output)
 }

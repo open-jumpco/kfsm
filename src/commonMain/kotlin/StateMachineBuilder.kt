@@ -54,7 +54,7 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
         name: String,
         validStates: Set<S>
     ): StateMapBuilder<S, E, C, A, R> {
-        require(name.trim().length > 0) { "statemap name must not be empty" }
+        require(name.trim().isNotEmpty()) { "statemap name must not be empty" }
         require(name != "default") { "Map cannot be named 'default'" }
         require(validStates.isNotEmpty()) { "Provide at least one entty in validStates" }
         val stateMapBuilder = StateMapBuilder<S, E, C, A, R>(validStates, name, this)

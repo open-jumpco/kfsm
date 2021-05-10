@@ -147,7 +147,7 @@ enum class ReaderStates {
 
 // end::states-events[]
 // tag::packaged[]
-class PacketReaderFSM(private val packetHandler: PacketHandler) {
+class PacketReaderFSM(packetHandler: PacketHandler) {
     companion object {
 
         val definition = stateMachine(

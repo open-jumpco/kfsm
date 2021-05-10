@@ -26,9 +26,10 @@ inline fun <S, E, C : Any, A : Any, R : Any> asyncStateMachine(
 /**
  * Defines the start of a state machine DSL declaration with `Any` as the return type
  * @param validStates A set of the possible states supported by the top-level state map
- * @param eventClass The class of the possible events
+ * @param validEvents The class of the possible events*
  * @param contextClass The class of the context
  * @param argumentClass The class of the argument to events/actions
+ * @param handler The state machine handler
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */
 inline fun <S, E, C : Any, A : Any> asyncStateMachine(
@@ -42,7 +43,7 @@ inline fun <S, E, C : Any, A : Any> asyncStateMachine(
 /**
  * Defines the start of a state machine DSL declaration with `Any` as the type of arguments and returns types for events/actions
  * @param validStates A set of the possible states supported by the top-level state map
- * @param eventClass The class of the possible events
+ * @param validEvents The class of the possible events
  * @param contextClass The class of the context
  * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
  */

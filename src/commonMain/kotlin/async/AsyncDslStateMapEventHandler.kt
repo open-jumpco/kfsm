@@ -13,7 +13,6 @@ import io.jumpco.open.kfsm.AsyncStateAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
-import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateGuard
 
 class AsyncDslStateMapEventHandler<S, E, C, A, R>(

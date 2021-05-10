@@ -9,8 +9,6 @@
 
 package io.jumpco.open.kfsm.async
 
-import io.jumpco.open.kfsm.StateChangeAction
-
 /**
  * This handler will be active inside the top level of the stateMachine definition.
  */

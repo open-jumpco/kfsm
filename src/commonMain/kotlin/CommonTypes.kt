@@ -133,7 +133,7 @@ class Stack<T> {
     /**
      * Returns and removed the element on the top of the stack.
      * @return The element on the top of the stack
-     * @throws Will throw IllegalStateException is the stack is empty
+     * @throws IllegalStateException if the stack is empty
      */
     fun pop(): T {
         check(elements.isNotEmpty()) { "stack is empty" }

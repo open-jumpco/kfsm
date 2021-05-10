@@ -7,6 +7,8 @@
  * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("RemoveExplicitTypeArguments")
+
 package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateAction
@@ -14,7 +16,6 @@ import io.jumpco.open.kfsm.AsyncStateChangeAction
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
-import io.jumpco.open.kfsm.StateChangeAction
 import io.jumpco.open.kfsm.StateGuard
 import io.jumpco.open.kfsm.StateMapQuery
 import io.jumpco.open.kfsm.StateQuery
@@ -56,7 +57,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         name: String,
         validStates: Set<S>
     ): AsyncStateMapBuilder<S, E, C, A, R> {
-        require(name.trim().length > 0) { "statemap name must not be empty" }
+        require(name.trim().isNotEmpty()) { "statemap name must not be empty" }
         require(name != "default") { "Map cannot be named 'default'" }
         require(validStates.isNotEmpty()) { "Provide at least one entty in validStates" }
         val stateMapBuilder =

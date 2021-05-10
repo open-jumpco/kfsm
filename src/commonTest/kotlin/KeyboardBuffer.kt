@@ -34,7 +34,7 @@ class KeyboardBuffer {
     fun read(): Char = buffer.removeAt(0)
 }
 
-class KeyboardBufferFSM(private val context: KeyboardBuffer) {
+class KeyboardBufferFSM(context: KeyboardBuffer) {
     companion object {
         val definition = stateMachine(
             KeyboardBufferStates.values().toSet(),

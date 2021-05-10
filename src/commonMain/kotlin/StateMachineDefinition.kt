@@ -53,20 +53,24 @@ class StateMachineDefinition<S, E, C, A, R>(
         initialState: S? = null,
         intitialExternalState: ExternalState<S>? = null
     ): StateMapInstance<S, E, C, A, R> {
-        if (intitialExternalState != null) {
-            intitialExternalState.forEach { (initial, mapName) ->
-                createMap(mapName, context, parentFsm, initial)
+        return when {
+            intitialExternalState != null -> {
+                intitialExternalState.forEach { (initial, mapName) ->
+                    createMap(mapName, context, parentFsm, initial)
+                }
+                parentFsm.mapStack.pop()
             }
-            return parentFsm.mapStack.pop()
-        } else if (deriveInitialMap != null) {
-            deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
-                createMap(mapName, context, parentFsm, initial)
+            deriveInitialMap != null -> {
+                deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
+                    createMap(mapName, context, parentFsm, initial)
+                }
+                parentFsm.mapStack.pop()
             }
-            return parentFsm.mapStack.pop()
-        } else {
-            val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
+            else -> {
+                val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
                 ?: error("Definition requires deriveInitialState or deriveInitialMap")
-            return StateMapInstance(context, initial, null, parentFsm, defaultStateMap)
+                StateMapInstance(context, initial, null, parentFsm, defaultStateMap)
+            }
         }
     }
 

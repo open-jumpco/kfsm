@@ -61,7 +61,6 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
      * This function will create a state machine instance provided with content and optional initialState.
      * @param context The context will be provided to actions
      * @param initialState If this is not provided the function defined in `initial` will be invoked to derive the initialState.
-     * @see StateMachineBuilder.initialState
      */
     internal fun create(
         context: C,
@@ -69,26 +68,30 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
         initialState: S? = null,
         intitialExternalState: ExternalState<S>? = null
     ): AsyncStateMapInstance<S, E, C, A, R> {
-        if (intitialExternalState != null) {
-            intitialExternalState.forEach { (initial, mapName) ->
-                createMap(mapName, context, parentFsm, initial)
+        when {
+            intitialExternalState != null -> {
+                intitialExternalState.forEach { (initial, mapName) ->
+                    createMap(mapName, context, parentFsm, initial)
+                }
+                return parentFsm.mapStack.pop()
             }
-            return parentFsm.mapStack.pop()
-        } else if (deriveInitialMap != null) {
-            deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
-                createMap(mapName, context, parentFsm, initial)
+            deriveInitialMap != null -> {
+                deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
+                    createMap(mapName, context, parentFsm, initial)
+                }
+                return parentFsm.mapStack.pop()
             }
-            return parentFsm.mapStack.pop()
-        } else {
-            val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
-            ?: error("Definition requires deriveInitialState or deriveInitialMap")
-            return AsyncStateMapInstance(
-                context,
-                initial,
-                null,
-                parentFsm,
-                defaultStateMap
-            )
+            else -> {
+                val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
+                ?: error("Definition requires deriveInitialState or deriveInitialMap")
+                return AsyncStateMapInstance(
+                    context,
+                    initial,
+                    null,
+                    parentFsm,
+                    defaultStateMap
+                )
+            }
         }
     }
 

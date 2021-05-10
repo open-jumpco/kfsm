@@ -69,7 +69,7 @@ class SecureTurnstile {
 // end::context[]
 
 // tag::fsm[]
-class SecureTurnstileFSM(private val secureTurnstile: SecureTurnstile) {
+class SecureTurnstileFSM(secureTurnstile: SecureTurnstile) {
     companion object {
         val definition = stateMachine(
             SecureTurnstileStates.values().toSet(),
