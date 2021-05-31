@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateAction
+import io.jumpco.open.kfsm.Condition
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState

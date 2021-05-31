@@ -23,12 +23,14 @@ class StateMapInstance<S, E, C, A, R>(
 ) {
     init {
         require(definition.validStates.contains(newState)) { "Initial state is $newState and not in ${definition.validStates}" }
+        definition.invariants.forEach { checkInvariant(context, it) }
     }
 
     var currentState: S = newState
         internal set
 
     internal fun changeState(targetState: S) {
+        definition.invariants.forEach { checkInvariant(context, it) }
         if (currentState != targetState) {
             val oldState = currentState
             currentState = targetState
@@ -40,6 +42,7 @@ class StateMapInstance<S, E, C, A, R>(
                 }
             }
         }
+        definition.invariants.forEach { checkInvariant(context, it) }
     }
     internal fun execute(transition: SyncTransition<S, E, C, A, R>, arg: A?): R? {
         val result = transition.execute(context, this, arg)

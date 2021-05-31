@@ -9,6 +9,10 @@
 
 package io.jumpco.open.kfsm.async
 
+import io.jumpco.open.kfsm.checkInvariant
+import io.jumpco.open.kfsm.checkPostcondition
+import io.jumpco.open.kfsm.checkPrecondition
+
 class AsyncStateMapInstance<S, E, C, A, R>(
     val context: C,
     val newState: S,
@@ -18,6 +22,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
 ) {
     init {
         require(definition.validStates.contains(newState)) { "Initial state is $newState and not in ${definition.validStates}" }
+        definition.invariants.forEach { checkInvariant(context, it) }
     }
 
     var currentState: S = newState
@@ -37,6 +42,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
     }
 
     internal suspend fun changeState(targetState: S) {
+        definition.invariants.forEach { checkInvariant(context, it) }
         if (currentState != targetState) {
             val oldState = currentState
             currentState = targetState
@@ -48,11 +54,12 @@ class AsyncStateMapInstance<S, E, C, A, R>(
                 }
             }
         }
+        definition.invariants.forEach { checkInvariant(context, it) }
     }
 
     internal fun executeEntry(context: C, targetState: S, arg: A?) {
-        val entryAction =
-            definition.entryActions[targetState] ?: parentFsm.definition.defaultStateMap.entryActions[targetState]
+        val entryAction = definition.entryActions[targetState]
+            ?: parentFsm.definition.defaultStateMap.entryActions[targetState]
         entryAction?.invoke(context, currentState, targetState, arg)
         val defaultEntry = definition.defaultEntryAction ?: parentFsm.definition.defaultStateMap.defaultEntryAction
         defaultEntry?.invoke(context, currentState, targetState, arg)

@@ -24,6 +24,10 @@ class StateMapDefinition<S, E, C, A, R>(
      */
     val validStates: Set<S>,
     /**
+     * Invariant conditions are checked before and after every transition an will throw an InvariantException if false
+     */
+    val invariants: Set<Pair<String, Condition<C>>>,
+    /**
      * transitionRule contains a map of TransitionRules that is keyed by a Pair of state,event
      * This will be the most common transition rule.
      */

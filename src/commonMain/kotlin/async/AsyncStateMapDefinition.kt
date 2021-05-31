@@ -10,6 +10,7 @@
 package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateChangeAction
+import io.jumpco.open.kfsm.Condition
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 
@@ -22,6 +23,10 @@ class AsyncStateMapDefinition<S, E, C, A, R>(
      * A set of the valid states for this map.
      */
     val validStates: Set<S>,
+    /**
+     * Invariant conditions are checked before and after every transition an will throw an InvariantException if false
+     */
+    val invariants: Set<Pair<String, Condition<C>>>,
     /**
      * transitionRule contains a map of TransitionRules that is keyed by a Pair of state,event
      * This will be the most common transition rule.

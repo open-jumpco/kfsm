@@ -38,6 +38,16 @@ class StateMapBuilder<S, E, C, A, R>(
     private var globalDefault: DefaultStateAction<C, S, E, A, R>? = null
     private var defaultEntryAction: DefaultEntryExitAction<C, S, A>? = null
     private var defaultExitAction: DefaultEntryExitAction<C, S, A>? = null
+    private val invariants: MutableSet<Pair<String, Condition<C>>> = mutableSetOf()
+
+    /**
+     * This function defines an invariant condition that will hold true before and after all transitions.
+     * @param message The message added to exception
+     * @param condition A boolean expression applied to the context
+     */
+    fun invariant(message: String, condition: Condition<C>) {
+        invariants.add(Pair(message, condition))
+    }
 
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
@@ -660,9 +670,10 @@ class StateMapBuilder<S, E, C, A, R>(
     /**
      * Creates a `StateMapDefinition` from the data in this builder
      */
-    fun toMap(afterStateChangeAction: StateChangeAction<C,S>?): StateMapDefinition<S, E, C, A, R> = StateMapDefinition(
+    fun toMap(afterStateChangeAction: StateChangeAction<C, S>?): StateMapDefinition<S, E, C, A, R> = StateMapDefinition(
         this.name,
         this.validStates,
+        this.invariants.toSet(),
         this.transitionRules.toMap(),
         this.defaultTransitions.toMap(),
         this.entryActions.toMap(),

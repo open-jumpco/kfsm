@@ -9,6 +9,9 @@
 
 package io.jumpco.open.kfsm
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
 /**
  * This represents an action that may be invoked during a transition.
  * @author Corneil du Plessis
@@ -90,18 +93,22 @@ enum class TransitionType {
      * Transitions are triggered and may change to a new state or remain at the same state while performing an action.
      */
     NORMAL,
+
     /**
      * A push transition will place the current state map on a stack and make the named statemap the current map and change to the given state,
      */
     PUSH,
+
     /**
      * A pop transition will pop the stack and make the transition current. If the pop transition provided a new targetMap or targetState that will result in push or normal transition behaviour.
      */
     POP,
+
     /**
      * A default transition will take place when no configured state/event pair matches.
      */
     DEFAULT,
+
     /**
      * A timeout may trigger a transition if the timeout occurs. The timeout will be cancelled when the state exit action is triggered.
      *
@@ -109,14 +116,28 @@ enum class TransitionType {
     TIMEOUT
 }
 
-/**
- * An extension function that evaluates the expression and invokes the provided `block` if true.
- */
-inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit): T {
-    if (expression) {
-        this.apply(block)
-    }
-    return this
+class PreConditionException(message: String) : RuntimeException(message)
+class PostConditionException(message: String) : RuntimeException(message)
+class InvariantException(message: String) : RuntimeException(message)
+
+@Throws(InvariantException::class)
+inline fun <C> checkInvariant(context: C, condition: Pair<String, Condition<C>>?) {
+    val check = condition?.second?.invoke(context) ?: true
+    if (!check) throw InvariantException(condition!!.first)
+}
+
+typealias Condition<C> = C.() -> Boolean
+
+@Throws(PreConditionException::class)
+inline fun <C> checkPrecondition(context: C, condition: Pair<String, Condition<C>>?) {
+    val check = condition?.second?.invoke(context) ?: true
+    if (!check) throw PreConditionException(condition!!.first)
+}
+
+@Throws(PostConditionException::class)
+inline fun <C> checkPostcondition(context: C, condition: Pair<String, Condition<C>>?) {
+    val check = condition?.second?.invoke(context) ?: true
+    if (!check) throw PostConditionException(condition!!.first)
 }
 
 /**
@@ -124,6 +145,7 @@ inline fun <T> T.ifApply(expression: Boolean, block: T.() -> Unit): T {
  */
 class Stack<T> {
     private val elements: MutableList<T> = mutableListOf()
+
     /**
      * Push an element onto the stack.
      * @param value The element will be pushed

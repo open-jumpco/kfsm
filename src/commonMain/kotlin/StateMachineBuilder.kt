@@ -95,6 +95,15 @@ class StateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal val va
     }
 
     /**
+     * This function defines an invariant condition that will hold true before and after all transitions.
+     * @param message The message added to exception
+     * @param condition A boolean expression applied to the context
+     */
+    fun invariant(message: String, condition: Condition<C>) {
+        defaultStateMap.invariant(message, condition)
+    }
+
+    /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
      * received and the guard expression is met. The action is executed after any exit action and before entry actions.
      * @param startState The transition will be considered when currentState matches stateState

@@ -78,6 +78,7 @@ class LockFSM(context: Lock) {
                     else -> error("Invalid state locked=$locked")
                 }
             }
+            invariant("invalid locked value") { locked in 0..2 }
             onStateChange { oldState, newState ->
                 println("onStateChange:$oldState -> $newState")
             }

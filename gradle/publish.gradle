@@ -90,7 +90,7 @@ publishing {
 
 signing {
     sign publishing.publications.kotlinMultiplatform
-    sign publishing.publications.metadata
+    // sign publishing.publications.metadata
     sign publishing.publications.documentation
 
     if (useTarget['jvm']) {

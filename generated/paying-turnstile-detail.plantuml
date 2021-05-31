@@ -15,4 +15,7 @@ LOCKED --> COINS : COIN [{value->\lrequireNotNull(value){"argument required for 
 UNLOCKED --> UNLOCKED : COIN\l<<action>> {value->\lrequireNotNull(value){"argument required for COIN"}\lreturnCoin(coin(value))\l}
 UNLOCKED --> LOCKED : PASS\l<<action>> {\llock()\l}
 }
+note top of PayingTurnstileFSM
+<<invariant>> {coins >= 0}
+end note
 @enduml

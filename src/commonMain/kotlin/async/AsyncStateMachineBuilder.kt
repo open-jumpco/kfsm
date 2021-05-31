@@ -13,6 +13,7 @@ package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateAction
 import io.jumpco.open.kfsm.AsyncStateChangeAction
+import io.jumpco.open.kfsm.Condition
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
@@ -47,7 +48,14 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         require(!completed) { "Statemachine has been completed" }
         deriveInitialStateMap = init
     }
-
+    /**
+     * This function defines an invariant condition that will hold true before and after all transitions.
+     * @param message The message added to exception
+     * @param condition A boolean expression applied to the context
+     */
+    fun invariant(message: String, condition: Condition<C>) {
+        defaultStateMap.invariant(message, condition)
+    }
     /**
      * This function will be use to define a named statemap.
      * @param name The name of the StateMap. It must be unique.

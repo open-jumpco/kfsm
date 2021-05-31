@@ -1,10 +1,14 @@
 buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
     dependencies {
         classpath group: 'org.jetbrains.kotlinx', name: 'kotlinx-html-jvm', version: '0.7.3'
     }
 }
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.4.31'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.4.32'
     id 'org.jetbrains.dokka' version '1.4.32'
     id 'maven-publish'
     id 'signing'
@@ -12,7 +16,7 @@ plugins {
     id 'org.jlleitschuh.gradle.ktlint' version '9.4.1'
     id 'org.jlleitschuh.gradle.ktlint-idea' version '9.4.1'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
-    id 'io.jumpco.open.kfsm.viz-plugin' version '1.4.31'
+    id 'io.jumpco.open.kfsm.viz-plugin' version '1.4.32.1'
 }
 
 repositories {
@@ -20,7 +24,7 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '1.4.31'
+version = '1.4.32'
 description = 'Kotlin Finite-state machine'
 
 java {
@@ -36,9 +40,11 @@ def useTarget = project.ext.useTarget
 
 
 kotlin {
+    js(IR) {}
     sourceSets {
         commonMain {
             dependencies {
+                api 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
             }
         }
@@ -50,6 +56,7 @@ kotlin {
         if (useTarget['js']) {
             jsMain {
                 dependencies {
+                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
                     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.4.3'
                 }
             }
@@ -57,12 +64,13 @@ kotlin {
         if (useTarget['jvm']) {
             jvmMain {
                 dependencies {
+                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
                     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.4.3'
                 }
             }
             jvmTest {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-test:1.4.31'
+                    implementation 'org.jetbrains.kotlin:kotlin-test:1.4.32'
                     implementation 'junit:junit:4.13.2'
                     implementation 'io.mockk:mockk:1.10.5'
                 }

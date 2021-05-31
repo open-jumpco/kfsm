@@ -11,6 +11,7 @@ package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.AsyncStateAction
 import io.jumpco.open.kfsm.AsyncStateChangeAction
+import io.jumpco.open.kfsm.Condition
 import io.jumpco.open.kfsm.DefaultAsyncStateAction
 import io.jumpco.open.kfsm.DefaultEntryExitAction
 import io.jumpco.open.kfsm.EventState
@@ -41,6 +42,16 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
     private var defaultEntryAction: DefaultEntryExitAction<C, S, A>? = null
     private var defaultExitAction: DefaultEntryExitAction<C, S, A>? = null
     private val timerActions: MutableMap<S, AsyncTimerDefinition<S, E, C, A, R>> = mutableMapOf()
+    private val invariants: MutableSet<Pair<String, Condition<C>>> = mutableSetOf()
+
+    /**
+     * This function defines an invariant condition that will hold true before and after all transitions.
+     * @param message The message added to exception
+     * @param condition A boolean expression applied to the context
+     */
+    fun invariant(message: String, condition: Condition<C>) {
+        invariants.add(Pair(message, condition))
+    }
 
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
@@ -654,6 +665,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
         AsyncStateMapDefinition(
             this.name,
             this.validStates,
+            this.invariants.toSet(),
             this.transitionRules.toMap(),
             this.defaultTransitions.toMap(),
             this.entryActions.toMap(),

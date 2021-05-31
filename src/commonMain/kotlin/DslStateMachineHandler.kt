@@ -37,16 +37,16 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
 
     ```
     initialStates {
-        mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
-            if (locked) {
-                this.add(PayingTurnstileStates.LOCKED to "default")
-            } else {
-                this.add(PayingTurnstileStates.UNLOCKED to "default")
-            }
-            if (coins > 0) {
-                this.add(PayingTurnstileStates.COINS to "coins")
-            }
-        }
+    mutableListOf<StateMapItem<PayingTurnstileStates>>().apply {
+    if (locked) {
+    this.add(PayingTurnstileStates.LOCKED to "default")
+    } else {
+    this.add(PayingTurnstileStates.UNLOCKED to "default")
+    }
+    if (coins > 0) {
+    this.add(PayingTurnstileStates.COINS to "coins")
+    }
+    }
     }
     ```
 
@@ -55,6 +55,12 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
         fsm.initialStates(deriveInitialMap)
         return this
     }
+
+    fun invariant(message: String, condition: Condition<C>): DslStateMachineHandler<S, E, C, A, R> {
+        fsm.invariant(message, condition)
+        return this
+    }
+
     /**
      * Defines an action that will be invoked after a transition to a new state.
      * Any exceptions thrown by the action will be ignored.
@@ -62,6 +68,7 @@ class DslStateMachineHandler<S, E, C, A, R>(private val fsm: StateMachineBuilder
     fun onStateChange(action: StateChangeAction<C, S>) {
         fsm.afterStateChange(action)
     }
+
     /**
      * Defines a section for a specific state.
      * @param currentState The give state
