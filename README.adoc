@@ -1,5 +1,7 @@
 = Kotlin Finite-state machine
 
+This work is licensed under link:https://www.apache.org/licenses/LICENSE-2.0.html[Apache License 2.0]
+
 This is a small implementation of an FSM in Kotlin.
 
 == Resources
