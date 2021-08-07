@@ -192,11 +192,19 @@ class AsyncDslStateMapEventHandler<S, E, C, A, R>(
     }
 
     fun timeout(targetState: S, timeout: Long, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeout(currentState, targetState, { timeout }, null, action)
+    }
+
+    fun timeout(targetState: S, timeout: C.() -> Long, action: AsyncStateAction<C, A, R>?) {
         fsm.timeout(currentState, targetState, timeout, null, action)
     }
 
-    fun timeout(targetState: S, timeout: Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
+    fun timeout(targetState: S, timeout: C.() -> Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         fsm.timeout(currentState, targetState, timeout, guard, action)
+    }
+
+    fun timeout(targetState: S, timeout: Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeout(currentState, targetState, { timeout }, guard, action)
     }
 
     fun automaticPop(targetState: S, action: AsyncStateAction<C, A, R>?) {
@@ -224,23 +232,53 @@ class AsyncDslStateMapEventHandler<S, E, C, A, R>(
     }
 
     fun timeoutPop(targetState: S, timeout: Long, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeoutPop(currentState, null, targetState, { timeout }, null, action)
+    }
+
+    fun timeoutPop(targetState: S, timeout: C.() -> Long, action: AsyncStateAction<C, A, R>?) {
         fsm.timeoutPop(currentState, null, targetState, timeout, null, action)
     }
 
     fun timeoutPop(timeout: Long, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeoutPop(currentState, null, null, { timeout }, null, action)
+    }
+
+    fun timeoutPop(timeout: C.() -> Long, action: AsyncStateAction<C, A, R>?) {
         fsm.timeoutPop(currentState, null, null, timeout, null, action)
     }
 
     fun timeoutPop(targetMap: String, targetState: S, timeout: Long, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeoutPop(currentState, targetMap, targetState, { timeout }, null, action)
+    }
+
+    fun timeoutPop(targetMap: String, targetState: S, timeout: C.() -> Long, action: AsyncStateAction<C, A, R>?) {
         fsm.timeoutPop(currentState, targetMap, targetState, timeout, null, action)
     }
 
     fun timeoutPop(targetState: S, timeout: Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeoutPop(currentState, null, targetState, { timeout }, guard, action)
+    }
+
+    fun timeoutPop(targetState: S, timeout: C.() -> Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         fsm.timeoutPop(currentState, null, targetState, timeout, guard, action)
     }
 
     fun timeoutPop(timeout: Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeoutPop(currentState, null, null, { timeout }, guard, action)
+    }
+
+    fun timeoutPop(timeout: C.() -> Long, guard: StateGuard<C, A>, action: AsyncStateAction<C, A, R>?) {
         fsm.timeoutPop(currentState, null, null, timeout, guard, action)
+    }
+
+    fun timeoutPop(
+        targetMap: String,
+        targetState: S,
+        timeout: C.() -> Long,
+        guard: StateGuard<C, A>,
+        action: AsyncStateAction<C, A, R>?
+    ) {
+        fsm.timeoutPop(currentState, targetMap, targetState, timeout, guard, action)
     }
 
     fun timeoutPop(
@@ -250,7 +288,7 @@ class AsyncDslStateMapEventHandler<S, E, C, A, R>(
         guard: StateGuard<C, A>,
         action: AsyncStateAction<C, A, R>?
     ) {
-        fsm.timeoutPop(currentState, targetMap, targetState, timeout, guard, action)
+        fsm.timeoutPop(currentState, targetMap, targetState, { timeout }, guard, action)
     }
 
     fun automaticPush(targetMap: String, targetState: S, action: AsyncStateAction<C, A, R>?) {
@@ -261,14 +299,28 @@ class AsyncDslStateMapEventHandler<S, E, C, A, R>(
         fsm.automaticPush(currentState, targetMap, targetState, guard, action)
     }
 
-    fun timeoutPush(targetMap: String, targetState: S, timeout: Long, action: AsyncStateAction<C, A, R>?) {
+    fun timeoutPush(targetMap: String, targetState: S, timeout: C.() -> Long, action: AsyncStateAction<C, A, R>?) {
         fsm.timeoutPush(currentState, targetMap, targetState, timeout, null, action)
+    }
+
+    fun timeoutPush(targetMap: String, targetState: S, timeout: Long, action: AsyncStateAction<C, A, R>?) {
+        fsm.timeoutPush(currentState, targetMap, targetState, { timeout }, null, action)
     }
 
     fun timeoutPush(
         targetMap: String,
         targetState: S,
         timeout: Long,
+        guard: StateGuard<C, A>,
+        action: AsyncStateAction<C, A, R>?
+    ) {
+        fsm.timeoutPush(currentState, targetMap, targetState, { timeout }, guard, action)
+    }
+
+    fun timeoutPush(
+        targetMap: String,
+        targetState: S,
+        timeout: C.() -> Long,
         guard: StateGuard<C, A>,
         action: AsyncStateAction<C, A, R>?
     ) {

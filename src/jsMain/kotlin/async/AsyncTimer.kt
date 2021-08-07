@@ -27,7 +27,7 @@ actual class AsyncTimer<S, E, C, A, R> actual constructor(
     init {
         active = true
         timer = GlobalScope.launch {
-            delay(definition.timeout)
+            delay(context.(definition.timeout)())
             trigger()
         }
     }

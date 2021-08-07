@@ -112,7 +112,10 @@ class TimeoutSecureTurnstileTests {
             fsm.card(1)
             println("Assertion")
             assertTrue { !turnstile.locked }
-            println("Delay")
+            println("Delay:100")
+            delay(100L)
+            assertTrue { !turnstile.locked }
+            println("Delay:1000")
             delay(1000L)
             println("Assertion")
             assertTrue { turnstile.locked }

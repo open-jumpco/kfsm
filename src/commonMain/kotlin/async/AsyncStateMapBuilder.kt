@@ -291,7 +291,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
     fun timeout(
         startState: S,
         targetState: S,
-        timeout: Long,
+        timeout: C.() -> Long,
         guard: StateGuard<C, A>?,
         action: AsyncStateAction<C, A, R>?
     ) {
@@ -405,7 +405,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
         startState: S,
         targetMap: String?,
         targetState: S?,
-        timeout: Long,
+        timeout: C.() -> Long,
         guard: StateGuard<C, A>?,
         action: AsyncStateAction<C, A, R>?
     ) {
@@ -519,7 +519,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
         startState: S,
         targetMap: String,
         targetState: S,
-        timeout: Long,
+        timeout: C.() -> Long,
         guard: StateGuard<C, A>?,
         action: AsyncStateAction<C, A, R>?
     ) {

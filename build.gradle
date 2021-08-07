@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenLocal()
+        gradlePluginPortal()
         mavenCentral()
     }
     dependencies {
@@ -8,15 +9,15 @@ buildscript {
     }
 }
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.4.32'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.5.10'
     id 'org.jetbrains.dokka' version '1.4.32'
     id 'maven-publish'
     id 'signing'
     id 'org.asciidoctor.jvm.convert' version '2.4.0'
-    id 'org.jlleitschuh.gradle.ktlint' version '9.4.1'
-    id 'org.jlleitschuh.gradle.ktlint-idea' version '9.4.1'
+    id 'org.jlleitschuh.gradle.ktlint' version '10.1.0'
+    id 'org.jlleitschuh.gradle.ktlint-idea' version '10.1.0'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
-    id 'io.jumpco.open.kfsm.viz-plugin' version '1.4.32.1'
+    id 'io.jumpco.open.kfsm.viz-plugin' version '1.5.0'
 }
 
 repositories {
@@ -24,7 +25,7 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '1.4.32'
+version = '1.5.0'
 description = 'Kotlin Finite-state machine'
 
 java {
@@ -45,19 +46,20 @@ kotlin {
         commonMain {
             dependencies {
                 api 'org.jetbrains.kotlin:kotlin-stdlib-common'
-                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
+                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
             }
         }
         commonTest {
             dependencies {
-                implementation 'io.mockk:mockk-common:1.10.5'
+                implementation 'io.mockk:mockk-common:1.12.0'
             }
         }
         if (useTarget['js']) {
             jsMain {
                 dependencies {
                     implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
-                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.4.3'
+                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.5.0'
+
                 }
             }
         }
@@ -65,14 +67,14 @@ kotlin {
             jvmMain {
                 dependencies {
                     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.4.3'
+                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.0'
                 }
             }
             jvmTest {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-test:1.4.32'
+                    implementation 'org.jetbrains.kotlin:kotlin-test:1.5.10'
                     implementation 'junit:junit:4.13.2'
-                    implementation 'io.mockk:mockk:1.10.5'
+                    implementation 'io.mockk:mockk:1.12.0'
                 }
             }
         }

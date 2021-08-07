@@ -38,7 +38,7 @@ class TimerSecureTurnstile {
         private set
     var overrideActive: Boolean = false
         private set
-
+    val timeout = 500L
     fun activateOverride() {
         overrideActive = true
         println("override activated")
@@ -138,7 +138,7 @@ class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile) {
                 }
             }
             whenState(SecureTurnstileStates.UNLOCKED) {
-                timeout(SecureTurnstileStates.LOCKED, 500L) {
+                timeout(SecureTurnstileStates.LOCKED, { timeout }) {
                     println("Timeout. Locking")
                     lock()
                 }

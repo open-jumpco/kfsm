@@ -9,7 +9,7 @@ LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(car
 LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\lactivateOverride()\l}
 LOCKED --> UNLOCKED : CARD [{cardId->\lrequireNotNull(cardId);\loverrideActive||isValidCard(cardId);\l}]\l<<action>> {\lunlock()\l}
 LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId){"cardId is required"};\l!isValidCard(cardId);\l}]\l<<action>> {cardId->\lrequireNotNull(cardId)\linvalidCard(cardId)\l}
-UNLOCKED --> LOCKED : <<timeout = 500>>\l<<action>> {\lprintln("Timeout. Locking")\llock()\l}
+UNLOCKED --> LOCKED : <<timeout = {timeout}>>\l<<action>> {\lprintln("Timeout. Locking")\llock()\l}
 UNLOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\llock()\l}
 UNLOCKED --> LOCKED : PASS\l<<action>> {\llock()\l}
 }
