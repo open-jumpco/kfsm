@@ -1,12 +1,15 @@
 @startuml
+skinparam monochrome true
 skinparam StateFontName Helvetica
 skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
 skinparam state {
-    BackgroundColor LightBlue
+    FontColor Black
+    FontStyle Bold
 }
 state TurnstileFSM {
-LOCKED --> UNLOCKED : COIN\l<<action>> {\lunlock()\l}
-UNLOCKED --> UNLOCKED : COIN\l<<action>> {\lreturnCoin()\l}
-UNLOCKED --> LOCKED : PASS\l<<action>> {\llock()\l}
+LOCKED --> UNLOCKED : COIN -> {\l  unlock()\l}
+UNLOCKED --> UNLOCKED : COIN -> {\l  returnCoin()\l}
+UNLOCKED --> LOCKED : PASS -> {\l  lock()\l}
 }
 @enduml

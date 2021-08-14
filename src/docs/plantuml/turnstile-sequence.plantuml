@@ -1,4 +1,7 @@
 @startuml
+
+skinparam monochrome true
+
 actor Consumer
 boundary TurnStileFSM
 control Turnstile

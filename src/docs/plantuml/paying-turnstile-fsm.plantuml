@@ -1,5 +1,6 @@
 @startuml
 
+skinparam monochrome true
 skinparam classFontSize 9
 skinparam classFontName Monospaced
 

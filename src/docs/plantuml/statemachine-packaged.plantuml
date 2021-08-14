@@ -1,5 +1,7 @@
 @startuml
 
+skinparam monochrome true
+
 class Turnstile {
     lock()
     unlock()

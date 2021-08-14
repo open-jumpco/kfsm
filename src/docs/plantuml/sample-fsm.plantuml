@@ -1,7 +1,14 @@
 @startuml
 
-skinparam classFontSize 9
-skinparam classFontName Monospaced
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontColor Black
+    FontStyle Bold
+}
+
 
 [*] --> STATE1
 STATE1 ---> STATE2 : EVENT1\n{ action1() }

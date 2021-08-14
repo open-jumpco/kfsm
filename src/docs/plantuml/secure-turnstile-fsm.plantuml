@@ -1,15 +1,21 @@
 @startuml
 
-skinparam classFontSize 9
-skinparam classFontName Monospaced
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontColor Black
+    FontStyle Bold
+}
 
 [*] -right-> LOCKED
 
-LOCKED ----> UNLOCKED : CARD(id)\n guard={ isOverrideCard(id) }\n{ activateOverride() }
-LOCKED ----> UNLOCKED : CARD(id)\n guard={ isValid(id) || overrideActive }\n{ unlock() }
-LOCKED ----> UNLOCKED : CARD(id)\n guard={ !isValid(id) }\n{ error("Invalid card") }
+LOCKED ----> UNLOCKED : CARD(id) [{ isOverrideCard(id) }] -> {\l  activateOverride()\l}
+LOCKED ----> UNLOCKED : CARD(id) [{ isValid(id) || overrideActive }] -> {\l  unlock()\l}]
+LOCKED ----> UNLOCKED : CARD(id) [{ !isValid(id) }] -> {\l  error("Invalid card")\l}
 
-UNLOCKED ----> LOCKED : PASS\n{ lock() }
-UNLOCKED ----> LOCKED : CARD(id)\n guard={ isOverrideCard(id) }\n{ lock() }
+UNLOCKED ----> LOCKED : PASS\l{\l  lock()\l}
+UNLOCKED ----> LOCKED : CARD(id)\l [{ isOverrideCard(id) }] -> {\l  lock()\l}
 
 @enduml

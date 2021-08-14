@@ -1,16 +1,19 @@
 @startuml
+skinparam monochrome true
 skinparam StateFontName Helvetica
 skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
 skinparam state {
-    BackgroundColor LightBlue
+    FontColor Black
+    FontStyle Bold
 }
 state TimerSecureTurnstileFSM {
-LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId)&&overrideActive;\l}]\l<<action>> {\lcancelOverride()\l}
-LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\lactivateOverride()\l}
-LOCKED --> UNLOCKED : CARD [{cardId->\lrequireNotNull(cardId);\loverrideActive||isValidCard(cardId);\l}]\l<<action>> {\lunlock()\l}
-LOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId){"cardId is required"};\l!isValidCard(cardId);\l}]\l<<action>> {cardId->\lrequireNotNull(cardId)\linvalidCard(cardId)\l}
-UNLOCKED --> LOCKED : <<timeout = {timeout}>>\l<<action>> {\lprintln("Timeout. Locking")\llock()\l}
-UNLOCKED --> LOCKED : CARD [{cardId->\lrequireNotNull(cardId);\lisOverrideCard(cardId);\l}]\l<<action>> {\llock()\l}
-UNLOCKED --> LOCKED : PASS\l<<action>> {\llock()\l}
+LOCKED --> LOCKED : CARD [{cardId->\l  requireNotNull(cardId);\l  isOverrideCard(cardId)&&overrideActive;\l}] -> {\l  cancelOverride()\l}
+LOCKED --> LOCKED : CARD [{cardId->\l  requireNotNull(cardId);\l  isOverrideCard(cardId);\l}] -> {\l  activateOverride()\l}
+LOCKED --> UNLOCKED : CARD [{cardId->\l  requireNotNull(cardId);\l  overrideActive||isValidCard(cardId);\l}] -> {\l  unlock()\l}
+LOCKED --> LOCKED : CARD [{cardId->\l  requireNotNull(cardId){"cardId is required"};\l  !isValidCard(cardId);\l}] -> {cardId->\l  requireNotNull(cardId)\l  invalidCard(cardId)\l}
+UNLOCKED --> LOCKED : <<timeout = {timeout}>> -> {\l  println("Timeout. Locking")\l  lock()\l}
+UNLOCKED --> LOCKED : CARD [{cardId->\l  requireNotNull(cardId);\l  isOverrideCard(cardId);\l}] -> {\l  lock()\l}
+UNLOCKED --> LOCKED : PASS -> {\l  lock()\l}
 }
 @enduml

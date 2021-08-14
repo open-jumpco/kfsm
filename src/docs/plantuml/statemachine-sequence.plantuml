@@ -1,5 +1,7 @@
 @startuml
 
+skinparam monochrome true
+
 actor Consumer
 boundary StateMachineInstance
 control Context

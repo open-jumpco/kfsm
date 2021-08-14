@@ -1,19 +1,22 @@
 @startuml
+skinparam monochrome true
 skinparam StateFontName Helvetica
 skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
 skinparam state {
-    BackgroundColor LightBlue
+    FontColor Black
+    FontStyle Bold
 }
 state coins {
-COINS --> UNLOCKED : <<automatic>> [{coins > requiredCoins}]\l<<action>> {\lprintln("automaticPop:returnCoin")\lreturnCoin(coins-requiredCoins)\lunlock()\lreset()\l}
-COINS --> UNLOCKED : <<automatic>> [{coins == requiredCoins}]\l<<action>> {\lprintln("automaticPop")\lunlock()\lreset()\l}
-COINS --> COINS : COIN\l<<action>> {value->\lrequireNotNull(value){"argument required for COIN"}\lcoin(value)\lprintln("Coins=$coins")\lif(coins < requiredCoins){\lprintln("Please add ${requiredCoins-coins}")\l}\l}
+COINS --> UNLOCKED : <<automatic>> [{coins > requiredCoins}] -> {\l  println("automaticPop:returnCoin")\l  returnCoin(coins-requiredCoins)\l  unlock()\l  reset()\l}
+COINS --> UNLOCKED : <<automatic>> [{coins == requiredCoins}] -> {\l  println("automaticPop")\l  unlock()\l  reset()\l}
+COINS --> COINS : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  coin(value)\l  println("Coins=$coins")\l  if(coins < requiredCoins){\l  println("Please add ${requiredCoins-coins}")\l  }\l}
 }
 state PayingTurnstileFSM {
-LOCKED --> COINS : COIN\l<<action>> {value->\lrequireNotNull(value){"argument required for COIN"}\lcoin(value)\lunlock()\lreset()\l}
-LOCKED --> COINS : COIN [{value->\lrequireNotNull(value){"argument required for COIN"};\lvalue+coins < requiredCoins;\l}]\l<<action>> {value->\lrequireNotNull(value){"argument required for COIN"}\lprintln("PUSH TRANSITION")\lcoin(value)\lprintln("Coins=$coins, Please add ${requiredCoins-coins}")\l}
-UNLOCKED --> UNLOCKED : COIN\l<<action>> {value->\lrequireNotNull(value){"argument required for COIN"}\lreturnCoin(coin(value))\l}
-UNLOCKED --> LOCKED : PASS\l<<action>> {\llock()\l}
+LOCKED --> COINS : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  coin(value)\l  unlock()\l  reset()\l}
+LOCKED --> COINS : COIN [{value->\l  requireNotNull(value){"argument required for COIN"};\l  value+coins < requiredCoins;\l}] -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  println("PUSH TRANSITION")\l  coin(value)\l  println("Coins=$coins, Please add ${requiredCoins-coins}")\l}
+UNLOCKED --> UNLOCKED : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  returnCoin(coin(value))\l}
+UNLOCKED --> LOCKED : PASS -> {\l  lock()\l}
 }
 note top of PayingTurnstileFSM
 <<invariant>> {coins >= 0}
