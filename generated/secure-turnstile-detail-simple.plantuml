@@ -1,0 +1,18 @@
+@startuml
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontStyle Bold
+}
+state SecureTurnstileFSM {
+[*] --> UNLOCKED
+LOCKED --> LOCKED : CARD
+LOCKED --> LOCKED : CARD
+LOCKED --> UNLOCKED : CARD
+LOCKED --> LOCKED : CARD
+UNLOCKED --> LOCKED : CARD
+UNLOCKED --> LOCKED : PASS
+}
+@enduml

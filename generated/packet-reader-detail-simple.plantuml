@@ -1,0 +1,26 @@
+@startuml
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontStyle Bold
+}
+state PacketReaderFSM {
+[*] --> RCVPCKT : CTRL
+RCVPCKT --> RCVDATA : CTRL
+RCVPCKT --> RCVCHK : BYTE
+RCVDATA --> RCVDATA : BYTE
+RCVDATA --> RCVPCKT : CTRL
+RCVDATA --> RCVESC : ESC
+RCVESC --> RCVDATA : ESC
+RCVESC --> RCVDATA : CTRL
+RCVCHK --> RCVCHK : BYTE
+RCVCHK --> RCVCHKESC : ESC
+RCVCHK --> CHKSUM : CTRL
+CHKSUM --> [*] : <<automatic>>
+CHKSUM --> [*] : <<automatic>>
+RCVCHKESC --> RCVCHK : ESC
+RCVCHKESC --> RCVCHK : CTRL
+}
+@enduml
