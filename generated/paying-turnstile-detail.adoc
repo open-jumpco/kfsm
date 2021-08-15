@@ -1,51 +1,5 @@
 == PayingTurnstileFSM State Chart
 
-=== State Map coins
-
-|===
-| Start | Event[Guard] | Target | Action
-
-| COINS
-| \<<automatic>> `[{coins > requiredCoins}]`
-| UNLOCKED
-a| [source,kotlin]
-----
-{
-println("automaticPop:returnCoin")
-returnCoin(coins-requiredCoins)
-unlock()
-reset()
-}
-----
-
-| COINS
-| \<<automatic>> `[{coins == requiredCoins}]`
-| UNLOCKED
-a| [source,kotlin]
-----
-{
-println("automaticPop")
-unlock()
-reset()
-}
-----
-
-| COINS
-| COIN
-| COINS
-a| [source,kotlin]
-----
-{value->
-requireNotNull(value){"argument required for COIN"}
-coin(value)
-println("Coins=$coins")
-if(coins < requiredCoins){
-println("Please add ${requiredCoins-coins}")
-}
-}
-----
-|===
-
 === PayingTurnstileFSM State Map
 
 |===
@@ -95,6 +49,52 @@ a| [source,kotlin]
 ----
 {
 lock()
+}
+----
+|===
+
+=== State Map coins
+
+|===
+| Start | Event[Guard] | Target | Action
+
+| COINS
+| \<<automatic>> `[{coins > requiredCoins}]`
+| UNLOCKED
+a| [source,kotlin]
+----
+{
+println("automaticPop:returnCoin")
+returnCoin(coins-requiredCoins)
+unlock()
+reset()
+}
+----
+
+| COINS
+| \<<automatic>> `[{coins == requiredCoins}]`
+| UNLOCKED
+a| [source,kotlin]
+----
+{
+println("automaticPop")
+unlock()
+reset()
+}
+----
+
+| COINS
+| COIN
+| COINS
+a| [source,kotlin]
+----
+{value->
+requireNotNull(value){"argument required for COIN"}
+coin(value)
+println("Coins=$coins")
+if(coins < requiredCoins){
+println("Please add ${requiredCoins-coins}")
+}
 }
 ----
 |===

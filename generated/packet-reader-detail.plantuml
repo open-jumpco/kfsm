@@ -4,23 +4,22 @@ skinparam StateFontName Helvetica
 skinparam defaultFontName Monospaced
 skinparam defaultFontStyle Bold
 skinparam state {
-    FontColor Black
     FontStyle Bold
 }
 state PacketReaderFSM {
-[*] --> RCVPCKT : CTRL [{byte->byte == CharacterConstants.SOH}]
-RCVPCKT --> RCVDATA : CTRL [{byte->byte == CharacterConstants.STX}] -> {\l  addField()\l}
+[*] --> RCVPCKT : CTRL [byte->byte == CharacterConstants.SOH]
+RCVPCKT --> RCVDATA : CTRL [byte->byte == CharacterConstants.STX] -> {\l  addField()\l}
 RCVPCKT --> RCVCHK : BYTE -> {byte->\l  requireNotNull(byte)\l  addChecksum(byte)\l}
 RCVDATA --> RCVDATA : BYTE -> {byte->\l  requireNotNull(byte)\l  addByte(byte)\l}
-RCVDATA --> RCVPCKT : CTRL [{byte->byte == CharacterConstants.ETX}] -> {\l  endField()\l}
+RCVDATA --> RCVPCKT : CTRL [byte->byte == CharacterConstants.ETX] -> {\l  endField()\l}
 RCVDATA --> RCVESC : ESC
 RCVESC --> RCVDATA : ESC -> {\l  addByte(CharacterConstants.ESC)\l}
 RCVESC --> RCVDATA : CTRL -> {byte->\l  requireNotNull(byte)\l  addByte(byte)\l}
 RCVCHK --> RCVCHK : BYTE -> {byte->\l  requireNotNull(byte)\l  addChecksum(byte)\l}
 RCVCHK --> RCVCHKESC : ESC
-RCVCHK --> CHKSUM : CTRL [{byte->byte == CharacterConstants.EOT}] -> {\l  checksum()\l}
-CHKSUM --> [*] : <<automatic>> [{!checksumValid}] -> {\l  sendNACK()\l}
-CHKSUM --> [*] : <<automatic>> [{checksumValid}] -> {\l  sendACK()\l}
+RCVCHK --> CHKSUM : CTRL [byte->byte == CharacterConstants.EOT] -> {\l  checksum()\l}
+CHKSUM --> [*] : <<automatic>> [!checksumValid] -> {\l  sendNACK()\l}
+CHKSUM --> [*] : <<automatic>> [checksumValid] -> {\l  sendACK()\l}
 RCVCHKESC --> RCVCHK : ESC -> {\l  addChecksum(CharacterConstants.ESC)\l}
 RCVCHKESC --> RCVCHK : CTRL -> {byte->\l  requireNotNull(byte)\l  addChecksum(byte)\l}
 }

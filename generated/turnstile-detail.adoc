@@ -5,6 +5,11 @@
 |===
 | Start | Event[Guard] | Target | Action
 
+| <<start>>
+| 
+| UNLOCKED
+a| 
+
 | LOCKED
 | COIN
 | UNLOCKED
