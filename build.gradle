@@ -17,7 +17,7 @@ plugins {
     id 'org.jlleitschuh.gradle.ktlint' version '10.1.0'
     id 'org.jlleitschuh.gradle.ktlint-idea' version '10.1.0'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
-    id 'io.jumpco.open.kfsm.viz-plugin' version '1.5.2.3'
+    id 'io.jumpco.open.kfsm.viz-plugin' version '1.5.2.4'
 }
 
 repositories {

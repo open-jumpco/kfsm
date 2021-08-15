@@ -7,7 +7,7 @@ skinparam state {
     FontStyle Bold
 }
 state TimerSecureTurnstileFSM {
-[*] --> UNLOCKED
+[*] --> LOCKED
 LOCKED --> LOCKED : CARD [cardId->\l  requireNotNull(cardId);\l  isOverrideCard(cardId)&&overrideActive;\l] -> {\l  cancelOverride()\l}
 LOCKED --> LOCKED : CARD [cardId->\l  requireNotNull(cardId);\l  isOverrideCard(cardId);\l] -> {\l  activateOverride()\l}
 LOCKED --> UNLOCKED : CARD [cardId->\l  requireNotNull(cardId);\l  overrideActive||isValidCard(cardId);\l] -> {\l  unlock()\l}

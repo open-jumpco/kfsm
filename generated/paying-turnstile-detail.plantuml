@@ -12,6 +12,7 @@ COINS --> UNLOCKED : <<automatic>> [coins == requiredCoins] -> {\l  println("aut
 COINS --> COINS : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  coin(value)\l  println("Coins=$coins")\l  if(coins < requiredCoins){\l  println("Please add ${requiredCoins-coins}")\l  }\l}
 }
 state PayingTurnstileFSM {
+[*] --> UNLOCKED
 LOCKED --> COINS : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  coin(value)\l  unlock()\l  reset()\l}
 LOCKED --> COINS : COIN [value->\l  requireNotNull(value){"argument required for COIN"};\l  value+coins < requiredCoins;\l] -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  println("PUSH TRANSITION")\l  coin(value)\l  println("Coins=$coins, Please add ${requiredCoins-coins}")\l}
 UNLOCKED --> UNLOCKED : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  returnCoin(coin(value))\l}

@@ -7,7 +7,7 @@ skinparam state {
     FontStyle Bold
 }
 state TimerSecureTurnstileFSM {
-[*] --> UNLOCKED
+[*] --> LOCKED
 LOCKED --> LOCKED : CARD
 LOCKED --> LOCKED : CARD
 LOCKED --> UNLOCKED : CARD

@@ -5,7 +5,7 @@
 |===
 | Start | Event[Guard] | Target | Action
 
-| [*]
+| START
 | CTRL `[{byte->byte == CharacterConstants.SOH}]`
 | RCVPCKT
 a| 

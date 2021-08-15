@@ -7,7 +7,7 @@
 
 | <<start>>
 | 
-| UNLOCKED
+| LOCKED
 a| 
 
 | LOCKED
