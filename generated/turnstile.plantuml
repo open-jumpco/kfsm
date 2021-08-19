@@ -1,8 +1,15 @@
 @startuml
-state default {
-  [*] --> LOCKED
-  LOCKED --> UNLOCKED : COIN
-  UNLOCKED --> UNLOCKED : COIN
-  UNLOCKED --> LOCKED : PASS
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontStyle Bold
+}
+state TurnstileFSM {
+[*] --> LOCKED
+LOCKED --> UNLOCKED : COIN -> {\l  unlock()\l}
+UNLOCKED --> UNLOCKED : COIN -> {\l  returnCoin()\l}
+UNLOCKED --> LOCKED : PASS -> {\l  lock()\l}
 }
 @enduml

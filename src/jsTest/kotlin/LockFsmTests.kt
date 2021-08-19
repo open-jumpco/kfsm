@@ -9,11 +9,17 @@
  */
 package io.jumpco.open.kfsm
 
-import io.jumpco.open.kfsm.LockEvents.LOCK
-import io.jumpco.open.kfsm.LockEvents.UNLOCK
-import io.jumpco.open.kfsm.LockStates.DOUBLE_LOCKED
-import io.jumpco.open.kfsm.LockStates.LOCKED
-import io.jumpco.open.kfsm.LockStates.UNLOCKED
+import io.jumpco.open.kfsm.example.Lock
+import io.jumpco.open.kfsm.example.LockEvents
+import io.jumpco.open.kfsm.example.LockEvents.LOCK
+import io.jumpco.open.kfsm.example.LockEvents.UNLOCK
+import io.jumpco.open.kfsm.example.LockFSM
+import io.jumpco.open.kfsm.example.LockStates
+import io.jumpco.open.kfsm.example.LockStates.DOUBLE_LOCKED
+import io.jumpco.open.kfsm.example.LockStates.LOCKED
+import io.jumpco.open.kfsm.example.LockStates.UNLOCKED
+import io.jumpco.open.kfsm.AnyStateMachineBuilder
+import io.jumpco.open.kfsm.AnyStateMachineInstance
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -108,7 +114,7 @@ class LockFsmTests {
     @Test
     fun testDslCreationOfFsm() {
         // given
-        val definition = stateMachine(
+        val definition = io.jumpco.open.kfsm.stateMachine(
             LockStates.values().toSet(),
             LockEvents.values().toSet(),
             Lock::class

@@ -7,7 +7,7 @@ This is a small implementation of an FSM in Kotlin.
 == Resources
 * link:https://open.jumpco.io/projects/kfsm/index.html[Documentation]
 * link:https://open.jumpco.io/projects/kfsm/javadoc/kfsm/index.html[API Docs]
-* link:https://github.com/open-jumpco/kfsm-viz[Visualization Support kfsm-viz]
+* link:https://github.com/open-jumpco/kfsm-viz[Visualization Support kfsm-io.jumpco.open.kfsm.viz]
 * link:https://github.com/open-jumpco/kfsm-samples[Sample Project]
 * link:https://github.com/open-jumpco/kfsm-web[Turnstile Sample for Browser]
 * link:https://github.com/open-jumpco/kfsm-kvision-web[Turnstile Sample with KVision for Browser]
@@ -293,7 +293,7 @@ dependencies {
 
 By using the StateMachineDefinition created by the DSL we do not have access to the details of guard expressions or actions.
 
-For more detailed visualization use link:https://github.com/open-jumpco/kfsm-viz[kfsm-viz]
+For more detailed visualization use link:https://github.com/open-jumpco/kfsm-viz[kfsm-io.jumpco.open.kfsm.viz]
 
 [source,kotlin]
 ----

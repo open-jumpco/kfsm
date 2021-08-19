@@ -1,14 +1,24 @@
 @startuml
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontStyle Bold
+}
 state coins {
-  COINS --> COINS : COIN
-  COINS --> COINS
+COINS --> UNLOCKED : <<automatic>> [coins > requiredCoins] -> {\l  println("automaticPop:returnCoin")\l  returnCoin(coins-requiredCoins)\l  unlock()\l  reset()\l}
+COINS --> UNLOCKED : <<automatic>> [coins == requiredCoins] -> {\l  println("automaticPop")\l  unlock()\l  reset()\l}
+COINS --> COINS : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  coin(value)\l  println("Coins=$coins")\l  if(coins < requiredCoins){\l  println("Please add ${requiredCoins-coins}")\l  }\l}
 }
-state default {
-  [*] --> LOCKED
-  LOCKED --> COINS : COIN
-  UNLOCKED --> UNLOCKED : COIN
-  UNLOCKED --> LOCKED : PASS
-  LOCKED --> COINS : COIN
-  COINS --> UNLOCKED : <<automatic>>
+state PayingTurnstileFSM {
+[*] --> UNLOCKED
+LOCKED --> COINS : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  coin(value)\l  unlock()\l  reset()\l}
+LOCKED --> COINS : COIN [value->\l  requireNotNull(value){"argument required for COIN"};\l  value+coins < requiredCoins;\l] -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  println("PUSH TRANSITION")\l  coin(value)\l  println("Coins=$coins, Please add ${requiredCoins-coins}")\l}
+UNLOCKED --> UNLOCKED : COIN -> {value->\l  requireNotNull(value){"argument required for COIN"}\l  returnCoin(coin(value))\l}
+UNLOCKED --> LOCKED : PASS -> {\l  lock()\l}
 }
+note top of PayingTurnstileFSM
+<<invariant>> {coins >= 0}
+end note
 @enduml

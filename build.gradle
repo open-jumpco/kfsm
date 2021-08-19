@@ -75,6 +75,7 @@ kotlin {
                     implementation 'org.jetbrains.kotlin:kotlin-test:1.5.10'
                     implementation 'junit:junit:4.13.2'
                     implementation 'io.mockk:mockk:1.12.0'
+                    implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'
                 }
             }
         }
@@ -143,14 +144,14 @@ docs.dependsOn('generateFsmViz')
 kfsmViz {
     fsm('TurnstileFSM') {
         outputFolder = file('generated')
-        input = file('src/commonTest/kotlin/TurnstileTypes.kt')
+        input = file('src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt')
         isGeneratePlantUml = true
         isGenerateAsciidoc = true
         output = 'turnstile-detail'
     }
     fsm('PayingTurnstileFSM') {
         outputFolder = file('generated')
-        input = file('src/commonTest/kotlin/PayingTurnstileTypes.kt')
+        input = file('src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt')
         isGeneratePlantUml = true
         isGenerateAsciidoc = true
         output = 'paying-turnstile-detail'
@@ -158,7 +159,7 @@ kfsmViz {
 
     fsm('SecureTurnstileFSM') {
         outputFolder = file('generated')
-        input = file('src/commonTest/kotlin/SecureTurnstile.kt')
+        input = file('src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt')
         isGeneratePlantUml = true
         isGenerateAsciidoc = true
         output = 'secure-turnstile-detail'
@@ -166,16 +167,17 @@ kfsmViz {
 
     fsm('TimerSecureTurnstileFSM') {
         outputFolder = file('generated')
-        input = file('src/commonTest/kotlin/TimeoutSecureTurnstile.kt')
+        input = file('src/commonTest/kotlin/io/jumpco/open/kfsm/example/TimeoutSecureTurnstile.kt')
         isGeneratePlantUml = true
         isGenerateAsciidoc = true
         output = 'timeout-turnstile-detail'
     }
     fsm('PacketReaderFSM') {
         outputFolder = file('generated')
-        input = file('src/jvmTest/kotlin/PacketReaderTests.kt')
+        input = file('src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt')
         isGeneratePlantUml = true
         isGenerateAsciidoc = true
         output = 'packet-reader-detail'
     }
 }
+

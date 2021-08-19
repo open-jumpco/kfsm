@@ -9,10 +9,16 @@
  */
 package io.jumpco.open.kfsm
 
-import io.jumpco.open.kfsm.TurnstileEvents.COIN
-import io.jumpco.open.kfsm.TurnstileEvents.PASS
-import io.jumpco.open.kfsm.TurnstileStates.LOCKED
-import io.jumpco.open.kfsm.TurnstileStates.UNLOCKED
+import io.jumpco.open.kfsm.example.Turnstile
+import io.jumpco.open.kfsm.example.TurnstileEvents
+import io.jumpco.open.kfsm.example.TurnstileEvents.COIN
+import io.jumpco.open.kfsm.example.TurnstileEvents.PASS
+import io.jumpco.open.kfsm.example.TurnstileFSM
+import io.jumpco.open.kfsm.example.TurnstileStates
+import io.jumpco.open.kfsm.example.TurnstileStates.LOCKED
+import io.jumpco.open.kfsm.example.TurnstileStates.UNLOCKED
+import io.jumpco.open.kfsm.AnyStateMachineBuilder
+import io.jumpco.open.kfsm.AnyStateMachineInstance
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -81,7 +87,7 @@ class TurnstileFsmTests {
     fun turnstileDSL() {
         // given
         val definition =
-            stateMachine(
+            io.jumpco.open.kfsm.stateMachine(
                 TurnstileStates.values().toSet(),
                 TurnstileEvents.values().toSet(),
                 Turnstile::class
@@ -114,7 +120,7 @@ class TurnstileFsmTests {
 
     @Test
     fun simpleTurnstileTest() {
-        val definition = stateMachine(
+        val definition = io.jumpco.open.kfsm.stateMachine(
             TurnstileStates.values().toSet(),
             TurnstileEvents.values().toSet(),
             Turnstile::class
