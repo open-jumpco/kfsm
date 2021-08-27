@@ -249,7 +249,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:1.5.1'
+    implementation 'io.jumpco.open:kfsm-jvm:1.5.2'
 }
 ----
 
@@ -258,7 +258,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:1.5.1'
+    implementation 'io.jumpco.open:kfsm-js:1.5.2'
 }
 ----
 
@@ -267,7 +267,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:1.5.1'
+    implementation 'io.jumpco.open:kfsm-linuxX64:1.5.2'
 }
 ----
 
@@ -276,7 +276,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:1.5.1'
+    implementation 'io.jumpco.open:kfsm-mingwX64:1.5.2'
 }
 ----
 
@@ -285,7 +285,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:1.5.1'
+    implementation 'io.jumpco.open:kfsm-macosX64:1.5.2'
 }
 ----
 
@@ -310,25 +310,25 @@ fun produceVisualizationTurnstileFSM() {
 
 ==== Turnstile FSM
 
-link:./src/commonTest/kotlin/TurnstileTypes.kt[TurnstileTypes.kt]
+link:./src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt[TurnstileTypes.kt]
 
 image::turnstile.png[]
 
 ==== Paying Turnstile FSM
 
-link:./src/commonTest/kotlin/PayingTurnstileTypes.kt[PayingTurnstileTypes.kt]
+link:./src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt[PayingTurnstileTypes.kt]
 
 image::paying_turnstile.png[]
 
 ==== Secure Turnstile FSM
 
-link:./src/commonTest/kotlin/SecureTurnstile.kt[SecureTurnstile.kt]
+link:./src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt[SecureTurnstile.kt]
 
 image::secure_turnstile.png[]
 
 ==== Packer Reader FSM
 
-link:./src/jvmTest/kotlin/PacketReaderTests.kt[PacketReaderTests.kt]
+link:./src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[PacketReaderTests.kt]
 
 image::packet_reader.png[]
 

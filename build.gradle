@@ -25,7 +25,7 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '1.5.1'
+version = '1.5.2'
 description = 'Kotlin Finite-state machine'
 
 java {
@@ -87,11 +87,11 @@ dokkaHtml {
     dokkaSourceSets {
         configureEach {
             samples.from(
-                "$rootDir/src/commonTest/kotlin/TurnstileTypes.kt",
-                "$rootDir/src/commonTest/kotlin/ImmutableLockFSM.kt",
-                "$rootDir/src/commonTest/kotlin/LockTypes.kt",
-                "$rootDir/src/commonTest/kotlin/PayingTurnstileTypes.kt",
-                "$rootDir/src/commonTest/kotlin/SecureTurnstile.kt"
+                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt",
+                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/ImmutableLockFSM.kt",
+                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/LockTypes.kt",
+                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt",
+                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt"
             )
         }
     }

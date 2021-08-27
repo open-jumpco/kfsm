@@ -18,7 +18,7 @@ repositories {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:1.5.1'
+    implementation 'io.jumpco.open:kfsm-jvm:1.5.2'
 }
 ----
 
@@ -26,7 +26,7 @@ dependencies {
 [source,kotlin]
 ----
 dependencies {
-    implementation("io.jumpco.open:kfsm-jvm:1.5.1")
+    implementation("io.jumpco.open:kfsm-jvm:1.5.2")
 }
 ----
 
@@ -35,14 +35,14 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:1.5.1'
+    implementation 'io.jumpco.open:kfsm-js:1.5.2'
 }
 ----
 ===== Gradle Kotlin DSL
 [source,kotlin]
 ----
 dependencies {
-    implementation("io.jumpco.open:kfsm-js:1.5.1")
+    implementation("io.jumpco.open:kfsm-js:1.5.2")
 }
 ----
 
@@ -51,14 +51,14 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:1.5.1'
+    implementation 'io.jumpco.open:kfsm-linuxX64:1.5.2'
 }
 ----
 ===== Gradle Kotlin DSL
 [source,kotlin]
 ----
 dependencies {
-    implementation("io.jumpco.open:kfsm-linuxX64:1.5.1")
+    implementation("io.jumpco.open:kfsm-linuxX64:1.5.2")
 }
 ----
 
@@ -67,14 +67,14 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:1.5.1'
+    implementation 'io.jumpco.open:kfsm-mingwX64:1.5.2'
 }
 ----
 ===== Gradle Kotlin DSL
 [source,kotlin]
 ----
 dependencies {
-    implementation("io.jumpco.open:kfsm-mingwX64:1.5.1")
+    implementation("io.jumpco.open:kfsm-mingwX64:1.5.2")
 }
 ----
 
@@ -83,14 +83,14 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:1.5.1'
+    implementation 'io.jumpco.open:kfsm-macosX64:1.5.2'
 }
 ----
 ===== Gradle Kotlin DSL
 [source,kotlin]
 ----
 dependencies {
-    implementation("io.jumpco.open:kfsm-macosX64:1.5.1")
+    implementation("io.jumpco.open:kfsm-macosX64:1.5.2")
 }
 ----
 
