@@ -17,8 +17,6 @@ import io.jumpco.open.kfsm.example.TurnstileFSM
 import io.jumpco.open.kfsm.example.TurnstileStates
 import io.jumpco.open.kfsm.example.TurnstileStates.LOCKED
 import io.jumpco.open.kfsm.example.TurnstileStates.UNLOCKED
-import io.jumpco.open.kfsm.AnyStateMachineBuilder
-import io.jumpco.open.kfsm.AnyStateMachineInstance
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

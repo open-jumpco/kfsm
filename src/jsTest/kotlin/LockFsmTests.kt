@@ -18,8 +18,6 @@ import io.jumpco.open.kfsm.example.LockStates
 import io.jumpco.open.kfsm.example.LockStates.DOUBLE_LOCKED
 import io.jumpco.open.kfsm.example.LockStates.LOCKED
 import io.jumpco.open.kfsm.example.LockStates.UNLOCKED
-import io.jumpco.open.kfsm.AnyStateMachineBuilder
-import io.jumpco.open.kfsm.AnyStateMachineInstance
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
