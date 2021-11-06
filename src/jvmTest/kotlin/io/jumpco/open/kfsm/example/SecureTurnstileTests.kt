@@ -10,8 +10,6 @@
 
 package io.jumpco.open.kfsm.example
 
-import io.jumpco.open.kfsm.example.SecureTurnstile
-import io.jumpco.open.kfsm.example.SecureTurnstileFSM
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -30,6 +28,7 @@ class SecureTurnstileTests {
         fsm.pass()
         assertTrue { turnstile.locked }
     }
+
     @Test
     fun `test invalid card`() {
         // given
@@ -44,6 +43,7 @@ class SecureTurnstileTests {
         fsm.pass()
         assertTrue { turnstile.locked }
     }
+
     @Test
     fun `test invalid card override`() {
         // given
@@ -59,6 +59,7 @@ class SecureTurnstileTests {
         fsm.pass()
         assertTrue { turnstile.locked }
     }
+
     @Test
     fun `test cancel override to lock`() {
         // given
@@ -75,6 +76,7 @@ class SecureTurnstileTests {
         fsm.card(42) // override card
         assertTrue { turnstile.locked }
     }
+
     @Test
     fun `test cancel override`() {
         // given

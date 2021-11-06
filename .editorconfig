@@ -12,8 +12,9 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 
-[*.{kt,java}]
+[*.{kt,java,kts}]
 indent_style = space
+indent_size = 4
 
 [*.{ts,tsx,js,jsx,json,css,scss,yml}]
 indent_size = 2
@@ -21,5 +22,3 @@ indent_size = 2
 [*.md]
 trim_trailing_whitespace = false
 
-[*.{kt,kts}]
-disabled_rules=import-ordering

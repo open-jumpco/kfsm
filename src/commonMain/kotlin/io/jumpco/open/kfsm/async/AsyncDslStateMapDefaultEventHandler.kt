@@ -53,7 +53,10 @@ class AsyncDslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: AsyncS
      * @param event Pair representing an on and targetState for transition. Can be written as EVENT to STATE
      * @param action The action will be performed before transition is completed
      */
-    fun onEvent(event: EventState<E, S>, action: AsyncStateAction<C, A, R>?): AsyncDslStateMapDefaultEventHandler<S, E, C, A, R> {
+    fun onEvent(
+        event: EventState<E, S>,
+        action: AsyncStateAction<C, A, R>?
+    ): AsyncDslStateMapDefaultEventHandler<S, E, C, A, R> {
         fsm.default(event, action)
         return this
     }

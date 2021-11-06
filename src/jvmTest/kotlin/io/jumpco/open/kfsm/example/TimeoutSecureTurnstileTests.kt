@@ -10,8 +10,6 @@
 
 package io.jumpco.open.kfsm.example
 
-import io.jumpco.open.kfsm.example.TimerSecureTurnstile
-import io.jumpco.open.kfsm.example.TimerSecureTurnstileFSM
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -103,6 +101,7 @@ class TimeoutSecureTurnstileTests {
         runBlocking { fsm.card(2) }
         assertTrue { turnstile.locked }
     }
+
     // tag::test[]
     @Test
     fun `test timeout`() {

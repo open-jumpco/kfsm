@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<scxml initial="Locked" name="Turnstile" version="1.0" datamodel="ts" binding="early" exmode="lax"
-       xmlns="http://www.w3.org/2005/07/scxml" xmlns:ts="http://turnstiles.com">
+<scxml xmlns:ts="http://turnstiles.com" initial="Locked" name="Turnstile" version="1.0" datamodel="ts" binding="early"
+       exmode="lax" xmlns="http://www.w3.org/2005/07/scxml">
     <state id="Locked">
         <transition event="coin" target="Unlocked">
             <ts:unlock/>

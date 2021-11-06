@@ -39,6 +39,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         AsyncStateMapBuilder<S, E, C, A, R>(validMapStates, null, this)
     internal val namedStateMaps: MutableMap<String, AsyncStateMapBuilder<S, E, C, A, R>> = mutableMapOf()
     internal var afterStateChangeAction: AsyncStateChangeAction<C, S>? = null
+
     /**
      * This function is used to provide a method for determining the initial state of the FSM using the provided content.
      * @param init Is a function that receives a context and returns the state that represents the context
@@ -57,6 +58,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         require(!completed) { "Statemachine has been completed" }
         deriveInitialStateMap = init
     }
+
     /**
      * This function defines an invariant condition that will hold true before and after all transitions.
      * @param message The message added to exception
@@ -65,6 +67,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     fun invariant(message: String, condition: Condition<C>) {
         defaultStateMap.invariant(message, condition)
     }
+
     /**
      * This function will be use to define a named statemap.
      * @param name The name of the StateMap. It must be unique.
@@ -107,7 +110,6 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     inline fun stateMachine(handler: AsyncDslStateMachineHandler<S, E, C, A, R>.() -> Unit): AsyncDslStateMachineHandler<S, E, C, A, R> =
         AsyncDslStateMachineHandler(this).apply(handler)
 
-
     /**
      * This function will set an action that will be invoked when the state has changed and transition is complete.
      * This will be invoked after onEntry and onExit handlers.
@@ -115,6 +117,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     fun afterStateChange(action: AsyncStateChangeAction<C, S>) {
         this.afterStateChangeAction = action
     }
+
     /**
      * This function defines a transition from the currentState equal to startState to the targetState when event is
      * received and the guard expression is met. The action is executed after any exit action and before entry actions.

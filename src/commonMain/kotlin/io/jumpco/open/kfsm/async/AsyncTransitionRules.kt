@@ -24,6 +24,7 @@ class AsyncTransitionRules<S, E, C, A, R>(
 ) {
     var transition: SimpleAsyncTransition<S, E, C, A, R>? = transition
         internal set
+
     /**
      * Add a guarded transition to the end of the list
      */

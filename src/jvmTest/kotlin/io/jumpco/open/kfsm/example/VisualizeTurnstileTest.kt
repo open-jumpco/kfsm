@@ -38,7 +38,10 @@ class VisualizeTurnstileTest {
     @Test
     fun produceVisualizationTurnstileFSM() {
         println("== TurnStile")
-        val visualisation = Parser.parseStateMachine("TurnstileFSM", File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt"))
+        val visualisation = Parser.parseStateMachine(
+            "TurnstileFSM",
+            File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt")
+        )
         println(visualisation)
         File("generated", "turnstile.plantuml").writeText(Visualization.plantUml(visualisation))
     }
@@ -46,7 +49,10 @@ class VisualizeTurnstileTest {
     @Test
     fun produceVisualizationPayingTurnstile() {
         println("== PayingTurnstile")
-        val visualization = Parser.parseStateMachine("PayingTurnstileFSM", File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt"))
+        val visualization = Parser.parseStateMachine(
+            "PayingTurnstileFSM",
+            File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt")
+        )
         println(visualization)
         File("generated", "paying-turnstile.plantuml").writeText(Visualization.plantUml(visualization))
     }
@@ -54,7 +60,10 @@ class VisualizeTurnstileTest {
     @Test
     fun produceVisualizationSecureTurnstile() {
         println("== SecureTurnstile")
-        val visualization = Parser.parseStateMachine("SecureTurnstileFSM", File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt"))
+        val visualization = Parser.parseStateMachine(
+            "SecureTurnstileFSM",
+            File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt")
+        )
         println(visualization)
         File("generated", "secure-turnstile.plantuml").writeText(Visualization.plantUml(visualization))
     }
@@ -62,7 +71,10 @@ class VisualizeTurnstileTest {
     @Test
     fun produceVisualizationPacketReader() {
         println("== PacketReader")
-        val visualization = Parser.parseStateMachine("PacketReaderFSM", File("src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt"))
+        val visualization = Parser.parseStateMachine(
+            "PacketReaderFSM",
+            File("src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt")
+        )
         println(visualization)
         File("generated", "packet-reader.plantuml").writeText(Visualization.plantUml(visualization))
     }

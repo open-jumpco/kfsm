@@ -1,10 +1,12 @@
 === Simple turnstile example
+
 Assume we and to manage the state on a simple lock.
 We want to ensure that the `lock()` function is only called when the lock is not locked and we want `unlock()` to be called when locked.
 
 Then we use the DSL to declare a definition of a statemachine matching the diagram:
 
 ==== State Diagram
+
 image::turnstile_detail.png[LockStateDiagram]
 
 ==== State Table
@@ -34,12 +36,14 @@ image::turnstile_detail.png[LockStateDiagram]
 |===
 
 ==== Context class
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt[tag=context]
 ----
 
 ==== Enums for States and Events
+
 We declare 2 enums, one for the possible states and one for the possible events.
 
 [source,kotlin,numbered]
@@ -48,13 +52,14 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt[t
 ----
 
 ==== Packaged definition and execution
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt[tag=packaged]
 ----
 
-
 ==== Usage
+
 Then we instantiate the FSM and provide a context to operate on:
 
 [source,kotlin,numbered]
@@ -66,6 +71,7 @@ val fsm = TurnstileFSM(turnstile)
 Now we have a context that is independent of the FSM.
 
 Sending events may invoke actions:
+
 [source,kotlin,numbered]
 ----
 // State state is LOCKED
@@ -84,15 +90,18 @@ fsm.coin()
 link:https://github.com/open-jumpco/kfsm-samples[Samples]
 
 === Advanced Features
+
 We can add an argument to events and use named state maps with push / pop and automatic transitions.
 
 The argument is sent as follows:
+
 [source,kotlin,numbered]
 ----
 fsm.sendEvent(EVENT1, arg)
 ----
 
 The argument is references in the action as follows:
+
 [source,kotlin,numbered]
 ----
 onEvent(EVENT1) { arg ->
@@ -156,6 +165,7 @@ We will further place COINS state in a named state map to illustrate how these c
 
 The context class doesn't make decisions.
 The context class stores values and will update value in very specific ways.
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt[tag=context]
@@ -167,8 +177,9 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileType
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt[tag=states-events]
 ----
+
 We add a stateMap named `coins` with the state `COINS`.
-The statemap  will be entered when there are coins.
+The statemap will be entered when there are coins.
 The automatic transitions will be triggered based on the guard expressions.
 
 ==== State machine definition packaged
@@ -182,12 +193,14 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileType
 ----
 
 ==== Test
+
 [source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTests.kt[tag=test]
 ----
 
 ==== Output
+
 ```
 --coin1
 sendEvent:COIN:10
@@ -284,12 +297,11 @@ image::secure_turnstile_detail.png[Secure Turnstile FSM]
 
 |===
 
-
 ==== Context class
 
 The context class doesn't make decisions about the behaviour of the turnstile.
-The context will provide information about the state of turnstile and validity of cards
-The context class stores values and will update value in very specific ways.
+The context will provide information about the state of turnstile and validity of cards The context class stores values and will update value in very specific ways.
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt[tag=context]
@@ -303,12 +315,14 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt[
 ----
 
 ==== State machine definition packaged
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt[tag=fsm]
 ----
 
 ==== Test
+
 [source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTests.kt[tag=test]
@@ -363,7 +377,9 @@ include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[t
 In the case where you want a pure functional context that is immutable the following example will provide what you need:
 
 ==== Immutable Context
-The immutable context doesn't modify a variable. It returns a copy containing the new context
+
+The immutable context doesn't modify a variable.
+It returns a copy containing the new context
 
 [source,kotlin,numbered]
 ----
@@ -371,6 +387,7 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/ImmutableLockFSM.kt
 ----
 
 ==== Definition
+
 The definition only exposes one method to handle an event given a context and return the new context.
 
 [source,kotlin,numbered]
@@ -379,7 +396,10 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/ImmutableLockFSM.kt
 ----
 
 ==== Usage
-We also added an overloaded plus operator. The provides for a way of signaling the application of event to context.
+
+We also added an overloaded plus operator.
+The provides for a way of signaling the application of event to context.
+
 [source,kotlin]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/ImmutableLockFSM.kt[tag=test]
@@ -395,6 +415,7 @@ In the case where the argument to the state action will be something other than 
 
 This assumes the argument is defined as type `Int` and the return as `Pair<LockStates,ImmutablePayingTurnstile>`
 The `handleEventMethod` will be:
+
 [source,kotlin]
 ----
     fun handleEvent(context: ImmutablePayingTurnstile, event: Pair<LockEvents, Int>): Pair<LockStates,ImmutablePayingTurnstile> {
@@ -421,6 +442,7 @@ image::timeout_turnstile_detail.png[Timeout Secure Turnstile FSM]
 | CARD `[{cardId->requireNotNull(cardId);isOverrideCard(cardId)&&overrideActive;}]`
 | LOCKED
 a| [source,kotlin]
+
 ----
 {
 cancelOverride()
@@ -431,6 +453,7 @@ cancelOverride()
 | CARD `[{cardId->requireNotNull(cardId);isOverrideCard(cardId);}]`
 | LOCKED
 a| [source,kotlin]
+
 ----
 {
 activateOverride()
@@ -441,6 +464,7 @@ activateOverride()
 | CARD `[{cardId->requireNotNull(cardId);overrideActive\|\|isValidCard(cardId);}]`
 | UNLOCKED
 a| [source,kotlin]
+
 ----
 {
 unlock()
@@ -451,6 +475,7 @@ unlock()
 | CARD `[{cardId->requireNotNull(cardId){"cardId is required"};!isValidCard(cardId);}]`
 | LOCKED
 a| [source,kotlin]
+
 ----
 {cardId->
 requireNotNull(cardId)
@@ -462,6 +487,7 @@ invalidCard(cardId)
 | \<<timeout = 500>>
 | LOCKED
 a| [source,kotlin]
+
 ----
 {
 println("Timeout. Locking")
@@ -473,6 +499,7 @@ lock()
 | CARD `[{cardId->requireNotNull(cardId);isOverrideCard(cardId);}]`
 | LOCKED
 a| [source,kotlin]
+
 ----
 {
 lock()
@@ -483,6 +510,7 @@ lock()
 | PASS
 | LOCKED
 a| [source,kotlin]
+
 ----
 {
 lock()
@@ -490,13 +518,11 @@ lock()
 ----
 |===
 
-
-
 ==== Context class
 
 The context class doesn't make decisions about the behaviour of the turnstile.
-The context will provide information about the state of turnstile and validity of cards
-The context class stores values and will update value in very specific ways.
+The context will provide information about the state of turnstile and validity of cards The context class stores values and will update value in very specific ways.
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/TimeoutSecureTurnstile.kt[tag=context]
@@ -510,12 +536,14 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/TimeoutSecureTurnst
 ----
 
 ==== State machine definition packaged
+
 [source,kotlin,numbered]
 ----
 include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/TimeoutSecureTurnstile.kt[tag=fsm]
 ----
 
 ==== Test
+
 [source,kotlin,numbered]
 ----
 include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/TimeoutSecureTurnstileTests.kt[tag=test]
@@ -527,6 +555,7 @@ The escape handling from the packet reader could be a separate statemap.
 The current implementation has a problem in that the value should be added to different buffer.
 It may be worthwhile to have a mechanism for providing a different substate context to take care of this kind of situation.
 An interface/class exposed to the substate instead of the full context.
-In this example `Block` will be exposed to the stateMap. The stateMap can then pop after adding the byte.
+In this example `Block` will be exposed to the stateMap.
+The stateMap can then pop after adding the byte.
 In the case of an invalid character the statemap will still transition to the end state.
 

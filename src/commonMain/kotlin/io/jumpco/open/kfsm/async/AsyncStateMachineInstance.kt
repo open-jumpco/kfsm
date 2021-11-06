@@ -57,7 +57,11 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
      * @param definition The definition of the state machine instance.
      * @param initialExternalState The previously externalised state.
      */
-    constructor(context: C, definition: AsyncStateMachineDefinition<S, E, C, A, R>, initialExternalState: ExternalState<S>) :
+    constructor(
+        context: C,
+        definition: AsyncStateMachineDefinition<S, E, C, A, R>,
+        initialExternalState: ExternalState<S>
+    ) :
         this(context, definition, null, initialExternalState)
 
     init {

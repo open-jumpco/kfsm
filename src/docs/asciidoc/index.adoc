@@ -3,9 +3,9 @@
 :toclevels: 3
 
 == Introduction
-Having used various incarnations of link:http://smc.sourceforge.net/[SMC] over the years we decided to try it again and
-discovered it didn't have specific support for Kotlin. Instead of creating a generator for Kotlin we decided to attempt
-a Kotlin DSL along with a simple implementation.
+
+Having used various incarnations of link:http://smc.sourceforge.net/[SMC] over the years we decided to try it again and discovered it didn't have specific support for Kotlin.
+Instead of creating a generator for Kotlin we decided to attempt a Kotlin DSL along with a simple implementation.
 
 To learn more about Finite State Machines visit:
 
@@ -16,7 +16,9 @@ To learn more about Finite State Machines visit:
 The <<Tutorial>> provides examples of how to compose a DSL and FSM.
 
 == Links
+
 === link:javadoc/kfsm/index.html[API Docs]
+
 === link:https://github.com/open-jumpco/kfsm[Source]
 
 == Features
@@ -39,8 +41,8 @@ This Finite state machine implementation has the following features:
 * Timeout Transitions
 * StateChange notification action
 
-
 == Tutorial
+
 include::kfsm.adoc[]
 
 include::documentation.adoc[]

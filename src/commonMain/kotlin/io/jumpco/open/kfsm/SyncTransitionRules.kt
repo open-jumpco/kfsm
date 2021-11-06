@@ -32,6 +32,7 @@ class SyncTransitionRules<S, E, C, A, R>(
 ) {
     var transition: SimpleSyncTransition<S, E, C, A, R>? = transition
         internal set
+
     /**
      * Add a guarded transition to the end of the list
      */

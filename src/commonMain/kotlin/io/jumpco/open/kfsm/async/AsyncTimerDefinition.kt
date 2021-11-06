@@ -19,6 +19,6 @@
 package io.jumpco.open.kfsm.async
 
 class AsyncTimerDefinition<S, E, C, A, R>(
-    val timeout: C.()-> Long,
+    val timeout: C.() -> Long,
     val rule: AsyncTransitionRules<S, E, C, A, R>
 )
