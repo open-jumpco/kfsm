@@ -30,7 +30,7 @@ import kotlin.reflect.KClass
  * @param argumentClass The class of the argument to events/actions
  * @param returnClass The class of the return type of events/actions
  * @param handler Statemachine handler
- * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ * @sample io.jumpco.open.kfsm.TurnstileFSM.Companion.definition
  */
 inline fun <S, E, C : Any, A : Any, R : Any> stateMachine(
     validStates: Set<S>,

@@ -11,8 +11,8 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.6.0-RC'
-    id 'org.jetbrains.dokka' version '1.5.0'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.6.21'
+    id 'org.jetbrains.dokka' version '1.6.21'
     id 'maven-publish'
     id 'signing'
     id 'org.asciidoctor.jvm.convert' version '2.4.0'
@@ -29,7 +29,7 @@ repositories {
     mavenCentral()
 }
 group = 'io.jumpco.open'
-version = '1.6.0-SNAPSHOT'
+version = '1.6.0'
 description = 'Kotlin Finite-state machine'
 
 java {
@@ -47,22 +47,25 @@ def useTarget = project.ext.useTarget
 kotlin {
     js() {}
     sourceSets {
+        all {
+            languageSettings.optIn("kotlin.RequiresOptIn")
+        }
         commonMain {
             dependencies {
                 api 'org.jetbrains.kotlin:kotlin-stdlib-common'
-                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
+                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
             }
         }
         commonTest {
             dependencies {
-                implementation 'io.mockk:mockk-common:1.12.0'
+                implementation 'io.mockk:mockk-common:1.12.3'
             }
         }
         if (useTarget['js']) {
             jsMain {
                 dependencies {
                     implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
-                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.5.0'
+                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.1'
 
                 }
             }
@@ -71,14 +74,14 @@ kotlin {
             jvmMain {
                 dependencies {
                     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.0'
+                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.1'
                 }
             }
             jvmTest {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-test:1.5.10'
+                    implementation 'org.jetbrains.kotlin:kotlin-test:1.6.21'
                     implementation 'junit:junit:4.13.2'
-                    implementation 'io.mockk:mockk:1.12.0'
+                    implementation 'io.mockk:mockk:1.12.3'
                     implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'
                 }
             }
