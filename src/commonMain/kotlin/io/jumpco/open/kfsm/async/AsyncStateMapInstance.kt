@@ -19,13 +19,15 @@
 package io.jumpco.open.kfsm.async
 
 import io.jumpco.open.kfsm.checkInvariant
+import kotlinx.coroutines.CoroutineScope
 
 class AsyncStateMapInstance<S, E, C, A, R>(
     val context: C,
     val newState: S,
     val name: String?,
     val parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
-    val definition: AsyncStateMapDefinition<S, E, C, A, R>
+    val definition: AsyncStateMapDefinition<S, E, C, A, R>,
+    val coroutineScope: CoroutineScope
 ) {
     init {
         require(definition.validStates.contains(newState)) { "Initial state is $newState and not in ${definition.validStates}" }
@@ -80,7 +82,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
     internal fun createTimers(targetState: S, context: C, arg: A?) {
         val timerDefinition = definition.timerDefinitions[targetState]
         if (timerDefinition != null) {
-            timers.add(AsyncTimer(this, context, arg, timerDefinition))
+            timers.add(AsyncTimer(this, context, arg, timerDefinition, coroutineScope))
         }
     }
 

@@ -18,7 +18,11 @@
 
 package io.jumpco.open.kfsm.example
 
+import io.jumpco.open.kfsm.async.AsyncStateMachineInstance
 import io.jumpco.open.kfsm.async.asyncStateMachine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 
 // tag::states-events[]
 enum class TimeoutSecureTurnstileEvents {
@@ -81,7 +85,7 @@ class TimerSecureTurnstile {
 
 @OptIn(ExperimentalStdlibApi::class)
 // tag::fsm[]
-class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile) {
+class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile, coroutineScope: CoroutineScope) {
     companion object {
         val definition = asyncStateMachine(
             TimeoutSecureTurnstileStates.values().toSet(),
@@ -159,7 +163,8 @@ class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile) {
         }.build()
     }
 
-    private val fsm = definition.create(secureTurnstile)
+    private val fsm = definition.create(secureTurnstile, coroutineScope)
+
     suspend fun card(cardId: Int) = fsm.sendEvent(TimeoutSecureTurnstileEvents.CARD, cardId)
     suspend fun pass() = fsm.sendEvent(TimeoutSecureTurnstileEvents.PASS)
     fun allowEvent(): Set<String> = fsm.allowed().map { it.name.lowercase() }.toSet()

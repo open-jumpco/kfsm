@@ -21,6 +21,7 @@ package io.jumpco.open.kfsm.async
 import io.jumpco.open.kfsm.ExternalState
 import io.jumpco.open.kfsm.StateMapQuery
 import io.jumpco.open.kfsm.StateQuery
+import kotlinx.coroutines.CoroutineScope
 
 class AsyncStateMachineDefinition<S, E, C, A, R>(
     val defaultInitialState: S?,
@@ -40,7 +41,8 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
         mapName: String,
         context: C,
         parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
-        initial: S
+        initial: S,
+        coroutineScope: CoroutineScope
     ) {
         if (mapName == "default") {
             parentFsm.pushMap(
@@ -49,7 +51,8 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
                     initial,
                     null,
                     parentFsm,
-                    defaultStateMap
+                    defaultStateMap,
+                    coroutineScope
                 )
             )
         } else {
@@ -60,7 +63,8 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
                     initial,
                     mapName,
                     parentFsm,
-                    stateMap
+                    stateMap,
+                    coroutineScope
                 )
             )
         }
@@ -74,22 +78,25 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
     internal fun create(
         context: C,
         parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
+        coroutineScope: CoroutineScope,
         initialState: S? = null,
         intitialExternalState: ExternalState<S>? = null
     ): AsyncStateMapInstance<S, E, C, A, R> {
         when {
             intitialExternalState != null -> {
                 intitialExternalState.forEach { (initial, mapName) ->
-                    createMap(mapName, context, parentFsm, initial)
+                    createMap(mapName, context, parentFsm, initial, coroutineScope)
                 }
                 return parentFsm.mapStack.pop()
             }
+
             deriveInitialMap != null -> {
                 deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
-                    createMap(mapName, context, parentFsm, initial)
+                    createMap(mapName, context, parentFsm, initial, coroutineScope)
                 }
                 return parentFsm.mapStack.pop()
             }
+
             else -> {
                 val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
                 ?: error("Definition requires deriveInitialState or deriveInitialMap")
@@ -98,7 +105,8 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
                     initial,
                     null,
                     parentFsm,
-                    defaultStateMap
+                    defaultStateMap,
+                    coroutineScope
                 )
             }
         }
@@ -108,14 +116,16 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
         name: String,
         context: C,
         parentFsm: AsyncStateMachineInstance<S, E, C, A, R>,
-        initialState: S
+        initialState: S,
+        coroutineScope: CoroutineScope
     ): AsyncStateMapInstance<S, E, C, A, R> =
         AsyncStateMapInstance(
             context,
             initialState,
             name,
             parentFsm,
-            namedStateMaps[name] ?: error("Named map $name not found")
+            namedStateMaps[name] ?: error("Named map $name not found"),
+            coroutineScope
         )
 
     /**
@@ -123,10 +133,15 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
      * @param context The instance will operate on the provided context
      * @param initialExternalState The previously externalised state
      */
-    fun create(context: C, initialExternalState: ExternalState<S>): AsyncStateMachineInstance<S, E, C, A, R> =
+    fun create(
+        context: C,
+        coroutineScope: CoroutineScope,
+        initialExternalState: ExternalState<S>,
+    ): AsyncStateMachineInstance<S, E, C, A, R> =
         AsyncStateMachineInstance<S, E, C, A, R>(
             context,
             this,
+            coroutineScope,
             null,
             initialExternalState
         )
@@ -137,8 +152,12 @@ class AsyncStateMachineDefinition<S, E, C, A, R>(
      * @param initial The initial state
      *
      */
-    fun create(context: C, initial: S? = null): AsyncStateMachineInstance<S, E, C, A, R> =
-        AsyncStateMachineInstance<S, E, C, A, R>(context, this, initial)
+    fun create(
+        context: C,
+        coroutineScope: CoroutineScope,
+        initial: S? = null
+    ): AsyncStateMachineInstance<S, E, C, A, R> =
+        AsyncStateMachineInstance<S, E, C, A, R>(context, this, coroutineScope, initial)
 
     /**
      * This function will provide a list of possible events given a specific state.

@@ -11,8 +11,8 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.6.21'
-    id 'org.jetbrains.dokka' version '1.6.21'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.6.10'
+    id 'org.jetbrains.dokka' version '1.6.10'
     id 'maven-publish'
     id 'signing'
     id 'org.asciidoctor.jvm.convert' version '2.4.0'
@@ -79,7 +79,7 @@ kotlin {
             }
             jvmTest {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-test:1.6.21'
+                    implementation 'org.jetbrains.kotlin:kotlin-test:1.6.10'
                     implementation 'junit:junit:4.13.2'
                     implementation 'io.mockk:mockk:1.12.3'
                     implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'

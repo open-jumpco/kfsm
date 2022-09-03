@@ -19,7 +19,6 @@
 package io.jumpco.open.kfsm.async
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -28,14 +27,15 @@ actual class AsyncTimer<S, E, C, A, R> actual constructor(
     val parentFsm: AsyncStateMapInstance<S, E, C, A, R>,
     val context: C,
     val arg: A?,
-    val definition: AsyncTimerDefinition<S, E, C, A, R>
+    val definition: AsyncTimerDefinition<S, E, C, A, R>,
+    val coroutineScope: CoroutineScope
 ) {
     var active: Boolean
     private val timer: Job
 
     init {
         active = true
-        timer = CoroutineScope(Dispatchers.Default).async {
+        timer = coroutineScope.async {
             delay(context.(definition.timeout)())
             trigger()
         }

@@ -75,7 +75,13 @@ kotlin {
         }
         js('js') {
             nodejs()
-            browser()
+            browser {
+                testTask {
+                    useKarma {
+                        useFirefox()
+                    }
+                }
+            }
             compilations.main {
                 kotlinOptions {
                     metaInfo = true

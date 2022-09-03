@@ -18,11 +18,14 @@
 
 package io.jumpco.open.kfsm.async
 
+import kotlinx.coroutines.CoroutineScope
+
 expect class AsyncTimer<S, E, C, A, R>(
     parentFsm: AsyncStateMapInstance<S, E, C, A, R>,
     context: C,
     arg: A?,
-    definition: AsyncTimerDefinition<S, E, C, A, R>
+    definition: AsyncTimerDefinition<S, E, C, A, R>,
+    coroutineScope: CoroutineScope
 ) {
     fun cancel()
 

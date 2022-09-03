@@ -10,17 +10,20 @@
 
 package io.jumpco.open.kfsm.example
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class TimeoutSecureTurnstileTests {
+    val coroutineScope = CoroutineScope(Dispatchers.Default)
     @Test
     fun `test normal operation`() {
         // given
         val turnstile = TimerSecureTurnstile()
-        val fsm = TimerSecureTurnstileFSM(turnstile)
+        val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         // when
         assertTrue { fsm.allowEvent() == setOf("card") }
         assertTrue { turnstile.locked }
@@ -41,7 +44,7 @@ class TimeoutSecureTurnstileTests {
     fun `test invalid card`() {
         // given
         val turnstile = TimerSecureTurnstile()
-        val fsm = TimerSecureTurnstileFSM(turnstile)
+        val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         // when
         assertTrue { fsm.allowEvent() == setOf("card") }
         assertTrue { turnstile.locked }
@@ -56,7 +59,7 @@ class TimeoutSecureTurnstileTests {
     fun `test invalid card override`() {
         // given
         val turnstile = TimerSecureTurnstile()
-        val fsm = TimerSecureTurnstileFSM(turnstile)
+        val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         // when
         assertTrue { turnstile.locked }
         runBlocking { fsm.card(2) }
@@ -72,7 +75,7 @@ class TimeoutSecureTurnstileTests {
     fun `test cancel override to lock`() {
         // given
         val turnstile = TimerSecureTurnstile()
-        val fsm = TimerSecureTurnstileFSM(turnstile)
+        val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         // when
         assertTrue { turnstile.locked }
         runBlocking { fsm.card(2) }
@@ -89,7 +92,7 @@ class TimeoutSecureTurnstileTests {
     fun `test cancel override`() {
         // given
         val turnstile = TimerSecureTurnstile()
-        val fsm = TimerSecureTurnstileFSM(turnstile)
+        val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         // when
         assertTrue { turnstile.locked }
         runBlocking { fsm.card(2) }
@@ -106,7 +109,7 @@ class TimeoutSecureTurnstileTests {
     @Test
     fun `test timeout`() {
         val turnstile = TimerSecureTurnstile()
-        val fsm = TimerSecureTurnstileFSM(turnstile)
+        val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         assertTrue { turnstile.locked }
         println("Card 1")
         runBlocking {

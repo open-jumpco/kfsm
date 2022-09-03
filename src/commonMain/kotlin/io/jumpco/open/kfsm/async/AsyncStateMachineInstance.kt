@@ -21,6 +21,7 @@ package io.jumpco.open.kfsm.async
 import io.jumpco.open.kfsm.ExternalState
 import io.jumpco.open.kfsm.Stack
 import io.jumpco.open.kfsm.TransitionType
+import kotlinx.coroutines.CoroutineScope
 
 class AsyncStateMachineInstance<S, E, C, A, R>(
     /**
@@ -34,8 +35,9 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
     /**
      * The initialState will be assigned to the currentState
      */
+    val coroutineScope: CoroutineScope,
     initialState: S? = null,
-    initialExternalState: ExternalState<S>? = null
+    initialExternalState: ExternalState<S>? = null,
 ) {
     internal val namedInstances: MutableMap<String, AsyncStateMapInstance<S, E, C, A, R>> = mutableMapOf()
 
@@ -60,12 +62,13 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
     constructor(
         context: C,
         definition: AsyncStateMachineDefinition<S, E, C, A, R>,
-        initialExternalState: ExternalState<S>
+        initialExternalState: ExternalState<S>,
+        coroutineScope: CoroutineScope
     ) :
-        this(context, definition, null, initialExternalState)
+        this(context, definition, coroutineScope, null, initialExternalState)
 
     init {
-        currentStateMap = definition.create(context, this, initialState, initialExternalState)
+        currentStateMap = definition.create(context, this, coroutineScope, initialState, initialExternalState)
     }
 
     internal fun pushMap(
@@ -75,7 +78,7 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
         stateMap: AsyncStateMapDefinition<S, E, C, A, R>
     ): AsyncStateMapInstance<S, E, C, A, R> {
         mapStack.push(defaultInstance)
-        val pushedMap = AsyncStateMapInstance(context, initial, name, this, stateMap)
+        val pushedMap = AsyncStateMapInstance(context, initial, name, this, stateMap, coroutineScope)
         currentStateMap = pushedMap
         return pushedMap
     }
@@ -127,7 +130,7 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
 
     private suspend fun executePush(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
-            definition.createStateMap(transition.targetMap, context, this, transition.targetState!!).apply {
+            definition.createStateMap(transition.targetMap, context, this, transition.targetState!!, coroutineScope).apply {
                 namedInstances[transition.targetMap] = this
             }
         }
