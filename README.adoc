@@ -244,12 +244,24 @@ repositories {
 }
 ----
 === Dependencies
+
+==== KMP Projects
+
+The dependency used in common modules.
+
+[source,groovy]
+----
+dependencies {
+    implementation 'io.jumpco.open:kfsm:1.6.1'
+}
+----
+
 ==== JVM Projects
 
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-jvm:1.6.0'
+    implementation 'io.jumpco.open:kfsm-jvm:1.6.1'
 }
 ----
 
@@ -258,7 +270,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-js:1.6.0'
+    implementation 'io.jumpco.open:kfsm-js:1.6.1'
 }
 ----
 
@@ -267,7 +279,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-linuxX64:1.6.0'
+    implementation 'io.jumpco.open:kfsm-linuxX64:1.6.1'
 }
 ----
 
@@ -276,7 +288,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-mingwX64:1.6.0'
+    implementation 'io.jumpco.open:kfsm-mingwX64:1.6.1'
 }
 ----
 
@@ -285,7 +297,7 @@ dependencies {
 [source,groovy]
 ----
 dependencies {
-    implementation 'io.jumpco.open:kfsm-macosX64:1.6.0'
+    implementation 'io.jumpco.open:kfsm-macosX64:1.6.1'
 }
 ----
 

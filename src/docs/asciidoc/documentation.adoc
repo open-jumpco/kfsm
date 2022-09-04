@@ -272,6 +272,7 @@ val definition = stateMachine(
 
 This method provides for creating a statemachine definition and instances that have `suspend` functions as actions.
 This also adds the support for `timeout` on the state map handler.
+Creating an instance of an asyncStateMachine from a definition requires providing a `CoroutineScope`.
 
 * link:javadoc/kfsm/io.jumpco.open.kfsm.async/async-state-machine.html[asyncStateMachine]
 * link:javadoc/kfsm/io.jumpco.open.kfsm.async/-async-state-machine-builder/state-machine.html
@@ -817,14 +818,4 @@ The target state determines the entry action.
 
 === Notes on concurrency and coroutines.
 
-The implementations of the AsyncTimer on the different platform work slightly differently depending on the platform.
-
-==== JVM
-
-The code in the JVM implementation uses `CoroutineScope(Dispatchers.Default)` to `launch` the trigger.
-Your action will be responsible for ensuring proper handling if a UI thread is impacted.
-
-==== JavaScript
-
-The current code assumes you are executing in the browser it uses `window.setTimeout to configure a function that will use `GlobalScope` to `launch` the trigger.
-
+The implementations of the AsyncTimer uses the provided `CoroutineScope` to `launch` the trigger after a `delay`
