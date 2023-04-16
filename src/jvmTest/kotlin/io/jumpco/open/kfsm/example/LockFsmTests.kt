@@ -25,11 +25,6 @@ import io.jumpco.open.kfsm.example.LockStates.DOUBLE_LOCKED
 import io.jumpco.open.kfsm.example.LockStates.LOCKED
 import io.jumpco.open.kfsm.example.LockStates.UNLOCKED
 import io.jumpco.open.kfsm.stateMachine
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,18 +36,13 @@ import kotlin.test.fail
 class LockFsmTests {
 
     private fun verifyLockFSM(fsm: StateMachineInstance<LockStates, LockEvents, Lock, Any, Any>, lock: Lock) {
-        // when
-        every { lock.locked } returns 1
-        every { lock.unlock() } just Runs
-        every { lock.lock() } just Runs
-        every { lock.doubleLock() } just Runs
+
         // then
-        assertTrue { fsm.currentState == LOCKED }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.sendEvent(UNLOCK)
         // then
-        verify { lock.unlock() }
-        assertTrue { fsm.currentState == UNLOCKED }
+        assertTrue { lock.locked == 0 }
         try {
             // when
             fsm.sendEvent(UNLOCK)
@@ -65,13 +55,11 @@ class LockFsmTests {
         // when
         fsm.sendEvent(LOCK)
         // then
-        verify { lock.lock() }
-        assertTrue { fsm.currentState == LOCKED }
+        assertTrue { lock.locked == 1 }
         // when
         fsm.sendEvent(LOCK)
-        verify { lock.doubleLock() }
         // then
-        assertTrue { fsm.currentState == DOUBLE_LOCKED }
+        assertTrue { lock.locked == 2 }
         try {
             // when
             fsm.sendEvent(LOCK)
@@ -118,8 +106,7 @@ class LockFsmTests {
         }
         val definition = builder.complete()
         // when
-        val lock = mockk<Lock>()
-        every { lock.locked } returns 1
+        val lock = Lock(1)
         val fsm = definition.create(lock)
         // then
         verifyLockFSM(fsm, lock)
@@ -168,8 +155,8 @@ class LockFsmTests {
             }
         }.build()
         // when
-        val lock = mockk<Lock>()
-        every { lock.locked } returns 1
+        val lock = Lock(1)
+
         val fsm = definition.create(lock)
         // then
         verifyLockFSM(fsm, lock)

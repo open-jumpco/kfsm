@@ -24,11 +24,7 @@ import io.jumpco.open.kfsm.example.TurnstileEvents.PASS
 import io.jumpco.open.kfsm.example.TurnstileStates.LOCKED
 import io.jumpco.open.kfsm.example.TurnstileStates.UNLOCKED
 import io.jumpco.open.kfsm.stateMachine
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
+
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -40,31 +36,28 @@ class TurnstileFsmTests {
         fsm: AnyStateMachineInstance<TurnstileStates, TurnstileEvents, Turnstile>,
         turnstile: Turnstile
     ) {
-        every { turnstile.alarm() } just Runs
-        every { turnstile.unlock() } just Runs
-        every { turnstile.returnCoin() } just Runs
-        every { turnstile.lock() } just Runs
+
 
         assertTrue { fsm.currentState == LOCKED }
         // when
         fsm.sendEvent(COIN)
         // then
-        verify { turnstile.unlock() }
+
         assertTrue { fsm.currentState == UNLOCKED }
         // when
         fsm.sendEvent(COIN)
         // then
-        verify { turnstile.returnCoin() }
+
         assertTrue { fsm.currentState == UNLOCKED }
         // when
         fsm.sendEvent(PASS)
         // then
-        verify { turnstile.lock() }
+
         assertTrue { fsm.currentState == LOCKED }
         // when
         fsm.sendEvent(PASS)
         // then
-        verify { turnstile.alarm() }
+
         assertTrue { fsm.currentState == LOCKED }
     }
 
@@ -89,9 +82,9 @@ class TurnstileFsmTests {
         }
         val definition = builder.complete()
         // when
-        val turnstile = mockk<Turnstile>()
+        val turnstile = Turnstile(true)
 
-        every { turnstile.locked } returns true
+
         val fsm = definition.create(turnstile)
         // then
         verifyTurnstileFSM(fsm, turnstile)
@@ -127,9 +120,8 @@ class TurnstileFsmTests {
                 }
             }.build()
         // when
-        val turnstile = mockk<Turnstile>()
+        val turnstile = Turnstile(true)
 
-        every { turnstile.locked } returns true
         val fsm = definition.create(turnstile)
         // then
         verifyTurnstileFSM(fsm, turnstile)

@@ -19,11 +19,6 @@
 package io.jumpco.open.kfsm.example
 
 import io.jumpco.open.kfsm.stateMachine
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertFalse
@@ -262,55 +257,55 @@ class PacketReaderFSM(packetHandler: PacketHandler) {
 // end::packaged[]
 
 // tag::tests[]
+@OptIn(ExperimentalStdlibApi::class)
 class PacketReaderTests {
     @Test
     fun `test reader expect ACK`() {
-        val protocolHandler = mockk<ProtocolHandler>()
-        every { protocolHandler.sendACK() } just Runs
+        val protocolHandler = ProtocolSender()
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
         val stream =
             listOf(
                 CharacterConstants.SOH,
                 CharacterConstants.STX,
-                'A'.toInt(),
-                'B'.toInt(),
-                'C'.toInt(),
+                'A'.code,
+                'B'.code,
+                'C'.code,
                 CharacterConstants.ETX,
-                'A'.toInt(),
+                'A'.code,
                 CharacterConstants.EOT
             )
         stream.forEach { byte ->
             fsm.receiveByte(byte)
         }
         packetReader.print()
-        verify { protocolHandler.sendACK() }
+        protocolHandler.sendACK()
         assertTrue { packetReader.checksumValid }
     }
 
+
     @Test
     fun `test reader ESC expect ACK`() {
-        val protocolHandler = mockk<ProtocolHandler>()
-        every { protocolHandler.sendACK() } just Runs
+        val protocolHandler = ProtocolSender()
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
         val stream =
             listOf(
                 CharacterConstants.SOH,
                 CharacterConstants.STX,
-                'A'.toInt(),
+                'A'.code,
                 CharacterConstants.ESC,
                 CharacterConstants.EOT,
-                'C'.toInt(),
+                'C'.code,
                 CharacterConstants.ETX,
-                'A'.toInt(),
+                'A'.code,
                 CharacterConstants.EOT
             )
         stream.forEach { byte ->
             fsm.receiveByte(byte)
         }
         packetReader.print()
-        verify { protocolHandler.sendACK() }
+
         assertTrue { packetReader.checksumValid }
         assertTrue { packetReader.fields.size == 1 }
         assertTrue { packetReader.fields[0].size == 3 }
@@ -319,83 +314,82 @@ class PacketReaderTests {
 
     @Test
     fun `test reader ESC expect NACK`() {
-        val protocolHandler = mockk<ProtocolHandler>()
-        every { protocolHandler.sendNACK() } just Runs
+        val protocolHandler = ProtocolSender()
+
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
         val stream =
             listOf(
                 CharacterConstants.SOH,
                 CharacterConstants.STX,
-                'A'.toInt(),
+                'A'.code,
                 CharacterConstants.ESC,
-                'C'.toInt(),
+                'C'.code,
                 CharacterConstants.ETX,
-                'A'.toInt(),
+                'A'.code,
                 CharacterConstants.EOT
             )
         stream.forEach { byte ->
             fsm.receiveByte(byte)
         }
         packetReader.print()
-        verify { protocolHandler.sendNACK() }
+
         assertFalse { packetReader.checksumValid }
         assertTrue { packetReader.fields.isEmpty() }
     }
 
     @Test
     fun `test reader expect NACK`() {
-        val protocolHandler = mockk<ProtocolHandler>()
-        every { protocolHandler.sendNACK() } just Runs
+        val protocolHandler = ProtocolSender()
+
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
         val stream =
             listOf(
                 CharacterConstants.SOH,
                 CharacterConstants.STX,
-                'A'.toInt(),
-                'B'.toInt(),
-                'C'.toInt(),
+                'A'.code,
+                'B'.code,
+                'C'.code,
                 CharacterConstants.ETX,
-                'B'.toInt(),
+                'B'.code,
                 CharacterConstants.EOT
             )
         stream.forEach { byte ->
             fsm.receiveByte(byte)
         }
         packetReader.print()
-        verify { protocolHandler.sendNACK() }
+
         assertFalse { packetReader.checksumValid }
     }
 
     @Test
     fun `test reader multiple fields expect ACK`() {
-        val protocolHandler = mockk<ProtocolHandler>()
-        every { protocolHandler.sendACK() } just Runs
+        val protocolHandler = ProtocolSender()
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
         val stream =
             listOf(
                 CharacterConstants.SOH,
                 CharacterConstants.STX,
-                'A'.toInt(),
-                'B'.toInt(),
-                'C'.toInt(),
+                'A'.code,
+                'B'.code,
+                'C'.code,
                 CharacterConstants.ETX,
                 CharacterConstants.STX,
-                'D'.toInt(),
-                'E'.toInt(),
-                'F'.toInt(),
+                'D'.code,
+                'E'.code,
+                'F'.code,
                 CharacterConstants.ETX,
-                'A'.toInt(),
-                'D'.toInt(),
+                'A'.code,
+                'D'.code,
                 CharacterConstants.EOT
             )
         stream.forEach { byte ->
             fsm.receiveByte(byte)
         }
         packetReader.print()
-        verify { protocolHandler.sendACK() }
+
         assertTrue { packetReader.checksumValid }
         assertTrue { packetReader.fields.size == 2 }
     }

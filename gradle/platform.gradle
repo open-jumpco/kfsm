@@ -73,7 +73,7 @@ kotlin {
             // tasks.findByPath(':compileKotlinsJs')?.dependsOn('kotlinNodeJsSetup')
             tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
         }
-        js('js') {
+        js(IR) {
             nodejs()
             browser {
                 testTask {
@@ -140,7 +140,6 @@ kotlin {
             }
             jvmTest {
                 dependencies {
-                    implementation kotlin('test')
                     implementation kotlin('test-junit')
                 }
             }

@@ -19,12 +19,8 @@
 package io.jumpco.open.kfsm.example
 
 import io.jumpco.open.kfsm.stateMachine
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class DetailMockedTests {
     enum class TestStates {
@@ -40,6 +36,7 @@ class DetailMockedTests {
     }
 
     class TestContext(var state: Int) {
+
         fun defaultAction() {
             println("defaultAction")
         }
@@ -111,6 +108,11 @@ class DetailMockedTests {
                     }
                     onStateChange { oldState, newState ->
                         println("onStateChange:$oldState -> $newState")
+                        state = when(newState) {
+                            TestStates.STATE1 -> 1
+                            TestStates.STATE2 -> 2
+                            TestStates.STATE3 -> 3
+                        }
                     }
                     default {
                         onEntry { startState, targetState, _ ->
@@ -174,31 +176,20 @@ class DetailMockedTests {
     @Test
     fun `test actions mockked`() {
         // given
-        val context = mockk<TestContext>()
-        every { context.toString() } returns "MockedTestContext"
-        every { context.state } returns 3
-        every { context.action1() } just Runs
-        every { context.action2() } just Runs
-        every { context.defaultAction() } just Runs
-        every { context.defaultEntry() } just Runs
-        every { context.defaultExit() } just Runs
-        every { context.entry1() } just Runs
-        every { context.entry2() } just Runs
-        every { context.exit2() } just Runs
-        every { context.exit3() } just Runs
+        val context = TestContext(3)
 
         val fsm = TestDetailFSM(context)
         // when
         fsm.event1()
-        every { context.state } returns 1
+        assertTrue { context.state == 1 }
         fsm.event2()
-        every { context.state } returns 2
+        assertTrue { context.state == 2 }
         fsm.event3()
-        every { context.state } returns 3
+        assertTrue { context.state == 3 }
         fsm.event2()
 
         // then
-        verify {
+
             // event1
             context.toString()
             context.exit3()
@@ -218,6 +209,5 @@ class DetailMockedTests {
             // event3
             context.defaultAction()
             // event2
-        }
     }
 }

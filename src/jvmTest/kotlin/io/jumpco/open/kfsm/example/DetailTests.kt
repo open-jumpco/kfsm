@@ -156,18 +156,18 @@ class DetailTests {
                 }
                 stateMap("map1", setOf(TestStates.STATE1, TestStates.STATE2)) {
                     whenState(TestStates.STATE1) {
-                        onEventPop(TestEvents.EVENT1) { msg ->
+                        onEventPop(TestEvents.EVENT1) {
                             println("pop")
                         }
                     }
                     whenState(TestStates.STATE2) {
-                        automatic(TestStates.STATE1) { msg ->
+                        automatic(TestStates.STATE1) {
                             println("automatic -> TestStates.STATE1")
                         }
                     }
                 }
                 whenState(TestStates.STATE1) {
-                    onEvent(TestEvents.EVENT1) { msg ->
+                    onEvent(TestEvents.EVENT1) {
                         action1()
                     }
                     onEntry { _, _, _ ->

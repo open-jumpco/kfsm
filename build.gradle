@@ -6,32 +6,40 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'org.jetbrains.kotlinx', name: 'kotlinx-html-jvm', version: '0.7.3'
+        classpath group: 'org.jetbrains.kotlinx', name: 'kotlinx-html-jvm', version: '0.8.0'
     }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.6.10'
-    id 'org.jetbrains.dokka' version '1.6.10'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.8.20'
+    id 'org.jetbrains.dokka' version '1.8.10'
     id 'maven-publish'
     id 'signing'
-    id 'org.asciidoctor.jvm.convert' version '2.4.0'
-    id 'org.jlleitschuh.gradle.ktlint' version '10.1.0'
-    id 'org.jlleitschuh.gradle.ktlint-idea' version '10.1.0'
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'org.asciidoctor.jvm.gems' version '3.3.2'
+    id 'org.jlleitschuh.gradle.ktlint' version '11.3.1'
+    id 'org.jlleitschuh.gradle.ktlint-idea' version '11.3.1'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
     id 'io.jumpco.open.kfsm.viz-plugin' version '1.5.2.4'
-    id 'org.jetbrains.qodana' version '0.1.12'
+    id 'org.jetbrains.qodana' version '0.1.13'
 }
 
 repositories {
     mavenLocal()
     maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/kotlin/temporary' }
     mavenCentral()
+    ruby {
+        gems()
+    }
 }
+
 group = 'io.jumpco.open'
-version = '1.6.1'
+version = '1.8.0'
 description = 'Kotlin Finite-state machine'
 
+dependencies {
+    asciidoctorGems 'rubygems:asciidoctor-tabs:v1.0.0-beta.3'
+}
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -45,28 +53,31 @@ def useTarget = project.ext.useTarget
 
 
 kotlin {
-    js() {}
+
     sourceSets {
-        all {
+        configureEach {
             languageSettings.optIn("kotlin.RequiresOptIn")
         }
         commonMain {
             dependencies {
                 api 'org.jetbrains.kotlin:kotlin-stdlib-common'
-                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
+                api 'org.jetbrains.kotlin:kotlin-reflect'
+                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
             }
         }
         commonTest {
             dependencies {
-                implementation 'io.mockk:mockk-common:1.12.3'
+                implementation 'org.jetbrains.kotlin:kotlin-test:1.8.20'
             }
         }
         if (useTarget['js']) {
             jsMain {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
-                    runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.1'
-
+                    runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4'
+                }
+            }
+            jsTest {
+                dependencies {
                 }
             }
         }
@@ -74,15 +85,20 @@ kotlin {
             jvmMain {
                 dependencies {
                     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-                    runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.1'
+                    runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4'
                 }
             }
             jvmTest {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-test:1.6.10'
+                    implementation 'org.jetbrains.kotlin:kotlin-test:1.8.20'
                     implementation 'junit:junit:4.13.2'
-                    implementation 'io.mockk:mockk:1.12.3'
                     implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'
+                }
+            }
+        }
+        if(useTarget['native']) {
+            nativeMain {
+                dependencies {
                 }
             }
         }
