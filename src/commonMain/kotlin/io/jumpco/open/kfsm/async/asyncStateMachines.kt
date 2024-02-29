@@ -21,7 +21,7 @@ package io.jumpco.open.kfsm.async
 import kotlin.reflect.KClass
 
 /**
- * These function are use to create statemachines where the actions are suspend functions.
+ * These function are used to create statemachines where the actions are suspend functions.
  */
 inline fun <S, E, C : Any, A : Any, R : Any> asyncStateMachine(
     validStates: Set<S>,

@@ -112,7 +112,7 @@ class LockFsmTests {
     @Test
     fun testDslCreationOfFsm() {
         // given
-        val definition = io.jumpco.open.kfsm.stateMachine(
+        val definition = stateMachine(
             LockStates.values().toSet(),
             LockEvents.values().toSet(),
             Lock::class

@@ -20,12 +20,12 @@ package io.jumpco.open.kfsm.example
 
 import io.jumpco.open.kfsm.viz.Parser
 import io.jumpco.open.kfsm.viz.Visualization
-import org.junit.Before
-import org.junit.Test
 import java.io.File
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class VisualizeTurnstileTest {
-    @Before
+    @BeforeTest
     fun setup() {
         val generated = File("generated")
         if (generated.exists() && !generated.isDirectory) {

@@ -69,7 +69,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     }
 
     /**
-     * This function will be use to define a named statemap.
+     * This function will be used to define a named statemap.
      * @param name The name of the StateMap. It must be unique.
      * @param validStates The set of valid states for the StateMap.
      */
@@ -105,7 +105,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
     }
 
     /**
-     * This function can be used the define a new state machine.
+     * This function can be used to define a new state machine.
      */
     inline fun stateMachine(handler: AsyncDslStateMachineHandler<S, E, C, A, R>.() -> Unit): AsyncDslStateMachineHandler<S, E, C, A, R> =
         AsyncDslStateMachineHandler(this).apply(handler)
@@ -137,7 +137,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         defaultStateMap.transition(startState, event, targetState, guard, action)
 
     /**
-     * This function defines a transition that doesn't change the state also know as an internal transition.
+     * This function defines a transition that doesn't change the state also known as an internal transition.
      * The transition will only occur if the guard expression is met.
      * @param startState The transition will be considered when currentState matches stateState
      * @param event The event will trigger the consideration of this transition
@@ -160,7 +160,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
 
     /**
      * This function defines a transition that doesn't change the state of the state machine when the currentState is startState and the on is received and after the action was performed. No entry or exit actions performed.
-     * @param startState transition applies when when FSM currentState is the same as stateState
+     * @param startState transition applies when FSM currentState is the same as stateState
      * @param event transition applies when on received
      * @param action actions will be invoked
      */
@@ -198,7 +198,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         defaultStateMap.default(currentState, action)
 
     /**
-     * This function defines an action to be invoked when no transitions match the event. The currentState will be change to second parameter of the Pair.
+     * This function defines an action to be invoked when no transitions match the event. The currentState will be changed to second parameter of the Pair.
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
@@ -222,7 +222,7 @@ class AsyncStateMachineBuilder<S, E, C, A, R>(validMapStates: Set<S>, internal v
         defaultStateMap.entry(currentState, action)
 
     /**
-     * This function defines an action to be invoke when the FSM changes from the provided state
+     * This function defines an action to be invoked when the FSM changes from the provided state
      * @param currentState The provided state
      * @param action This action will be invoked
      */

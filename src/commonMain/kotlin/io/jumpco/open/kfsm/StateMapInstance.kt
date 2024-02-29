@@ -121,7 +121,7 @@ class StateMapInstance<S, E, C, A, R>(
         definition.eventAllowed(event, currentState, includeDefault)
 
     internal fun executeAutomatic(currentTransition: SyncTransition<S, E, C, A, R>, state: S, arg: A?): Boolean {
-        var result: Boolean = false
+        var result = false
         definition.automaticTransitions[state]?.apply rule@{
             val defaultTransition = this.transition
             findGuard(context, arg)?.apply {

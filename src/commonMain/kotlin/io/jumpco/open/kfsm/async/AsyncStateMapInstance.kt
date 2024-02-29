@@ -129,7 +129,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
     fun allowed(includeDefaults: Boolean = false) = definition.allowed(currentState, includeDefaults)
 
     /**
-     * This function will provide an indication whether the given event is allow in the current state.
+     * This function will provide an indication whether the given event is allowed in the current state.
      * @param event The given event that will be used in combination with current state.
      */
     fun eventAllowed(event: E, includeDefault: Boolean): Boolean =
@@ -140,7 +140,7 @@ class AsyncStateMapInstance<S, E, C, A, R>(
         state: S,
         arg: A?
     ): Boolean {
-        var result: Boolean = false
+        var result = false
         definition.automaticTransitions[state]?.apply rule@{
             val defaultTransition = this.transition
             findGuard(context, arg)?.apply {

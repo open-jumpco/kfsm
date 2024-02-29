@@ -18,11 +18,8 @@
 
 package io.jumpco.open.kfsm.example
 
-import io.jumpco.open.kfsm.async.AsyncStateMachineInstance
 import io.jumpco.open.kfsm.async.asyncStateMachine
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 
 // tag::states-events[]
 enum class TimeoutSecureTurnstileEvents {
@@ -83,7 +80,6 @@ class TimerSecureTurnstile {
 }
 // end::context[]
 
-@OptIn(ExperimentalStdlibApi::class)
 // tag::fsm[]
 class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile, coroutineScope: CoroutineScope) {
     companion object {

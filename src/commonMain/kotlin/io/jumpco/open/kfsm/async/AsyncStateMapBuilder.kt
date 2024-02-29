@@ -609,7 +609,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
     }
 
     /**
-     * This function defines an action to be invoked when no transitions match the event. The currentState will be change to second parameter of the Pair.
+     * This function defines an action to be invoked when no transitions match the event. The currentState will be changed to second parameter of the Pair.
      * @param event The Pair holds the event and targetState and can be written as `event to state`
      * @param action The option action will be executed when this default transition occurs.
      */
@@ -657,7 +657,7 @@ class AsyncStateMapBuilder<S, E, C, A, R>(
     }
 
     /**
-     * This function defines an action to be invoke when the FSM changes from the provided state
+     * This function defines an action to be invoked when the FSM changes from the provided state
      * @param currentState The provided state
      * @param action This action will be invoked
      */

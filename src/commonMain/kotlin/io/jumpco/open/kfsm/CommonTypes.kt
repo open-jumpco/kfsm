@@ -60,7 +60,7 @@ typealias StateMapQuery<C, S> = (C.() -> StateMapList<S>)
  * This represents a default action that will be invoked when entering or exiting a state with an external state transitions.
  * @param C The context: C will be available to the lambda
  * @param S currentState: S and targetState: S will be available to the lambda as 1st and 2nd arguments.
- * @param A argumentType: A an arg: will be available to the lambda as the 3rd argument.
+ * @param A argumentType: A will be available to the lambda as the 3rd argument.
  */
 typealias DefaultEntryExitAction<C, S, A> = C.(S, S, A?) -> Unit
 typealias StateChangeAction<C, S> = C.(S, S) -> Unit
@@ -72,7 +72,7 @@ typealias AsyncStateChangeAction<C, S> = suspend C.(S, S) -> Unit
  * @param C The context: C will be available to the lambda
  * @param S The currentState:S will be available to the lambda
  * @param E The event: E will be available to the lambda
- * @param A argumentType: A an arg: will be available to the lambda as the 3rd argument.
+ * @param A argumentType: A will be available to the lambda as the 3rd argument.
  */
 typealias DefaultStateAction<C, S, E, A, R> = C.(S, E, A?) -> R?
 

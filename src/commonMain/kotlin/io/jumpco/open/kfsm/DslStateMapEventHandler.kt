@@ -45,7 +45,7 @@ class DslStateMapEventHandler<S, E, C, A, R>(
 
     /**
      * Defines an action to be performed after a transition has changed the state
-     * @param action The action will be invoke when exiting a state.
+     * @param action The action will be invoked when exiting a state.
      */
     fun onExit(action: DefaultEntryExitAction<C, S, A>) {
         fsm.exit(currentState, action)
@@ -104,7 +104,7 @@ class DslStateMapEventHandler<S, E, C, A, R>(
 
     /**
      * Defines a push transition on event for a targetMap and targetState.
-     * @param event The event the will trigger the transition.
+     * @param event The event that will trigger the transition.
      * @param targetMap The named stateMap that will be targeted.
      * @param targetState The new state within the targetMap
      * @param action The optional action that may be executed.
@@ -121,7 +121,7 @@ class DslStateMapEventHandler<S, E, C, A, R>(
 
     /**
      * Defines a push transition on event for a targetMap and targetState when the guard evaluates to `true`
-     * @param event The event the will trigger the transition.
+     * @param event The event that will trigger the transition.
      * @param targetMap The named stateMap that will be targeted.
      * @param targetState The new state within the targetMap
      * @param action The optional action that may be executed.

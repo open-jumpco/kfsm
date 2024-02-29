@@ -85,7 +85,7 @@ class TurnstileFsmTests {
     fun turnstileDSL() {
         // given
         val definition =
-            io.jumpco.open.kfsm.stateMachine(
+            stateMachine(
                 TurnstileStates.values().toSet(),
                 TurnstileEvents.values().toSet(),
                 Turnstile::class
@@ -118,7 +118,7 @@ class TurnstileFsmTests {
 
     @Test
     fun simpleTurnstileTest() {
-        val definition = io.jumpco.open.kfsm.stateMachine(
+        val definition = stateMachine(
             TurnstileStates.values().toSet(),
             TurnstileEvents.values().toSet(),
             Turnstile::class

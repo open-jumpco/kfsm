@@ -26,7 +26,7 @@ package io.jumpco.open.kfsm
 class DslStateMapDefaultEventHandler<S, E, C, A, R>(private val fsm: StateMapBuilder<S, E, C, A, R>) {
     /**
      * Define a default action that will be applied when no other transitions are matched.
-     * @param action Will be invoked when no transitions matches
+     * @param action Will be invoked when no transitions match
      */
     fun action(action: DefaultStateAction<C, S, E, A, R>) {
         fsm.defaultAction(action)

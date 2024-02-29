@@ -19,8 +19,9 @@
 package io.jumpco.open.kfsm.example
 
 import io.jumpco.open.kfsm.stateMachine
-import org.junit.Test
+
 import java.io.ByteArrayOutputStream
+import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -257,7 +258,6 @@ class PacketReaderFSM(packetHandler: PacketHandler) {
 // end::packaged[]
 
 // tag::tests[]
-@OptIn(ExperimentalStdlibApi::class)
 class PacketReaderTests {
     @Test
     fun `test reader expect ACK`() {

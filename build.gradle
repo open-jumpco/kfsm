@@ -2,31 +2,36 @@ buildscript {
     repositories {
         mavenLocal()
         maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/kotlin/temporary' }
+        maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental' }
+        maven { url = 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
         gradlePluginPortal()
         mavenCentral()
     }
     dependencies {
-        classpath group: 'org.jetbrains.kotlinx', name: 'kotlinx-html-jvm', version: '0.8.0'
+        classpath 'org.jetbrains.kotlinx:kotlinx-html-jvm:0.10.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20'
     }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.8.20'
-    id 'org.jetbrains.dokka' version '1.8.10'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.9.20'
+    id 'org.jetbrains.dokka' version '1.9.10'
     id 'maven-publish'
     id 'signing'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
     id 'org.asciidoctor.jvm.gems' version '3.3.2'
-    id 'org.jlleitschuh.gradle.ktlint' version '11.3.1'
-    id 'org.jlleitschuh.gradle.ktlint-idea' version '11.3.1'
+    id 'org.jlleitschuh.gradle.ktlint' version '12.1.0'
+    // id 'org.jlleitschuh.gradle.ktlint-idea' version '11.6.1'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
     id 'io.jumpco.open.kfsm.viz-plugin' version '1.5.2.4'
-    id 'org.jetbrains.qodana' version '0.1.13'
+    id 'org.jetbrains.qodana' version '2023.3.1'
 }
 
 repositories {
     mavenLocal()
     maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/kotlin/temporary' }
+    maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental' }
+    maven { url = 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
     mavenCentral()
     ruby {
         gems()
@@ -34,15 +39,15 @@ repositories {
 }
 
 group = 'io.jumpco.open'
-version = '1.8.0'
+version = '1.9.0-RC2'
 description = 'Kotlin Finite-state machine'
 
 dependencies {
-    asciidoctorGems 'rubygems:asciidoctor-tabs:v1.0.0-beta.3'
+    asciidoctorGems 'rubygems:asciidoctor-tabs:v1.0.0-beta.6'
 }
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 apply from: "$rootProject.projectDir/gradle/platform.gradle"
@@ -53,7 +58,6 @@ def useTarget = project.ext.useTarget
 
 
 kotlin {
-
     sourceSets {
         configureEach {
             languageSettings.optIn("kotlin.RequiresOptIn")
@@ -62,18 +66,18 @@ kotlin {
             dependencies {
                 api 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 api 'org.jetbrains.kotlin:kotlin-reflect'
-                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+                api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0'
             }
         }
         commonTest {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test:1.8.20'
+                implementation 'org.jetbrains.kotlin:kotlin-test'
             }
         }
         if (useTarget['js']) {
             jsMain {
                 dependencies {
-                    runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.6.4'
+                    // runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.8.0'
                 }
             }
             jsTest {
@@ -84,20 +88,32 @@ kotlin {
         if (useTarget['jvm']) {
             jvmMain {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-                    runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4'
+                    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+                    // runtimeOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.0'
+
                 }
             }
             jvmTest {
                 dependencies {
-                    implementation 'org.jetbrains.kotlin:kotlin-test:1.8.20'
-                    implementation 'junit:junit:4.13.2'
+                    implementation 'org.jetbrains.kotlin:kotlin-test'
                     implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'
                 }
             }
         }
         if(useTarget['native']) {
             nativeMain {
+                dependencies {
+                }
+            }
+        }
+        if(useTarget['wasm-js']) {
+            wasmJsMain {
+                dependencies {
+                }
+            }
+        }
+        if(useTarget['wasm-wasi']) {
+            wasmWasiMain {
                 dependencies {
                 }
             }

@@ -103,7 +103,6 @@ data class PayingTurnstileFSMExternalState(
     val initialState: ExternalState<PayingTurnstileStates>
 )
 
-@OptIn(ExperimentalStdlibApi::class)
 class PayingTurnstileFSM(
     requiredCoins: Int,
     savedState: PayingTurnstileFSMExternalState? = null

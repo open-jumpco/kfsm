@@ -1,7 +1,7 @@
 === Simple turnstile example
 
 Assume we and to manage the state on a simple lock.
-We want to ensure that the `lock()` function is only called when the lock is not locked and we want `unlock()` to be called when locked.
+We want to ensure that the `lock()` function is only called when the lock is not locked, and we want `unlock()` to be called when locked.
 
 Then we use the DSL to declare a definition of a statemachine matching the diagram:
 
@@ -159,7 +159,7 @@ image::paying_turnstile_detail.png[Paying Turnstile]
 |===
 
 When event is empty it is an automatic transition.
-We will further place COINS state in a named state map to illustrate how these can be composes to isolate or group behaviour.
+We will further place COINS state in a named state map to illustrate how these can be composed to isolate or group behaviour.
 
 ==== Context class
 
@@ -201,7 +201,8 @@ include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTest
 
 ==== Output
 
-```
+[source]
+----
 --coin1
 sendEvent:COIN:10
 entering:LOCKED ([10]) for Turnstile(locked=true,coins=0)
@@ -240,7 +241,7 @@ Coin received=10, Total=50
 Unlock
 Reset coins=0
 entering:UNLOCKED ([10]) for Turnstile(locked=false,coins=0)
-```
+----
 
 === Secure Turnstile Example
 

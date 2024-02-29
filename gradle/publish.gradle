@@ -86,7 +86,7 @@ publishing {
             }
         }
     }
-    def platforms = ['js', 'jvm', 'linux', 'mingw', 'macos', 'wasm']
+    def platforms = ['js', 'jvm', 'linux', 'mingw', 'macos', 'wasm-js'/*, 'wasm-wasi'*/]
     publications.all { publication ->
         pom.withXml(configureMavenCentralMetadata)
         logger.info "publication:$publication.name"
@@ -95,29 +95,42 @@ publishing {
         }
     }
 }
-
+def skipSign = hasProperty('skipSign')
 
 signing {
     sign publishing.publications.kotlinMultiplatform
     // sign publishing.publications.metadata
     sign publishing.publications.documentation
-
-    if (useTarget['jvm']) {
-        sign publishing.publications.jvm
+    if(!skipSign) {
+        publishing.publications.forEach {
+            if (it.name != publishing.publications.kotlinMultiplatform.name && it.name != publishing.publications.documentation.name) {
+                logger.info("sign:$it.name")
+                sign it
+            }
+        }
     }
-    if (useTarget['js']) {
-        sign publishing.publications.js
-    }
-    if (useTarget['macos']) {
-        sign publishing.publications.macos
-    }
-    if (useTarget['linux']) {
-        sign publishing.publications.linux
-    }
-    if (useTarget['mingw']) {
-        sign publishing.publications.mingw
-    }
-    if (useTarget['wasm']) {
-        sign publishing.publications.wasm
-    }
+//    // sign publishing.publications.metadata
+//    sign publishing.publications.documentation
+//
+//    if (useTarget['jvm']) {
+//        sign publishing.publications.jvm
+//    }
+//    if (useTarget['js']) {
+//        sign publishing.publications.js
+//    }
+//    if (useTarget['macos']) {
+//        sign publishing.publications.macos
+//    }
+//    if (useTarget['linux']) {
+//        sign publishing.publications.linux
+//    }
+//    if (useTarget['mingw']) {
+//        sign publishing.publications.mingw
+//    }
+//    if (useTarget['wasm-js']) {
+//        sign publishing.publications['wasm-js']
+//    }
+//    if (useTarget['wasm-wasi']) {
+//        sign publishing.publications.wasmWasi
+//    }
 }

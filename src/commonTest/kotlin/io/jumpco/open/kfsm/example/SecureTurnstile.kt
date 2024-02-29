@@ -79,7 +79,6 @@ class SecureTurnstile {
 }
 // end::context[]
 
-@OptIn(ExperimentalStdlibApi::class)
 // tag::fsm[]
 class SecureTurnstileFSM(secureTurnstile: SecureTurnstile) {
     companion object {

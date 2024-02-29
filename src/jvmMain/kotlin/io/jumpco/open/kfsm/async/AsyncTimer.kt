@@ -28,7 +28,7 @@ actual class AsyncTimer<S, E, C, A, R> actual constructor(
     val context: C,
     val arg: A?,
     val definition: AsyncTimerDefinition<S, E, C, A, R>,
-    val coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope
 ) {
     var active: Boolean
     private val timer: Job

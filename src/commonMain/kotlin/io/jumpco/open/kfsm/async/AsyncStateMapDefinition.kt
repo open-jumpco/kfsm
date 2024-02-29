@@ -33,7 +33,7 @@ class AsyncStateMapDefinition<S, E, C, A, R>(
      */
     val validStates: Set<S>,
     /**
-     * Invariant conditions are checked before and after every transition an will throw an InvariantException if false
+     * Invariant conditions are checked before and after every transition and will throw an InvariantException if false
      */
     val invariants: Set<Pair<String, Condition<C>>>,
     /**
@@ -102,7 +102,7 @@ class AsyncStateMapDefinition<S, E, C, A, R>(
     }
 
     /**
-     * This function will provide an indicator if an event is allow for a given state.
+     * This function will provide an indicator if an event is allowed for a given state.
      * When no state transition is declared this function will return false unless `includeDefault` is true and
      * there is a default transition of handler for the event.
      */

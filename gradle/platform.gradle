@@ -17,17 +17,13 @@
  */
 
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
-
-def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm']
+def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm-js'/*, 'wasm-wasi'*/]
 project.ext.useTarget = [:]
 def useTarget = project.ext.useTarget
 
-targetList.forEach { target ->
-    useTarget[target] = defaultProfile.contains(target)
-}
-
 def profile = ext.find('profile') ?: defaultProfile ?: ''
 if (profile.contains('default')) {
+    useTarget['jvm'] = true
     if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         useTarget['mingw'] = true
         logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using mingw"
@@ -41,17 +37,9 @@ if (profile.contains('default')) {
         logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using macos"
     }
 }
-if (profile.contains('linux')) {
-    useTarget['linux'] = true
-}
-if (profile.contains('mingw')) {
-    useTarget['mingw'] = true
-}
-if (profile.contains('macos')) {
-    useTarget['macos'] = true
-}
-if (profile.contains('wasm')) {
-    useTarget['wasm'] = true
+
+targetList.forEach { target ->
+    useTarget[target] = profile.contains('all') || (profile.contains(target) && !profile.contains("-$target"))
 }
 
 def configureNative(srcSetMain, srcSetTest) {
@@ -74,7 +62,11 @@ kotlin {
             tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
         }
         js(IR) {
-            nodejs()
+            nodejs {
+                kotlinNodeJs {
+                    nodeVersion = "21.6.2"
+                }
+            }
             browser {
                 testTask {
                     useKarma {
@@ -113,11 +105,31 @@ kotlin {
             }
         }
     }
-    if (useTarget['wasm']) {
-        wasm32("wasm") {
-            mavenPublication {
-                artifactId = "${project.name}-wasm32"
+    if (useTarget['wasm-js']) {
+        wasmJs {
+            browser {
+                testTask {
+                    useKarma {
+                        useFirefox()
+                    }
+                }
             }
+            binaries.executable()
+            mavenPublication {
+                artifactId = "${project.name}-wasm-js"
+            }
+        }
+    }
+    if (useTarget['wasm-wasi']) {
+        wasmWasi {
+            nodejs()
+            mavenPublication {
+                artifactId = "${project.name}-wasm-wasi"
+            }
+        }
+        kotlinNodeJs {
+            nodeVersion = "21.0.0-v8-canary202309143a48826a08"
+            nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
         }
     }
     sourceSets {
@@ -135,7 +147,7 @@ kotlin {
         if (useTarget['jvm']) {
             jvmMain {
                 dependencies {
-                    implementation kotlin('stdlib-jdk8')
+                    implementation kotlin('stdlib')
                 }
             }
             jvmTest {
@@ -166,9 +178,13 @@ kotlin {
         if (useTarget['macos']) {
             configureNative(macosMain, macosTest)
         }
-        if (useTarget['wasm']) {
-            configureNative(wasmMain, wasmTest)
+        if (useTarget['wasm-js']) {
+            wasmJsMain.kotlin.srcDirs = ['src/wasmMain/kotlin']
+            wasmJsTest.kotlin.srcDirs = ['src/wasmTest/kotlin']
+        }
+        if (useTarget['wasm-wasi']) {
+            wasmWasiMain.kotlin.srcDirs = ['src/wasmMain/kotlin']
+            wasmWasiTest.kotlin.srcDirs = ['src/wasmTest/kotlin']
         }
     }
 }
-

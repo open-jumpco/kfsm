@@ -42,7 +42,7 @@ enum class KeyboardEvent {
     ANY_KEY
 }
 
-@OptIn(ExperimentalStdlibApi::class)
+
 class KeyboardBuffer {
     private val buffer: MutableList<Char> = mutableListOf()
     fun add(ch: Char) {
