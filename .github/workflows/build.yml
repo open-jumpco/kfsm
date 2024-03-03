@@ -41,6 +41,7 @@ jobs:
       - name: 'Build'
         shell: bash
         run: |
+          chmod a+x ./gradlew
           echo "::info ::Build profile=${{ steps.parameters.outputs.profile }} on ${{ steps.parameters.outputs.arch }}"
           ./gradlew build -PbuildProfile=${{ steps.parameters.outputs.profile }}
 
