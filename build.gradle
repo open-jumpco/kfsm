@@ -11,13 +11,13 @@ buildscript {
     }
     dependencies {
         classpath 'org.jetbrains.kotlinx:kotlinx-html-jvm:0.10.0'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
         classpath 'org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.23.2'
     }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.9.20'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.9.22'
     id 'org.jetbrains.dokka' version '1.9.10'
     id 'maven-publish'
     // id 'signing'

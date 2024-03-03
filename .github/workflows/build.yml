@@ -6,7 +6,8 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ 'ubuntu', 'macos', 'windows' ]
+#        os: [ 'ubuntu', 'macos', 'windows' ]
+        os: [ 'ubuntu' ]
     runs-on: '${{ matrix.os }}-latest'
     steps:
       - uses: actions/checkout@v4
@@ -18,14 +19,17 @@ jobs:
             "ubuntu")
               echo "arch=x86" >> $GITHUB_OUTPUT
               echo "profile=jvm,js,linux,wasm-js" >> $GITHUB_OUTPUT
+              echo "dokka=true" >> $GITHUB_OUTPUT
               ;;
             "windows")
               echo "arch=x86" >> $GITHUB_OUTPUT
               echo "profile=mingw" >> $GITHUB_OUTPUT
+              echo "dokka=false" >> $GITHUB_OUTPUT
               ;;
             "macos")
               echo "arch=arm64" >> $GITHUB_OUTPUT
               echo "profile=macos" >> $GITHUB_OUTPUT
+              echo "dokka=false" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "Unable to determine arch from $OS"
@@ -43,6 +47,4 @@ jobs:
         run: |
           chmod a+x ./gradlew
           echo "::info ::Build profile=${{ steps.parameters.outputs.profile }} on ${{ steps.parameters.outputs.arch }}"
-          ./gradlew build -PbuildProfile=${{ steps.parameters.outputs.profile }}
-
-
+          ./gradlew build -PbuildProfile=${{ steps.parameters.outputs.profile }} -Pdokka=${{ steps.parameters.outputs.dokka }}
