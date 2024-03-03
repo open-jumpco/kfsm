@@ -44,10 +44,10 @@ if (buildTargetList.contains('default')) {
 }
 
 targetList.forEach { target ->
-    if(!useTarget[target]) {
+    if (!useTarget[target]) {
         useTarget[target] = buildTargetList.contains('all') || buildTargetList.contains(target)
     }
-    if(buildTargetList.contains("-$target")) {
+    if (buildTargetList.contains("-$target")) {
         useTarget[target] = false
     }
 }
@@ -56,10 +56,17 @@ logger.lifecycle(":platforms from: ${os.displayName} on ${arch.displayName}:${bu
 kotlin {
 
     if (useTarget['jvm']) {
-        jvm()
+        jvm() {
+            mavenPublication {
+                artifactId = "${project.name}-jvm"
+            }
+        }
     }
     if (useTarget['js']) {
         js(IR) {
+            mavenPublication {
+                artifactId = "${project.name}-js"
+            }
             browser {
                 testTask {
                     useKarma {
@@ -78,25 +85,56 @@ kotlin {
         }
     }
     if (useTarget['mingw']) {
-        mingwX64 {}
+        mingwX64 {
+            mavenPublication {
+                artifactId = "${project.name}-mingw64"
+            }
+        }
     }
     if (useTarget['linux']) {
         if (arch.arm64) {
-            linuxArm64()
+            linuxArm64() {
+                mavenPublication {
+                    artifactId = "${project.name}-linuxarm64"
+                }
+            }
         } else if (arch.amd64) {
-            linuxX64()
+            linuxX64() {
+                mavenPublication {
+                    artifactId = "${project.name}-linuxx64"
+                }
+            }
         } else {
             logger.error("Cannot use linux on:${arch.name}:${arch.displayName}")
         }
     }
     if (useTarget['macos']) {
-        iosArm64()
-        macosArm64()
-        watchosArm64()
-        tvosArm64()
+        iosArm64() {
+            mavenPublication {
+                artifactId = "${project.name}-iosarm64"
+            }
+        }
+        macosArm64() {
+            mavenPublication {
+                artifactId = "${project.name}-macosarm64"
+            }
+        }
+        watchosArm64() {
+            mavenPublication {
+                artifactId = "${project.name}-watcharm64"
+            }
+        }
+        tvosArm64() {
+            mavenPublication {
+                artifactId = "${project.name}-tvosarm64"
+            }
+        }
     }
     if (useTarget['wasm-js']) {
         wasmJs {
+            mavenPublication {
+                artifactId = "${project.name}-wasm-js"
+            }
             browser {
                 testTask {
                     useKarma {
