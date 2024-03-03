@@ -50,3 +50,10 @@ jobs:
           chmod a+x ./gradlew
           echo "::info ::Build profile=${{ steps.parameters.outputs.profile }} on ${{ steps.parameters.outputs.arch }}"
           ./gradlew build -PbuildProfile=${{ steps.parameters.outputs.profile }} -Pdokka=${{ steps.parameters.outputs.dokka }}
+      - name: 'Test Report - ${{ matrix.os }}'
+        if: ${{ success() || failure() }}
+        uses: dorny/test-reporter@v1
+        with:
+          name: 'Test Report - ${{ matrix.os }}'
+          path: '**/test-results/**/*.xml'
+          reporter: jest-junit
