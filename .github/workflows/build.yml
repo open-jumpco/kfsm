@@ -32,16 +32,16 @@ jobs:
               exit 1
               ;;
           esac
-      - name: Set up JDK 11 for ${{ needs.build.parameters.outputs.arch }}
+      - name: Set up JDK 11 for ${{ steps.parameters.outputs.arch }}
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'zulu'
-          architecture: ${{ needs.build.parameters.outputs.arch }}
+          architecture: ${{ steps.parameters.outputs.arch }}
       - name: 'Build'
         shell: bash
         run: |
-          echo "::info ::Build profile=${{ needs.build.parameters.outputs.profile }} on ${{ needs.build.parameters.outputs.arch }}"
-          ./gradlew build -PbuildProfile=${{ needs.build.parameters.outputs.profile }}
+          echo "::info ::Build profile=${{ steps.parameters.outputs.profile }} on ${{ steps.parameters.outputs.arch }}"
+          ./gradlew build -PbuildProfile=${{ steps.parameters.outputs.profile }}
 
 
