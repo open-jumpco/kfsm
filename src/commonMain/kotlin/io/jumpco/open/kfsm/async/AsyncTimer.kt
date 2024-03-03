@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -19,15 +19,42 @@
 package io.jumpco.open.kfsm.async
 
 import kotlinx.coroutines.CoroutineScope
-
-expect class AsyncTimer<S, E, C, A, R>(
-    parentFsm: AsyncStateMapInstance<S, E, C, A, R>,
-    context: C,
-    arg: A?,
-    definition: AsyncTimerDefinition<S, E, C, A, R>,
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.atomicfu.*
+class AsyncTimer<S, E, C, A, R> constructor(
+    private val parentFsm: AsyncStateMapInstance<S, E, C, A, R>,
+    val context: C,
+    val arg: A?,
+    val definition: AsyncTimerDefinition<S, E, C, A, R>,
     coroutineScope: CoroutineScope
 ) {
-    fun cancel()
+    private val active = atomic<Boolean>(false)
+    private val timer: Job
 
-    suspend fun trigger()
+    init {
+        active.value = true
+        timer = coroutineScope.async {
+            delay(context.(definition.timeout)())
+            trigger()
+        }
+    }
+
+    fun cancel() {
+        active.value = false
+    }
+
+    suspend fun trigger() {
+        if (active.value) {
+            val defaultTransition = definition.rule.transition
+            definition.rule.findGuard(context, arg)?.apply {
+                parentFsm.execute(this, arg)
+            } ?: run {
+                if (defaultTransition != null) {
+                    parentFsm.execute(defaultTransition, arg)
+                }
+            }
+        }
+    }
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -126,12 +126,33 @@ class PostConditionException(message: String) : RuntimeException(message)
 class InvariantException(message: String) : RuntimeException(message)
 
 @Throws(InvariantException::class)
+inline fun invariant(condition: () -> Boolean, errorMessage: () -> String) {
+    if (!condition.invoke()) {
+        throw InvariantException(errorMessage.invoke())
+    }
+}
+
+@Throws(InvariantException::class)
 inline fun <C> checkInvariant(context: C, condition: Pair<String, Condition<C>>?) {
     val check = condition?.second?.invoke(context) ?: true
     if (!check) throw InvariantException(condition!!.first)
 }
 
 typealias Condition<C> = C.() -> Boolean
+
+@Throws(PreConditionException::class)
+inline fun precondition(condition: () -> Boolean, errorMessage: () -> String) {
+    if (!condition.invoke()) {
+        throw PreConditionException(errorMessage.invoke())
+    }
+}
+
+@Throws(PostConditionException::class)
+inline fun postcondition(condition: () -> Boolean, errorMessage: () -> String) {
+    if (!condition.invoke()) {
+        throw PostConditionException(errorMessage.invoke())
+    }
+}
 
 @Throws(PreConditionException::class)
 inline fun <C> checkPrecondition(context: C, condition: Pair<String, Condition<C>>?) {
@@ -160,10 +181,10 @@ class Stack<T> {
     /**
      * Returns and removed the element on the top of the stack.
      * @return The element on the top of the stack
-     * @throws IllegalStateException if the stack is empty
+     * @throws PreConditionException if the stack is empty
      */
     fun pop(): T {
-        check(elements.isNotEmpty()) { "stack is empty" }
+        precondition(elements::isNotEmpty) { "stack is empty" }
         return elements.removeAt(elements.lastIndex)
     }
 

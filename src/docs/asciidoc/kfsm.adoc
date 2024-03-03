@@ -74,7 +74,7 @@ Sending events may invoke actions:
 
 [source,kotlin,numbered]
 ----
-// State state is LOCKED
+// State is LOCKED
 fsm.coin()
 // Expect unlock action end state is UNLOCKED
 fsm.pass()
@@ -196,7 +196,7 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileType
 
 [source,kotlin,numbered]
 ----
-include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTests.kt[tag=test]
+include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTests.kt[tag=test]
 ----
 
 ==== Output
@@ -326,7 +326,7 @@ include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt[
 
 [source,kotlin,numbered]
 ----
-include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTests.kt[tag=test]
+include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileFsmTests.kt[tag=test]
 ----
 
 === Packet Reader Example
@@ -349,28 +349,28 @@ The current checksum is a trivial implementation for the demonstration where the
 
 [source,kotlin,numbered]
 ----
-include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=context]
+include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=context]
 ----
 
 ==== States and Events
 
 [source,kotlin,numbered]
 ----
-include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=states-events]
+include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=states-events]
 ----
 
 ==== Packaged FSM
 
 [source,kotlin,numbered]
 ----
-include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=packaged]
+include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=packaged]
 ----
 
 ==== Tests
 
 [source,kotlin,numbered]
 ----
-include::../../jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=tests]
+include::../../commonTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[tag=tests]
 ----
 
 === Immutable Context Example

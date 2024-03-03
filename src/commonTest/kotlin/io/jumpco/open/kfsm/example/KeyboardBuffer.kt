@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -42,7 +42,6 @@ enum class KeyboardEvent {
     ANY_KEY
 }
 
-
 class KeyboardBuffer {
     private val buffer: MutableList<Char> = mutableListOf()
     fun add(ch: Char) {
@@ -59,8 +58,8 @@ class KeyboardBuffer {
 class KeyboardBufferFSM(context: KeyboardBuffer) {
     companion object {
         val definition = stateMachine(
-            KeyboardBufferStates.values().toSet(),
-            KeyboardEvent.values().toSet(),
+            KeyboardBufferStates.entries.toSet(),
+            KeyboardEvent.entries.toSet(),
             KeyboardBuffer::class,
             Char::class
         ) {

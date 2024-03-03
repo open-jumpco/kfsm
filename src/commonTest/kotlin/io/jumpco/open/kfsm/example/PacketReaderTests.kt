@@ -1,36 +1,29 @@
 /*
-    Copyright 2019-2021 Open JumpCO
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-    documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-    the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-    and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all copies or substantial
-    portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-    THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-    CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-    DEALINGS IN THE SOFTWARE.
+ * Copyright (c) 2024. Open JumpCO
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package io.jumpco.open.kfsm.example
 
 import io.jumpco.open.kfsm.stateMachine
 
-import java.io.ByteArrayOutputStream
+
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 // tag::context[]
 class Block {
-    val byteArrayOutputStream = ByteArrayOutputStream(32)
+    private val byteArray = mutableListOf<Byte>()
     fun addByte(byte: Int) {
-        byteArrayOutputStream.write(byte)
+        byteArray.add(byte.toByte())
     }
+    fun toByteArray(): ByteArray = byteArray.toByteArray()
+    fun size() = byteArray.size
 }
 
 interface ProtocolHandler {
@@ -89,7 +82,7 @@ class Packet(private val protocolHandler: ProtocolHandler) :
     override fun endField() {
         val field = currentField
         requireNotNull(field) { "expected currentField to have a value" }
-        fields.add(field.byteArrayOutputStream.toByteArray())
+        fields.add(field.toByteArray())
         currentField = null
     }
 
@@ -104,8 +97,8 @@ class Packet(private val protocolHandler: ProtocolHandler) :
     }
 
     override fun checksum() {
-        require(checkSum.byteArrayOutputStream.size() > 0)
-        val checksumBytes = checkSum.byteArrayOutputStream.toByteArray()
+        require(checkSum.size() > 0)
+        val checksumBytes = checkSum.toByteArray()
         _checksumValid = if (checksumBytes.size == fields.size) {
             checksumBytes.mapIndexed { index, cs ->
                 cs == fields[index][0]
@@ -157,8 +150,8 @@ class PacketReaderFSM(packetHandler: PacketHandler) {
     companion object {
 
         val definition = stateMachine(
-            ReaderStates.values().toSet(),
-            ReaderEvents.values().toSet(),
+            ReaderStates.entries.toSet(),
+            ReaderEvents.entries.toSet(),
             PacketHandler::class,
             Int::class
         ) {
@@ -251,6 +244,7 @@ class PacketReaderFSM(packetHandler: PacketHandler) {
             CharacterConstants.STX,
             CharacterConstants.ACK,
             CharacterConstants.NAK -> fsm.sendEvent(ReaderEvents.CTRL, byte)
+
             else -> fsm.sendEvent(ReaderEvents.BYTE, byte)
         }
     }
@@ -260,7 +254,7 @@ class PacketReaderFSM(packetHandler: PacketHandler) {
 // tag::tests[]
 class PacketReaderTests {
     @Test
-    fun `test reader expect ACK`() {
+    fun testReaderExpectACK() {
         val protocolHandler = ProtocolSender()
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
@@ -283,9 +277,8 @@ class PacketReaderTests {
         assertTrue { packetReader.checksumValid }
     }
 
-
     @Test
-    fun `test reader ESC expect ACK`() {
+    fun testReaderESCExpectACK() {
         val protocolHandler = ProtocolSender()
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)
@@ -313,7 +306,7 @@ class PacketReaderTests {
     }
 
     @Test
-    fun `test reader ESC expect NACK`() {
+    fun testReaderESCExpectNACK() {
         val protocolHandler = ProtocolSender()
 
         val packetReader = Packet(protocolHandler)
@@ -339,7 +332,7 @@ class PacketReaderTests {
     }
 
     @Test
-    fun `test reader expect NACK`() {
+    fun testReaderExpectNACK() {
         val protocolHandler = ProtocolSender()
 
         val packetReader = Packet(protocolHandler)
@@ -364,7 +357,7 @@ class PacketReaderTests {
     }
 
     @Test
-    fun `test reader multiple fields expect ACK`() {
+    fun testReaderMultipleFieldsExpectACK() {
         val protocolHandler = ProtocolSender()
         val packetReader = Packet(protocolHandler)
         val fsm = PacketReaderFSM(packetReader)

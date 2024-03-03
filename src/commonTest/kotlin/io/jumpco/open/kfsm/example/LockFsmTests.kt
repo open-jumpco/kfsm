@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021. Open JumpCO
+ * Copyright (c) 2020-2024. Open JumpCO
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -7,17 +7,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package io.jumpco.open.kfsm
+package io.jumpco.open.kfsm.example
 
-import io.jumpco.open.kfsm.example.Lock
-import io.jumpco.open.kfsm.example.LockEvents
+import io.jumpco.open.kfsm.AnyStateMachineBuilder
+import io.jumpco.open.kfsm.AnyStateMachineInstance
 import io.jumpco.open.kfsm.example.LockEvents.LOCK
 import io.jumpco.open.kfsm.example.LockEvents.UNLOCK
-import io.jumpco.open.kfsm.example.LockFSM
-import io.jumpco.open.kfsm.example.LockStates
 import io.jumpco.open.kfsm.example.LockStates.DOUBLE_LOCKED
 import io.jumpco.open.kfsm.example.LockStates.LOCKED
 import io.jumpco.open.kfsm.example.LockStates.UNLOCKED
+import io.jumpco.open.kfsm.stateMachine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -72,8 +71,8 @@ class LockFsmTests {
     fun testPlainCreationOfFsm() {
         // given
         val builder = AnyStateMachineBuilder<LockStates, LockEvents, Lock>(
-            LockStates.values().toSet(),
-            LockEvents.values().toSet()
+            LockStates.entries.toSet(),
+            LockEvents.entries.toSet()
         )
         builder.initialState {
             when (locked) {
@@ -113,8 +112,8 @@ class LockFsmTests {
     fun testDslCreationOfFsm() {
         // given
         val definition = stateMachine(
-            LockStates.values().toSet(),
-            LockEvents.values().toSet(),
+            LockStates.entries.toSet(),
+            LockEvents.entries.toSet(),
             Lock::class
         ) {
             initialState {

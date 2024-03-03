@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,9 +21,9 @@ package io.jumpco.open.kfsm.async
 import kotlin.reflect.KClass
 
 /**
- * These function are used to create statemachines where the actions are suspend functions.
+ * These function are used to create state machines where the actions are suspend functions.
  */
-inline fun <S, E, C : Any, A : Any, R : Any> asyncStateMachine(
+inline fun <reified S, reified E, reified C : Any, reified A : Any, reified R : Any> asyncStateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
@@ -39,9 +39,9 @@ inline fun <S, E, C : Any, A : Any, R : Any> asyncStateMachine(
  * @param contextClass The class of the context
  * @param argumentClass The class of the argument to events/actions
  * @param handler The state machine handler
- * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ * @sample io.jumpco.open.kfsm.example.TurnstileFSM.Companion.definition
  */
-inline fun <S, E, C : Any, A : Any> asyncStateMachine(
+inline fun <reified S, reified E, reified C : Any, reified A : Any> asyncStateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
@@ -54,16 +54,16 @@ inline fun <S, E, C : Any, A : Any> asyncStateMachine(
  * @param validStates A set of the possible states supported by the top-level state map
  * @param validEvents The class of the possible events
  * @param contextClass The class of the context
- * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ * @sample io.jumpco.open.kfsm.example.TurnstileFSM.Companion.definition
  */
-inline fun <S, E, C : Any> asyncStateMachine(
+inline fun <reified S, reified E, reified C : Any> asyncStateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
     handler: AsyncDslStateMachineHandler<S, E, C, Any, Any>.() -> Unit
 ) = asyncStateMachine<S, E, C, Any, Any>(validStates, validEvents, contextClass, Any::class, Any::class, handler)
 
-inline fun <S, E, C : Any> asyncFunctionalStateMachine(
+inline fun <reified S, reified E, reified C : Any> asyncFunctionalStateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,

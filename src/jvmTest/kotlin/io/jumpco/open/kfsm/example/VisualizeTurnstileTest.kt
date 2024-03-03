@@ -73,7 +73,7 @@ class VisualizeTurnstileTest {
         println("== PacketReader")
         val visualization = Parser.parseStateMachine(
             "PacketReaderFSM",
-            File("src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt")
+            File("src/commonTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt")
         )
         println(visualization)
         File("generated", "packet-reader.plantuml").writeText(Visualization.plantUml(visualization))

@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -68,8 +68,8 @@ class ImmutableLockFSM {
         }
 
         private val definition = functionalStateMachine(
-            LockStates.values().toSet(),
-            LockEvents.values().toSet(),
+            LockStates.entries.toSet(),
+            LockEvents.entries.toSet(),
             ImmutableLock::class
         ) {
             defaultInitialState = LockStates.LOCKED

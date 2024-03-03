@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -69,12 +69,14 @@ class StateMachineDefinition<S, E, C, A, R>(
                 }
                 parentFsm.mapStack.pop()
             }
+
             deriveInitialMap != null -> {
                 deriveInitialMap.invoke(context).forEach { (initial, mapName) ->
                     createMap(mapName, context, parentFsm, initial)
                 }
                 parentFsm.mapStack.pop()
             }
+
             else -> {
                 val initial = initialState ?: deriveInitialState?.invoke(context) ?: defaultInitialState
                 ?: error("Definition requires deriveInitialState or deriveInitialMap")

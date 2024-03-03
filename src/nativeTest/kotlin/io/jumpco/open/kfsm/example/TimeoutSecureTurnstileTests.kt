@@ -119,6 +119,7 @@ class TimeoutSecureTurnstileTests {
         val turnstile = TimerSecureTurnstile()
         val fsm = TimerSecureTurnstileFSM(turnstile, coroutineScope)
         assertTrue { turnstile.locked }
+
         println("Card 1")
         runBlocking {
             fsm.card(1)

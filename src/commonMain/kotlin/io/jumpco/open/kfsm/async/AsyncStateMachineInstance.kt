@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -130,9 +130,10 @@ class AsyncStateMachineInstance<S, E, C, A, R>(
 
     private suspend fun executePush(transition: AsyncTransition<S, E, C, A, R>, arg: A?): R? {
         val targetStateMap = namedInstances.getOrElse(transition.targetMap!!) {
-            definition.createStateMap(transition.targetMap, context, this, transition.targetState!!, coroutineScope).apply {
-                namedInstances[transition.targetMap] = this
-            }
+            definition.createStateMap(transition.targetMap, context, this, transition.targetState!!, coroutineScope)
+                .apply {
+                    namedInstances[transition.targetMap] = this
+                }
         }
         mapStack.push(currentStateMap)
         val result = transition.execute(context, currentStateMap, targetStateMap, arg)

@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -30,9 +30,9 @@ import kotlin.reflect.KClass
  * @param argumentClass The class of the argument to events/actions
  * @param returnClass The class of the return type of events/actions
  * @param handler Statemachine handler
- * @sample io.jumpco.open.kfsm.TurnstileFSM.Companion.definition
+ * @sample io.jumpco.open.kfsm.example.TurnstileFSM.Companion.definition
  */
-inline fun <S, E, C : Any, A : Any, R : Any> stateMachine(
+inline fun <reified S, reified E, reified C : Any, reified A : Any, reified R : Any> stateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
@@ -47,9 +47,9 @@ inline fun <S, E, C : Any, A : Any, R : Any> stateMachine(
  * @param eventClass The class of the possible events
  * @param contextClass The class of the context
  * @param argumentClass The class of the argument to events/actions
- * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ * @sample io.jumpco.open.kfsm.example.TurnstileFSM.Companion.definition
  */
-inline fun <S, E, C : Any, A : Any> stateMachine(
+inline fun <reified S, reified E, reified C : Any, reified A : Any> stateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
@@ -70,9 +70,9 @@ inline fun <S, E, C : Any, A : Any> stateMachine(
  * @param validEvents The class of the possible events
  * @param contextClass The class of the context
  * @param handler The DSL handler
- * @sample io.jumpco.open.kfsm.TurnstileFSM.definition
+ * @sample io.jumpco.open.kfsm.example.TurnstileFSM.definition
  */
-inline fun <S, E, C : Any> stateMachine(
+inline fun <reified S, reified E, reified C : Any> stateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,
@@ -86,7 +86,7 @@ inline fun <S, E, C : Any> stateMachine(
     handler
 )
 
-inline fun <S, E, C : Any> functionalStateMachine(
+inline fun <reified S, reified E, reified C : Any> functionalStateMachine(
     validStates: Set<S>,
     validEvents: Set<E>,
     contextClass: KClass<out C>,

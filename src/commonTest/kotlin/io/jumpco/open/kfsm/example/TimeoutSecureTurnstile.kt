@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -84,8 +84,8 @@ class TimerSecureTurnstile {
 class TimerSecureTurnstileFSM(secureTurnstile: TimerSecureTurnstile, coroutineScope: CoroutineScope) {
     companion object {
         val definition = asyncStateMachine(
-            TimeoutSecureTurnstileStates.values().toSet(),
-            TimeoutSecureTurnstileEvents.values().toSet(),
+            TimeoutSecureTurnstileStates.entries.toSet(),
+            TimeoutSecureTurnstileEvents.entries.toSet(),
             TimerSecureTurnstile::class,
             Int::class
         ) {

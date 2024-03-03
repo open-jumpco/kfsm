@@ -81,12 +81,12 @@ publishing {
             def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
             url = project.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials {
-                username rootProject.ext.find('ossJiraUser') ?: System.getenv('OSS_JIRA_USER')
-                password rootProject.ext.find('ossJiraPwd') ?: System.getenv('OSS_JIRA_PWD')
+                username rootProject.findProperty('ossJiraUser') ?: System.getenv('OSS_JIRA_USER')
+                password rootProject.findProperty('ossJiraPwd') ?: System.getenv('OSS_JIRA_PWD')
             }
         }
     }
-    def platforms = ['js', 'jvm', 'linux', 'mingw', 'macos', 'wasm-js'/*, 'wasm-wasi'*/]
+    def platforms = ['js', 'jvm', 'linux', 'mingw', 'macos', 'wasm-js']
     publications.all { publication ->
         pom.withXml(configureMavenCentralMetadata)
         logger.info "publication:$publication.name"
@@ -95,13 +95,13 @@ publishing {
         }
     }
 }
-def skipSign = hasProperty('skipSign')
 
-signing {
-    sign publishing.publications.kotlinMultiplatform
-    // sign publishing.publications.metadata
-    sign publishing.publications.documentation
-    if(!skipSign) {
+def skipSign = hasProperty('skipSign') ?: 'false'
+if (!skipSign.asBoolean()) {
+    signing {
+        sign publishing.publications.kotlinMultiplatform
+        // sign publishing.publications.metadata
+        sign publishing.publications.documentation
         publishing.publications.forEach {
             if (it.name != publishing.publications.kotlinMultiplatform.name && it.name != publishing.publications.documentation.name) {
                 logger.info("sign:$it.name")
@@ -109,28 +109,4 @@ signing {
             }
         }
     }
-//    // sign publishing.publications.metadata
-//    sign publishing.publications.documentation
-//
-//    if (useTarget['jvm']) {
-//        sign publishing.publications.jvm
-//    }
-//    if (useTarget['js']) {
-//        sign publishing.publications.js
-//    }
-//    if (useTarget['macos']) {
-//        sign publishing.publications.macos
-//    }
-//    if (useTarget['linux']) {
-//        sign publishing.publications.linux
-//    }
-//    if (useTarget['mingw']) {
-//        sign publishing.publications.mingw
-//    }
-//    if (useTarget['wasm-js']) {
-//        sign publishing.publications['wasm-js']
-//    }
-//    if (useTarget['wasm-wasi']) {
-//        sign publishing.publications.wasmWasi
-//    }
 }

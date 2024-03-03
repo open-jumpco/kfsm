@@ -1,5 +1,5 @@
 /*
-    Copyright 2019-2021 Open JumpCO
+    Copyright 2019-2024 Open JumpCO
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
     documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -15,58 +15,51 @@
     CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
  */
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
-def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm-js'/*, 'wasm-wasi'*/]
+def targetList = ['mingw', 'linux', 'macos', 'js', 'jvm', 'wasm-js']
+
 project.ext.useTarget = [:]
 def useTarget = project.ext.useTarget
 
-def profile = ext.find('profile') ?: defaultProfile ?: ''
-if (profile.contains('default')) {
-    useTarget['jvm'] = true
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+def arch = DefaultNativePlatform.currentArchitecture
+def os = DefaultNativePlatform.currentOperatingSystem
+
+def profile = ext.find('profile') ?: buildProfile ?: ''
+def buildTargetList = profile.tokenize(',')
+if (buildTargetList.contains('default')) {
+    if (os.isWindows()) {
         useTarget['mingw'] = true
-        logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using mingw"
+        logger.lifecycle "Detected ${os} using mingw"
     }
-    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+    if (os.isLinux()) {
         useTarget['linux'] = true
         logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using linux"
     }
-    if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+    if (os.isMacOsX()) {
         useTarget['macos'] = true
         logger.lifecycle "Detected ${org.gradle.internal.os.OperatingSystem.current()} using macos"
     }
 }
 
 targetList.forEach { target ->
-    useTarget[target] = profile.contains('all') || (profile.contains(target) && !profile.contains("-$target"))
+    if(!useTarget[target]) {
+        useTarget[target] = buildTargetList.contains('all') || buildTargetList.contains(target)
+    }
+    if(buildTargetList.contains("-$target")) {
+        useTarget[target] = false
+    }
 }
 
-def configureNative(srcSetMain, srcSetTest) {
-    srcSetMain.kotlin.srcDirs = ['src/nativeMain/kotlin']
-    srcSetTest.kotlin.srcDirs = ['src/nativeTest/kotlin']
-}
-
+logger.lifecycle(":platforms from: ${os.displayName} on ${arch.displayName}:${buildTargetList}=${useTarget}")
 kotlin {
 
     if (useTarget['jvm']) {
-        jvm() {
-            mavenPublication {
-                artifactId = "${project.name}-jvm"
-            }
-        }
+        jvm()
     }
     if (useTarget['js']) {
-        if (project.ext.has('nodeInstall')) {
-            // tasks.findByPath(':compileKotlinsJs')?.dependsOn('kotlinNodeJsSetup')
-            tasks.findByPath(':kotlinNodeJsSetup')?.onlyIf { true }
-        }
         js(IR) {
-            nodejs {
-                kotlinNodeJs {
-                    nodeVersion = "21.6.2"
-                }
-            }
             browser {
                 testTask {
                     useKarma {
@@ -85,25 +78,22 @@ kotlin {
         }
     }
     if (useTarget['mingw']) {
-        mingwX64('mingw') {
-            mavenPublication {
-                artifactId = "${project.name}-mingwX64"
-            }
-        }
+        mingwX64 {}
     }
     if (useTarget['linux']) {
-        linuxX64('linux') {
-            mavenPublication {
-                artifactId = "${project.name}-linuxX64"
-            }
+        if (arch.arm64) {
+            linuxArm64()
+        } else if (arch.amd64) {
+            linuxX64()
+        } else {
+            logger.error("Cannot use linux on:${arch.name}:${arch.displayName}")
         }
     }
     if (useTarget['macos']) {
-        macosX64('macos') {
-            mavenPublication {
-                artifactId = "${project.name}-macosX64"
-            }
-        }
+        iosArm64()
+        macosArm64()
+        watchosArm64()
+        tvosArm64()
     }
     if (useTarget['wasm-js']) {
         wasmJs {
@@ -114,77 +104,19 @@ kotlin {
                     }
                 }
             }
-            binaries.executable()
-            mavenPublication {
-                artifactId = "${project.name}-wasm-js"
-            }
-        }
-    }
-    if (useTarget['wasm-wasi']) {
-        wasmWasi {
-            nodejs()
-            mavenPublication {
-                artifactId = "${project.name}-wasm-wasi"
-            }
-        }
-        kotlinNodeJs {
-            nodeVersion = "21.0.0-v8-canary202309143a48826a08"
-            nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
         }
     }
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin('stdlib-common')
+                implementation kotlin('stdlib')
             }
         }
         commonTest {
             dependencies {
-                implementation kotlin('test-common')
+                implementation kotlin('test')
                 implementation kotlin('test-annotations-common')
             }
-        }
-        if (useTarget['jvm']) {
-            jvmMain {
-                dependencies {
-                    implementation kotlin('stdlib')
-                }
-            }
-            jvmTest {
-                dependencies {
-                    implementation kotlin('test-junit')
-                }
-            }
-        }
-        if (useTarget['js']) {
-            jsMain {
-                dependencies {
-                    implementation kotlin('stdlib-js')
-                }
-            }
-            jsTest {
-                dependencies {
-                    implementation kotlin('test-js')
-                }
-                kotlin.srcDirs = ['src/jsTest/kotlin']
-            }
-        }
-        if (useTarget['mingw']) {
-            configureNative(mingwMain, mingwTest)
-        }
-        if (useTarget['linux']) {
-            configureNative(linuxMain, linuxTest)
-        }
-        if (useTarget['macos']) {
-            configureNative(macosMain, macosTest)
-        }
-        if (useTarget['wasm-js']) {
-            wasmJsMain.kotlin.srcDirs = ['src/wasmMain/kotlin']
-            wasmJsTest.kotlin.srcDirs = ['src/wasmTest/kotlin']
-        }
-        if (useTarget['wasm-wasi']) {
-            wasmWasiMain.kotlin.srcDirs = ['src/wasmMain/kotlin']
-            wasmWasiTest.kotlin.srcDirs = ['src/wasmTest/kotlin']
         }
     }
 }
