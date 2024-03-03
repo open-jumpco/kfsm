@@ -37,7 +37,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'zulu'
-          architecture: ${{ steps.parameters.outputs.arch }}
+#          architecture: ${{ steps.parameters.outputs.arch }}
       - name: 'Build'
         shell: bash
         run: |
