@@ -67,6 +67,7 @@ kotlin {
             mavenPublication {
                 artifactId = "${project.name}-js"
             }
+            nodejs()
             browser {
                 testTask {
                     useKarma {

@@ -13,6 +13,7 @@ jobs:
     runs-on: '${{ matrix.os }}-latest'
     steps:
       - uses: actions/checkout@v4
+      - uses: browser-actions/setup-firefox@v1
       - id: parameters
         shell: bash
         run: |
@@ -56,4 +57,4 @@ jobs:
         with:
           name: 'Test Report - ${{ matrix.os }}'
           path: '**/test-results/**/*.xml'
-          reporter: jest-junit
+          reporter: java-junit
