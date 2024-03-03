@@ -14,7 +14,7 @@ jobs:
         shell: bash
         run: |
           OS="${{matrix.os}}"
-          case($OS) in
+          case $OS in
             "ubuntu")
               echo "arch=x86" >> $GITHUB_OUTPUT
               echo "profile=jvm,js,linux,wasm-js" >> $GITHUB_OUTPUT
@@ -23,11 +23,11 @@ jobs:
               echo "arch=x86" >> $GITHUB_OUTPUT
               echo "profile=mingw" >> $GITHUB_OUTPUT
               ;;
-            "macos"
+            "macos")
               echo "arch=arm64" >> $GITHUB_OUTPUT
               echo "profile=macos" >> $GITHUB_OUTPUT
               ;;
-            default
+            *)
               echo "Unable to determine arch from $OS"
               exit 1
               ;;
