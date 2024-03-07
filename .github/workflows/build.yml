@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
 #        os: [ 'ubuntu', 'macos', 'windows' ]
-        os: [ 'ubuntu', 'windows' ]
+        os: [ 'ubuntu', 'windows', 'macos' ]
     runs-on: '${{ matrix.os }}-latest'
     steps:
       - uses: actions/checkout@v4
