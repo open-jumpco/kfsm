@@ -42,9 +42,9 @@ jobs:
       - name: Set up JDK 11 for ${{ steps.parameters.outputs.arch }}
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'zulu'
-#          architecture: ${{ steps.parameters.outputs.arch }}
+          cache: gradle
       - name: 'Build'
         shell: bash
         run: |

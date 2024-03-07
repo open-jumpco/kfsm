@@ -48,8 +48,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 apply plugin: 'kotlinx-atomicfu'
@@ -143,21 +143,29 @@ tasks.withType(KotlinTest).configureEach {
 }
 
 def rootDir = rootProject.projectDir.path
-dokkaHtml {
-    onlyIf { (hasProperty('dokka') ?: 'false').asBoolean() }
-    dokkaSourceSets {
-        configureEach {
-            samples.from(
-                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt",
-                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/ImmutableLockFSM.kt",
-                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/LockTypes.kt",
-                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt",
-                "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt"
-            )
+
+if('true' == project.findProperty('dokka')) {
+    logger.lifecycle("dokkaHtml")
+    dokkaHtml {
+        dokkaSourceSets {
+            configureEach {
+                samples.from(
+                    "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt",
+                    "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/ImmutableLockFSM.kt",
+                    "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/LockTypes.kt",
+                    "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt",
+                    "$rootDir/src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt"
+                )
+            }
         }
+        inputs.dir('src/commonTest/kotlin')
     }
-    inputs.dir('src/commonTest/kotlin')
+} else {
+    dokkaHtml.onlyIf { false }
 }
+dokkaJavadoc.onlyIf { false }
+dokkaJekyll.onlyIf { false }
+dokkaGfm.onlyIf { false }
 
 tasks.register('copyPng', Copy) {
     from(projectDir) {
@@ -229,8 +237,3 @@ kfsmViz {
         output = 'packet-reader-detail'
     }
 }
-
-dokkaJavadoc.onlyIf { false }
-dokkaJekyll.onlyIf { false }
-dokkaGfm.onlyIf { false }
-
