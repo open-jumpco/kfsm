@@ -166,13 +166,18 @@ kotlin {
             }
         }
         if (useTarget['linux']) {
-            configureNative(linuxMain, linuxTest)
+            if (arch.arm64) {
+                configureNative(linuxArm64Main, linuxArm64Test)
+            } else if (arch.amd64) {
+                configureNative(linuxX64Main, linuxX64Test)
+            }
         }
         if (useTarget['mingw']) {
             configureNative(mingwX64Main, mingwX64Test)
         }
         if (useTarget['macos']) {
-            configureNative(macosMain, macosTest)
+            configureNative(macosArm64Main, macosArm64Test)
+            configureNative(macosX64Main, macosX64Test)
         }
     }
 }
