@@ -52,6 +52,12 @@ targetList.forEach { target ->
     }
 }
 
+static def configureNative(srcSetMain, srcSetTest) {
+    srcSetMain.kotlin.srcDirs = ['src/nativeMain/kotlin']
+    srcSetTest.kotlin.srcDirs = ['src/nativeTest/kotlin']
+}
+
+
 logger.lifecycle(":platforms from: ${os.displayName} on ${arch.displayName}:${buildTargetList}=${useTarget}")
 kotlin {
 
@@ -158,6 +164,15 @@ kotlin {
                 implementation kotlin('test')
                 implementation kotlin('test-annotations-common')
             }
+        }
+        if (useTarget['linux']) {
+            configureNative(linuxMain, linuxTest)
+        }
+        if (useTarget['mingw']) {
+            configureNative(mingwX64Main, mingwX64Test)
+        }
+        if (useTarget['macos']) {
+            configureNative(macosMain, macosTest)
         }
     }
 }
