@@ -32,6 +32,13 @@ The state machine implementation supports events triggering transitions from one
 * Externalisation of state.
 * Typed event parameters and return values.
 
+== Authors
+* http://github/com/corneil[corneil]
+
+== Star History
+image::https://api.star-history.com/svg?repos=open-jumpco/kfsm&type=Date[Star History link="https://star-history.com/#open-jumpco/kfsm&Date"]
+
+
 == Todo
 * [x] Multiple state maps
 * [x] Push / pop transitions
@@ -47,9 +54,6 @@ The state machine implementation supports events triggering transitions from one
 * [ ] Different type of contexts for Nested statemaps
 
 
-== Star History
-
-image::https://api.star-history.com/svg?repos=open-jumpco/kfsm&type=Date[Star History link="https://star-history.com/#open-jumpco/kfsm&Date"]
 
 == Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
