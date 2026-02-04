@@ -42,12 +42,12 @@ asciidoctor {
     }
 
     attributes toc: 'left',
-        'source-highlighter': 'prism',
+//        'source-highlighter': 'prism',
         idprefix: '',
         idseparator: '-',
         docinfo1: ''
 
-    requires ['asciidoctor-prism-extension']
+    // requires ['asciidoctor-prism-extension']
 
 }
 

@@ -1,6 +1,5 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.tasks.KotlinTest
-
 buildscript {
     repositories {
         mavenLocal()
@@ -10,30 +9,30 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.jetbrains.kotlinx:kotlinx-html-jvm:0.10.0'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
+        classpath 'org.jetbrains.kotlinx:kotlinx-html-jvm:0.11.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25'
         classpath 'org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.23.2'
     }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.9.22'
-    id 'org.jetbrains.dokka' version '1.9.10'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.9.25'
+    id 'org.jetbrains.dokka' version '1.9.20'
     id 'maven-publish'
     // id 'signing'
-    id 'org.asciidoctor.jvm.convert' version '3.3.2'
-    id 'org.asciidoctor.jvm.gems' version '3.3.2'
+    id 'org.asciidoctor.jvm.convert' version '4.0.2'
+    id 'org.asciidoctor.jvm.gems' version '4.0.4'
     id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
     id 'io.jumpco.open.kfsm.viz-plugin' version '1.5.2.4'
     // id 'org.jetbrains.qodana' version '2023.3.1'
 }
-
+def kotlinVersion = '1.9.25'
 repositories {
     mavenLocal()
-    maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/kotlin/temporary' }
+    mavenCentral()
     maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental' }
     maven { url = 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
-    mavenCentral()
+    maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/kotlin/temporary' }
     ruby {
         gems()
     }
@@ -76,13 +75,20 @@ kotlin {
         commonTest {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-test'
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0'
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0'
             }
         }
         if (useTarget['jvm']) {
+            jvmMain {
+                dependencies {
+                    implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'
+                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.0'
+                }
+            }
             jvmTest {
                 dependencies {
+                    implementation 'org.jetbrains.kotlin:kotlin-test-junit5'
                     implementation 'io.jumpco.open:kfsm-viz:1.5.2.4'
                     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
                     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.0'
@@ -92,6 +98,7 @@ kotlin {
         if (useTarget['js']) {
             jsTest {
                 dependencies {
+                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
                     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.8.0'
                 }
             }
@@ -99,6 +106,7 @@ kotlin {
         if (useTarget['wasm-js']) {
             wasmJsTest {
                 dependencies {
+                    implementation 'org.jetbrains.kotlin:kotlin-stdlib-wasm'
                     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-wasm-js:1.8.0'
                 }
             }
@@ -171,7 +179,7 @@ tasks.register('copyPng', Copy) {
     from(projectDir) {
         include '*.png'
     }
-    into "$layout.buildDirectory/docs/asciidoc"
+    into "${layout.buildDirectory.asFile.get()}/docs/asciidoc"
 }
 
 asciidoctor.dependsOn('copyPng')

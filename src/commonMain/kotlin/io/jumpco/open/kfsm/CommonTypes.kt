@@ -17,11 +17,14 @@
  */
 package io.jumpco.open.kfsm
 
+import kotlin.Pair
 /**
  * This represents an action that may be invoked during a transition.
  * @author Corneil du Plessis
  * @soundtrack Wolfgang Amadeus Mozart
  * @param C The context: C will be available to the lambda.
+ * @param A The type of the argument to the action
+ * @param R The return type of the action
  */
 typealias SyncStateAction<C, A, R> = C.(A?) -> R?
 
@@ -30,6 +33,7 @@ typealias AsyncStateAction<C, A, R> = suspend C.(A?) -> R?
 /**
  * This represents a guard expression that may be used to select a specific transition.
  * @param C The context: C will be available to the lambda
+ * @param A The type of the argument to the action
  */
 typealias StateGuard<C, A> = C.(A?) -> Boolean
 

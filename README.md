@@ -1,26 +1,26 @@
-= Kotlin Finite-state machine
+# Kotlin Finite-state machine
 
-This work is licensed under link:https://www.apache.org/licenses/LICENSE-2.0.html[Apache License 2.0]
+This work is licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 This is a small implementation of an FSM in Kotlin.
 
-== Resources
-* link:https://open.jumpco.io/projects/kfsm/index.html[Documentation]
-* link:https://open.jumpco.io/projects/kfsm/javadoc/index.html[API Docs]
-* link:https://github.com/open-jumpco/kfsm-viz[Visualization Support kfsm-io.jumpco.open.kfsm.viz]
-* link:https://github.com/open-jumpco/kfsm-samples[Sample Project]
-* link:https://github.com/open-jumpco/kfsm-web[Turnstile Sample for Browser]
-* link:https://github.com/open-jumpco/kfsm-kvision-web[Turnstile Sample with KVision for Browser]
-* link:https://github.com/open-jumpco/kfsm-android[Turnstile Sample for Android]
-* link:https://github.com/open-jumpco/kfsm-spring[Turnstile Sample for Spring MVC]
-* link:https://github.com/open-jumpco/kfsm-spring-rest[Turnstile Sample for Spring HATEOAS]
-* link:https://github.com/open-jumpco/kfsm-android-compose-traffic[Traffic Intersection for Android Compose]
+## Resources
+* [Documentation](https://open.jumpco.io/projects/kfsm/index.html)
+* [API Docs](https://open.jumpco.io/projects/kfsm/javadoc/index.html)
+* [Visualization Support kfsm-io.jumpco.open.kfsm.viz](https://github.com/open-jumpco/kfsm-viz)
+* [Sample Project](https://github.com/open-jumpco/kfsm-samples)
+* [Turnstile Sample for Browser](https://github.com/open-jumpco/kfsm-web)
+* [Turnstile Sample with KVision for Browser](https://github.com/open-jumpco/kfsm-kvision-web)
+* [Turnstile Sample for Android](https://github.com/open-jumpco/kfsm-android)
+* [Turnstile Sample for Spring MVC](https://github.com/open-jumpco/kfsm-spring)
+* [Turnstile Sample for Spring HATEOAS](https://github.com/open-jumpco/kfsm-spring-rest)
+* [Traffic Intersection for Android Compose](https://github.com/open-jumpco/kfsm-android-compose-traffic)
 
-== Getting Started
+## Getting Started
 
 The state machine implementation supports events triggering transitions from one state to another while performing an optional action as well as entry and exit actions.
 
-== Features
+## Features
 * Event driven state machine.
 * External and internal transitions
 * State entry and exit actions.
@@ -32,14 +32,7 @@ The state machine implementation supports events triggering transitions from one
 * Externalisation of state.
 * Typed event parameters and return values.
 
-== Authors
-* http://github.com/corneil[corneil]
-
-== Star History
-image::https://api.star-history.com/svg?repos=open-jumpco/kfsm&type=Date[Star History link="https://star-history.com/#open-jumpco/kfsm&Date"]
-
-
-== Todo
+## Todo
 * [x] Multiple state maps
 * [x] Push / pop transitions
 * [x] Automatic transitions
@@ -53,50 +46,36 @@ image::https://api.star-history.com/svg?repos=open-jumpco/kfsm&type=Date[Star Hi
 * [x] Corountines
 * [ ] Different type of contexts for Nested statemaps
 
+## Authors
+* [corneil](http://github.com/corneil)
 
+## Star History
+[![Star History](https://api.star-history.com/svg?repos=open-jumpco/kfsm&type=Date)](https://star-history.com/#open-jumpco/kfsm&Date)
 
-== Quick Tutorial
+## Quick Tutorial
 This is the classic turnstile FSM model from [SMC](http://smc.sourceforge.net/)
 
-=== Simple turnstile example
+### Simple turnstile example
 Assume we and to manage the state on a simple lock.
 We want to ensure that the `lock()` function is only called when the lock is not locked and we want `unlock()` to be called when locked.
 
 Then we use the DSL to declare a definition of a statemachine matching the diagram:
 
-==== State Diagram
+#### State Diagram
 
-image::src/docs/asciidoc/turnstile-fsm.png[Turnstile state diagram]
+![Turnstile state diagram](src/docs/asciidoc/turnstile-fsm.png)
 
-==== State Table
+#### State Table
 
-|===
-|Start State |Event |End State |Action
+| Start State | Event | End State | Action |
+| --- | --- | --- | --- |
+| LOCKED | PASS | LOCKED | alarm |
+| LOCKED | COIN | UNLOCKED | unlock |
+| UNLOCKED | PASS | LOCKED | lock |
+| UNLOCKED | COIN | UNLOCKED | returnCoin |
 
-|LOCKED
-|PASS
-|LOCKED
-|alarm
-
-|LOCKED
-|COIN
-|UNLOCKED
-|unlock
-
-|UNLOCKED
-|PASS
-|LOCKED
-|lock
-
-|UNLOCKED
-|COIN
-|UNLOCKED
-|returnCoin
-|===
-
-==== Context class
-[source,kotlin,numbered]
-----
+#### Context class
+```kotlin
 class Turnstile(var locked: Boolean = true) {
     fun unlock() {
         assert(locked) { "Cannot unlock when not locked" }
@@ -121,13 +100,12 @@ class Turnstile(var locked: Boolean = true) {
         return "Turnstile(locked=$locked)"
     }
 }
-----
+```
 
-==== Enums for States and Events
+#### Enums for States and Events
 We declare 2 enums, one for the possible states and one for the possible events.
 
-[source,kotlin,numbered]
-----
+```kotlin
 enum class TurnstileStates {
     LOCKED,
     UNLOCKED
@@ -137,11 +115,10 @@ enum class TurnstileEvents {
     COIN,
     PASS
 }
-----
+```
 
-==== Packaged definition and execution
-[source,kotlin,numbered]
-----
+#### Packaged definition and execution
+```kotlin
 class TurnstileFSM(turnstile: Turnstile) {
     private val fsm = definition.create(turnstile)
 
@@ -193,7 +170,7 @@ class TurnstileFSM(turnstile: Turnstile) {
         }.build()
     }
 }
-----
+```
 
 With this definition we are saying:
 When the state is `LOCKED` and on a `COIN` event then transition to `UNLOCKED` and execute the lambda which is treated
@@ -201,20 +178,18 @@ as a member of the context `{ unlock() }`
 
 When the state is `LOCKED` and on event `PASS` we perform the action `alarm()` without changing the end state.
 
-==== Usage
+#### Usage
 Then we instantiate the FSM and provide a context to operate on:
 
-[source,kotlin,numbered]
-----
+```kotlin
 val turnstile = Turnstile()
 val fsm = TurnstileFSM(turnstile)
-----
+```
 
 Now we have a context that is independent of the FSM.
 
 Sending events may invoke actions:
-[source,kotlin,numbered]
-----
+```kotlin
 // State state is LOCKED
 fsm.coin()
 // Expect unlock action end state is UNLOCKED
@@ -226,123 +201,116 @@ fsm.coin()
 // Expect unlock() and end state is UNLOCKED
 fsm.coin()
 // Expect returnCoin() and end state is UNLOCKED
-----
+```
 
 This model means the FSM can be instantiated as needed if the context has values that represent the state. The idea is that the context will properly maintain it's internal state.
 
 The FSM can derive the formal state from the value(s) of properties of the context.
 
-The link:https://open.jumpco.io/projects/kfsm/index.html[Documentation] contains more detail on creating finite state machine implementations.
+The [Documentation](https://open.jumpco.io/projects/kfsm/index.html) contains more detail on creating finite state machine implementations.
 
 The documentation contains examples for:
 
-* link:https://open.jumpco.io/projects/kfsm/index.html#advanced-features[Turnstile providing for coin values.]
-* link:https://open.jumpco.io/projects/kfsm/index.html#secure-turnstile-example[Secure turnstile with card and override.]
-* link:https://open.jumpco.io/projects/kfsm/index.html#packet-reader-example[Packet Reader finite state machine.]
-* link:https://open.jumpco.io/projects/kfsm/index.html#immutable-context-example[ImmutableLock and FSM.]
+* [Turnstile providing for coin values.](https://open.jumpco.io/projects/kfsm/index.html#advanced-features)
+* [Secure turnstile with card and override.](https://open.jumpco.io/projects/kfsm/index.html#secure-turnstile-example)
+* [Packet Reader example.](https://open.jumpco.io/projects/kfsm/index.html#packet-reader-example)
+* [ImmutableLock and FSM.](https://open.jumpco.io/projects/kfsm/index.html#immutable-context-example)
 
-=== Repository
+### Repository
 
 Use this repository for SNAPSHOT builds. Releases are on Maven Central
-[source,groovy]
-----
+```groovy
 repositories {
     maven {
         url 'https://oss.sonatype.org/content/groups/public'
     }
 }
-----
-=== Dependencies
+```
+### Dependencies
 
-==== KMP Projects
+#### KMP Projects
 
 The dependency used in common modules.
 
-[source,groovy]
-----
+```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm:1.9.0-RC1'
 }
-----
+```
 
-==== JVM Projects
+#### JVM Projects
 
-[source,groovy]
-----
+```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm-jvm:1.9.0-RC1'
 }
-----
+```
 
-==== KotlinJS Projects
+#### KotlinJS Projects
 
-[source,groovy]
-----
+```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm-js:1.9.0-RC1'
 }
-----
+```
 
-==== Kotlin/Native Projects using LinuxX64
+#### Kotlin/Native Projects using LinuxX64
 
-[source,groovy]
-----
+```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm-linuxX64:1.9.0-RC1'
 }
-----
+```
 
-==== Kotlin/Native Projects using MinGW64
+#### Kotlin/Native Projects using MinGW64
 
-[source,groovy]
-----
+```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm-mingwX64:1.9.0-RC1'
 }
-----
+```
 
-==== Kotlin/Native Projects using macOS
+#### Kotlin/Native Projects using macOS
 
-[source,groovy]
-----
+```groovy
 dependencies {
     implementation 'io.jumpco.open:kfsm-macosX64:1.9.0-RC1'
 }
-----
+```
 
-== Visualisation
+## Visualisation
 
-For more information about visualization options use link:https://github.com/open-jumpco/kfsm-viz[kfsm-io.jumpco.open.kfsm.viz]
-
-
-=== Plantuml Examples
-
-==== Turnstile FSM
-
-link:./src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt[TurnstileTypes.kt]
-
-image::turnstile.png[]
-
-==== Paying Turnstile FSM
-
-link:./src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt[PayingTurnstileTypes.kt]
-
-image::paying_turnstile.png[]
-
-==== Secure Turnstile FSM
-
-link:./src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt[SecureTurnstile.kt]
-
-image::secure_turnstile.png[]
-
-==== Packer Reader FSM
-
-link:./src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt[PacketReaderTests.kt]
-
-image::packet_reader.png[]
+For more information about visualization options use [kfsm-io.jumpco.open.kfsm.viz](https://github.com/open-jumpco/kfsm-viz)
 
 
-== Questions:
+### Plantuml Examples
+
+#### Turnstile FSM
+
+[TurnstileTypes.kt](./src/commonTest/kotlin/io/jumpco/open/kfsm/example/TurnstileTypes.kt)
+
+![](turnstile.png)
+
+#### Paying Turnstile FSM
+
+[PayingTurnstileTypes.kt](./src/commonTest/kotlin/io/jumpco/open/kfsm/example/PayingTurnstileTypes.kt)
+
+![](paying_turnstile.png)
+
+#### Secure Turnstile FSM
+
+[SecureTurnstile.kt](./src/commonTest/kotlin/io/jumpco/open/kfsm/example/SecureTurnstile.kt)
+
+![](secure_turnstile.png)
+
+#### Packer Reader FSM
+
+[PacketReaderTests.kt](./src/jvmTest/kotlin/io/jumpco/open/kfsm/example/PacketReaderTests.kt)
+
+![](packet_reader.png)
+
+
+## Questions:
 * Should entry / exit actions receive state or event as arguments?
 * Should default actions receive state or event as arguments?
 * Is there a more elegant way to define States and Events using sealed classes?

@@ -43,6 +43,17 @@ if (buildTargetList.contains('default')) {
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/kotlin/temporary' }
+    maven { url = 'https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental' }
+    maven { url = 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
+    ruby {
+        gems()
+    }
+}
+
 targetList.forEach { target ->
     if (!useTarget[target]) {
         useTarget[target] = buildTargetList.contains('all') || buildTargetList.contains(target)
